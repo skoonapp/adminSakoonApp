@@ -4,6 +4,8 @@ import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';
 import Header from '../common/Header';
+import ChatbotFAB from '../chatbot/ChatbotFAB';
+import ChatbotModal from '../chatbot/ChatbotModal';
 
 // The navigation order must match BottomNav to ensure correct swipe logic
 const NAV_ORDER = ['/dashboard', '/calls', '/chat', '/earnings', '/profile'];
@@ -27,6 +29,8 @@ const MainLayout: React.FC = () => {
     translateX: 0,
     direction: null,
   });
+
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     // Prevent swipe on interactive elements to not override their default behavior
@@ -116,6 +120,8 @@ const MainLayout: React.FC = () => {
       </main>
       <BottomNav />
       <IncomingCallManager />
+      <ChatbotFAB onClick={() => setIsChatbotOpen(true)} />
+      <ChatbotModal isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} />
     </div>
   );
 };

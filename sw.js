@@ -38,7 +38,8 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log("[sw.js] Received background message ", payload);
-  const { type, userName, callId, userAvatar } = payload.data || {};
+  const { type, userName, callId, userAvatar, silent } = payload.data || {};
+  const isSilent = silent === 'true'; // Check for silent flag from payload
 
   if (type === 'incoming_call') {
       const notificationTitle = `Incoming Call`;
@@ -52,14 +53,17 @@ messaging.onBackgroundMessage((payload) => {
               { action: 'reject', title: 'Reject' }
           ],
           requireInteraction: true,
+          silent: isSilent, // Use the silent flag
       };
       self.registration.showNotification(notificationTitle, notificationOptions);
   } else {
+      // Handle other notifications like new messages
       const notificationTitle = payload.notification?.title || "New Notification";
       const notificationOptions = {
           body: payload.notification?.body || "",
           icon: payload.notification?.image || "/icon-192.png",
           data: payload.data,
+          silent: isSilent, // Use the silent flag here too
       };
       self.registration.showNotification(notificationTitle, notificationOptions);
   }
