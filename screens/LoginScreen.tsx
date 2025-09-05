@@ -169,6 +169,11 @@ const LoginScreen: React.FC = () => {
           </>
         )}
       </div>
+      
+      <footer className="absolute bottom-0 left-0 right-0 p-4 text-center text-xs text-slate-400 z-10">
+        <p>SakoonApp by Metxfitt Pvt. Ltd. | © 2025 All Rights Reserved</p>
+        <p className="mt-1">Contact: support@sakoonapp.com | Follow us: @SakoonApp</p>
+      </footer>
     </div>
   );
 };
