@@ -52,7 +52,7 @@ const ToggleSwitch: React.FC<{ checked: boolean; onChange: (checked: boolean) =>
 
 const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
-        <path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.48 3.4 1.27 4.88L2 22l5.29-1.38c1.39.71 2.99 1.14 4.75 1.14c5.46 0 9.91-4.45 9.91-9.85c0-5.46-4.45-9.9-9.91-9.9zM12.04 20.13c-1.56 0-3.03-.4-4.31-1.18l-.31-.18l-3.21.84l.85-3.13l-.2-.32c-.85-1.34-1.31-2.91-1.31-4.58c0-4.49 3.62-8.12 8.12-8.12c4.49 0 8.12 3.63 8.12 8.12c0 4.49-3.63 8.12-8.12 8.12zm4.18-5.32c-.22-.11-1.3-.65-1.5-.72c-.2-.07-.35-.11-.49.11c-.15.22-.57.72-.7 1.05c-.13.11-.25.13-.49.02c-.23-.11-1-.37-1.9-1.18c-.71-.63-1.18-1.41-1.32-1.65c-.13-.25-.01-.38.1-.5c.1-.11.22-.28.33-.42c.11-.13.15-.22.22-.38c.07-.15.04-.28-.02-.39c-.07-.11-.49-1.18-.68-1.61c-.18-.43-.37-.37-.49-.37c-.12 0-.25-.01-.38-.01c-.13 0-.35.05-.53.22c-.18.18-.7.68-.7 1.66c0 .98.72 1.93.82 2.07c.1.15 1.41 2.15 3.43 3.01c.48.21.87.33 1.16.42c.5.15 1 .13 1.38-.08c.43-.25.7-.57.8-1.1c.1-.53.1-.98.07-1.1c-.04-.12-.16-.18-.34-.29z" />
+        <path fill="currentColor" d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91v.01c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91a9.85 9.85 0 0 0-2.91-7.01zM12.04 20.13c-1.53 0-3.03-.38-4.38-1.12l-.31-.18-3.24.85.87-3.18-.2-.33a8.168 8.168 0 0 1-1.26-4.38c0-4.49 3.62-8.12 8.12-8.12 2.18 0 4.22.86 5.74 2.38s2.38 3.56 2.38 5.74c0 4.49-3.63 8.12-8.12 8.12zm4.2-6.11c-.24-.12-1.42-.7-1.64-.78s-.38-.12-.54.12c-.16.24-.62.78-.76.94s-.28.18-.52.06c-.24-.12-1.02-.38-1.94-1.2c-.72-.64-1.2-1.42-1.35-1.66s-.02-.38.11-.5c.11-.1.24-.26.37-.39s.16-.24.24-.4c.08-.16.04-.3-.02-.42s-.54-1.29-.74-1.76c-.2-.48-.4-.41-.55-.41h-.48c-.16 0-.42.06-.64.3s-.84.82-.84 2c0 1.18.86 2.32 1 2.48s1.69 2.58 4.1 3.59c.58.24 1.03.38 1.4.48s.66.15.91-.09c.28-.27.62-.7.71-1.34s.09-1.2-.01-1.32z" />
     </svg>
 );
 
@@ -68,9 +68,6 @@ const ProfileScreen: React.FC = () => {
     });
 
     useEffect(() => {
-        // This effect syncs the local state with the listener profile's settings
-        // ONLY ON THE INITIAL LOAD. This prevents optimistic UI updates from being
-        // overwritten by the profile data before Firestore has had time to update.
         if (profile?.notificationSettings && isInitialLoad.current) {
             setLocalSettings({
                 calls: profile.notificationSettings.calls ?? true,
@@ -91,10 +88,7 @@ const ProfileScreen: React.FC = () => {
     
     const handleSettingsChange = async (key: 'calls' | 'messages', value: boolean) => {
         if (!profile?.uid) return;
-
-        // Optimistic UI update
         setLocalSettings(prev => ({ ...prev, [key]: value }));
-
         try {
             const listenerRef = db.collection('listeners').doc(profile.uid);
             await listenerRef.update({
@@ -102,7 +96,6 @@ const ProfileScreen: React.FC = () => {
             });
         } catch (error) {
             console.error(`Failed to update ${key} notification setting:`, error);
-            // Revert UI on failure and notify user
             setLocalSettings(prev => ({ ...prev, [key]: !value }));
             alert(`Could not save setting for ${key}. Please try again.`);
         }
