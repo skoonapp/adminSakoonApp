@@ -141,7 +141,7 @@ const StatusToggle: React.FC = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm flex items-center justify-between">
             <div>
                 <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center">
                     Active Status
