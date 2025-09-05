@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
-// FIX: Use namespace import for react-router-dom to fix module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Use named imports for react-router-dom to fix module resolution errors.
+import { useNavigate } from 'react-router-dom';
 import { messaging, db } from '../../../utils/firebase';
 import { useListener } from '../../ListenerContext';
 import firebase from 'firebase/compat/app';
 
 const IncomingCallManager: React.FC = () => {
   const { profile } = useListener();
-  const navigate = ReactRouterDOM.useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!messaging || !profile) {
