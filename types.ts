@@ -12,6 +12,11 @@ export interface ListenerProfile {
   status: ListenerStatus;
   fcmTokens?: string[];
   createdAt: Timestamp;
+  // FIX: Add notificationSettings to ListenerProfile to resolve type errors in ProfileScreen.tsx.
+  notificationSettings?: {
+    calls?: boolean;
+    messages?: boolean;
+  };
 }
 
 // Represents the end-user who is calling/chatting

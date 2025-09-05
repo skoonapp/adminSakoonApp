@@ -1,140 +1,98 @@
 import React from 'react';
 import PolicyPageLayout from '../context/components/common/PolicyPageLayout';
 
-const TermsScreen: React.FC = () => {
+export const TermsContent: React.FC = () => {
     const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
     return (
-        <PolicyPageLayout title="Terms & Conditions">
-            <p className="text-sm"><em>Effective Date: {today}</em><br/><em>Last Updated: {today}</em></p>
+        <>
+            <p className="text-sm"><em>Last Updated: {today}</em></p>
             
-            <h2>1. परिचय (Introduction)</h2>
-            <p>SakoonApp ("हमारा," "हमारे," या "हम") में आपका स्वागत है। ये नियम और शर्तें ("Terms") हमारे emotional support और listening platform के उपयोग को नियंत्रित करती हैं। SakoonApp का उपयोग करके, आप इन Terms से बाध्य होने के लिए सहमत हैं।</p>
+            <div className="p-4 rounded-lg bg-primary-50 dark:bg-slate-800 border border-primary-200 dark:border-primary-700/50 my-6">
+                <h3 className="text-lg font-bold text-primary-800 dark:text-primary-300">सबसे ज़रूरी बातें (Key Points)</h3>
+                <ul className="list-disc pl-5 mt-2 space-y-1 text-primary-700 dark:text-primary-300/90">
+                    <li><strong className="text-green-600 dark:text-green-400">हमेशा करें:</strong> User की इज़्ज़त करें, अच्छे से बात करें, और नियमों का पालन करें।</li>
+                    <li><strong className="text-red-500 dark:text-red-400">कभी न करें:</strong> अपनी पर्सनल जानकारी (नंबर, सोशल मीडिया) शेयर न करें, गलत भाषा का इस्तेमाल न करें, और कॉल/चैट बीच में न काटें।</li>
+                    <li><strong className="text-yellow-600 dark:text-yellow-400">पेमेंट याद रखें:</strong> पेमेंट हर हफ़्ते सोमवार को होता है। Minimum Payout ₹699 है। नियम तोड़ने पर आपकी कमाई 'Hold' हो सकती है और 20% पेनल्टी लग सकती है।</li>
+                </ul>
+            </div>
 
-            <h2>2. परिभाषाएं (Definitions)</h2>
-            <ul>
-                <li><strong>"User"</strong> - भावनात्मक सहायता या बातचीत की तलाश करने वाला व्यक्ति</li>
-                <li><strong>"Listener"</strong> - सुनने और सहायता सेवाएं प्रदान करने वाला verified व्यक्ति</li>
-                <li><strong>"Platform"</strong> - SakoonApp mobile application और संबंधित सेवाएं</li>
-                <li><strong>"Services"</strong> - Platform के माध्यम से प्रदान की जाने वाली सभी सुविधाएं</li>
-            </ul>
+            <h2>1. यह किसके लिए है? (Introduction)</h2>
+            <p>SakoonApp में आपका स्वागत है। ये नियम बताते हैं कि आप, एक Listener के तौर पर, हमारे प्लेटफॉर्म का इस्तेमाल कैसे कर सकते हैं। ऐप इस्तेमाल करने का मतलब है कि आप इन सभी नियमों से सहमत हैं।</p>
 
-            <h2>3. योग्यता (Eligibility)</h2>
-            <h3>Users के लिए:</h3>
+            <h2>2. Listener बनने की शर्तें (Eligibility)</h2>
             <ul>
-                <li>कम से कम 13 वर्ष की आयु (13-17 को parental consent चाहिए)</li>
-                <li>सटीक registration जानकारी प्रदान करनी होगी</li>
-                <li>कानून के तहत सेवा का उपयोग करने से प्रतिबंधित नहीं होना चाहिए</li>
-            </ul>
-            <h3>Listeners के लिए:</h3>
-            <ul>
-                <li>कम से-कम 18 वर्ष की आयु</li>
-                <li>हमारी verification और training process पास करना होगा</li>
-                <li>Platform guidelines के साथ good standing बनाए रखना होगा</li>
+                <li>आपकी उम्र कम से कम 18 साल होनी चाहिए।</li>
+                <li>आपको हमारी वेरिफिकेशन प्रक्रिया पूरी करनी होगी।</li>
+                <li>आपको हमारे सभी दिशानिर्देशों का पालन करना होगा।</li>
             </ul>
 
-            <h2>4. Listener Guidelines और Compensation</h2>
-            <h3>Listener की जिम्मेदारियां:</h3>
+            <h2>3. Listener के लिए नियम (Listener Guidelines)</h2>
+            <h3>आपका व्यवहार:</h3>
             <ul>
-                <li>Professional और respectful communication बनाए रखें</li>
-                <li>Call या chat को बीच में disconnect न करें बिना valid reason के</li>
-                <li>User privacy और confidentiality को protect करें</li>
-                <li>सभी platform guidelines और admin instructions follow करें</li>
-                <li>Misbehavior, abusing, sexual content या offensive language पूरी तरह prohibited है</li>
+                <li>हमेशा पेशेवर और सम्मानजनक तरीके से बात करें।</li>
+                <li>बिना किसी ठोस कारण के कॉल या चैट को बीच में न काटें।</li>
+                <li>User की प्राइवेसी का ध्यान रखें, उनकी बातें गुप्त रखें।</li>
+                <li>गाली-गलौज, गलत भाषा या यौन संबंधी बातें करना सख्त मना है।</li>
+                 <li><strong className="text-red-600 dark:text-red-400">अपनी कोई भी पर्सनल जानकारी जैसे मोबाइल नंबर, पता, या सोशल मीडिया अकाउंट (Instagram, Facebook, etc.) शेयर करना सख्त मना है।</strong></li>
             </ul>
+            <p className="font-semibold text-red-600 dark:text-red-400">ध्यान दें: आपकी सभी गतिविधियाँ एडमिन द्वारा मॉनिटर की जाती हैं ताकि सुरक्षा बनी रहे।</p>
 
-            <h3>Performance और Earnings:</h3>
-            <ul>
-                <li>Compensation performance-based होगी</li>
-                <li>Engagement जितना ज़्यादा, earning उतनी ज़्यादा</li>
-                <li>Engagement कम → income decrease</li>
-                <li>Quality interactions के लिए bonus incentives मिल सकते हैं</li>
-                <li>Poor performance के लिए earning reduce हो सकती है</li>
-            </ul>
 
-            <h3>Payment Structure:</h3>
-            <h4>Weekly Payment Schedule:</h4>
-            <ul>
-                <li><strong>Payment dates:</strong> हर महीने की <strong>10, 20, और 30 तारीख</strong></li>
-                <li><strong>Transaction fee:</strong> हर payment से <strong>15 रुपए transaction fee</strong> काटा जाएगा</li>
-                <li><strong>Payment method:</strong> Bank transfer या UPI के माध्यम से</li>
-            </ul>
-            <h4>Hold Account Policy:</h4>
-            <ul>
-                <li><strong>Hold account का payment:</strong> महीने की <strong>आखिरी तारीख (30) को</strong> दिया जाएगा</li>
-                <li><strong>Penalty:</strong> <strong>40% penalty</strong> + <strong>15 रुपए transaction fee</strong> काटा जाएगा</li>
-                <li><strong>Hold होने के कारण:</strong> Rule violation, user complaints, suspicious activity</li>
-            </ul>
-
-            <h3>Violations और Consequences:</h3>
-            <ul>
-                <li><strong>Minor violations:</strong> Warnings या temporary earning suspension</li>
-                <li><strong>Personal details share करना:</strong> Immediate account suspension → Hold account</li>
-                <li><strong>Serious violations:</strong> Permanent account termination</li>
-                <li>सभी activities admin द्वारा monitor की जाती हैं</li>
-            </ul>
-
-            <h2>5. User Conduct</h2>
-            <h3>Prohibited Activities:</h3>
-            <ul>
-                <li>Harassment, abuse, या inappropriate behavior</li>
-                <li>Personal contact information share करना</li>
-                <li>Sexual content या romantic advances</li>
-                <li>Threats, violence, या harmful content</li>
-                <li>Spam, scams, या fraudulent activities</li>
-            </ul>
-
-            <h2>6. Platform Services</h2>
-            <h3>Service की सीमाएं:</h3>
-            <ul>
-                <li>हम professional mental health service नहीं हैं</li>
-                <li>Listeners licensed therapists या counselors नहीं हैं</li>
-                <li>Emergency situations के लिए professional intervention की आवश्यकता</li>
-            </ul>
-
-            <h2>7. Payment Terms विस्तार से</h2>
-            <h3>Listeners के लिए Payment Rules:</h3>
-            <h4>Regular Payment (सामान्य भुगतान):</h4>
-            <ul>
-                <li>Payment Schedule: 10th, 20th, 30th of every month</li>
-                <li>Amount: Earned amount - 15 Rs transaction fee</li>
-                <li>Minimum payout: 100 Rs</li>
-                <li>Payment method: Bank transfer/UPI</li>
-            </ul>
-            <h4>Hold Account Payment:</h4>
-            <ul>
-                <li>Payment date: 30th of the month only</li>
-                <li>Penalty: 40% of total earned amount</li>
-                <li>Transaction fee: 15 Rs additional</li>
-            </ul>
-
-            <h2>8. Privacy और Data Protection</h2>
-            <p>Personal information हमारी Privacy Policy के अनुसार protected है। Conversations को quality और safety के लिए monitor किया जा सकता है।</p>
+            <h2>4. कमाई और पेमेंट (Earnings & Payments)</h2>
+            <p>आपकी कमाई आपके काम और प्रदर्शन पर आधारित है। जितना अच्छा आप Users के साथ जुड़ेंगे, उतनी ही ज़्यादा आपकी कमाई होगी।</p>
             
-            <h2>9. Account Termination</h2>
-            <p>हम इन Terms का violation करने पर, suspicious activity के लिए, या legal/safety concerns के लिए accounts terminate कर सकते हैं।</p>
-
-            <h2>10. Emergency Situations</h2>
-            <p>Platform crisis intervention के लिए suitable नहीं है। Users को emergencies के लिए immediate professional help लेनी चाहिए।</p>
-            
-            <h2>11. Terms में बदलाव</h2>
-            <p>हम इन Terms को update करने का अधिकार रखते हैं। Material changes की users को notification दी जाएगी।</p>
-
-            <h2>12. Contact Information</h2>
-            <p>Terms के बारे में questions के लिए: <a href="mailto:sakoonapp.help@gmail.com">sakoonapp.help@gmail.com</a></p>
-
-            <h2>13. Important Reminders for Listeners</h2>
-            <ul className="list-none p-0">
-                <li><strong className="text-red-500">❌ बिल्कुल न करें:</strong> Calls/chats बीच में disconnect करना, User के साथ misbehavior, Personal contact details share करना, Abusive या sexual content, Rules ignore करना।</li>
-                <li><strong className="text-green-500">✅ हमेशा करें:</strong> Respectful और professional behavior, Quality engagement maintain करें, Admin instructions follow करें, User satisfaction पर focus करें, Privacy maintain करें।</li>
-                <li><strong className="text-yellow-500">💰 Payment याद रखें:</strong> Regular payment: 10, 20, 30 तारीख को (-15 Rs fee). Hold payment: 30 तारीख को (-40% penalty -15 Rs fee). Violation = Hold account = कम payment.</li>
+            <h3>पेमेंट का शेड्यूल:</h3>
+            <ul className="list-decimal pl-5 space-y-2">
+                <li>
+                    <strong>सामान्य पेमेंट (Normal Payment):</strong>
+                    <ul>
+                        <li><strong>कब मिलेगा:</strong> हर हफ़्ते सोमवार (Monday) को।</li>
+                        <li><strong>Minimum Payout:</strong> पेमेंट के लिए कम से कम ₹699 होने चाहिए।</li>
+                        <li><strong>कितना कटेगा:</strong> हर पेमेंट पर ₹10 की बैंक ट्रांजैक्शन फीस लगेगी।</li>
+                        <li><strong>कैसे मिलेगा:</strong> आपके दिए गए बैंक खाते या UPI में।</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>होल्ड अकाउंट (Hold Account):</strong>
+                    <ul>
+                         <li><strong>यह क्या है:</strong> अगर आप कोई नियम तोड़ते हैं (जैसे पर्सनल जानकारी देना), तो आपकी कमाई 'Hold' पर चली जाती है।</li>
+                        <li><strong>कब मिलेगा:</strong> होल्ड की गई कमाई का पेमेंट भी हर हफ़्ते सोमवार को होगा।</li>
+                        <li><strong>कितना कटेगा:</strong> होल्ड की गई कमाई से <strong>20% पेनल्टी</strong> और ₹10 ट्रांजैक्शन फीस काटी जाएगी।</li>
+                    </ul>
+                </li>
             </ul>
+            
+
+            <h2>5. नियम तोड़ने के परिणाम (Consequences of Violation)</h2>
+            <ul>
+                <li><strong>छोटी गलतियाँ:</strong> चेतावनी या आपकी कमाई को अस्थायी रूप से रोका जा सकता है।</li>
+                <li><strong>पर्सनल जानकारी शेयर करना:</strong> आपका अकाउंट तुरंत सस्पेंड कर दिया जाएगा और कमाई होल्ड पर चली जाएगी।</li>
+                <li><strong>बड़ी गलतियाँ:</strong> आपका अकाउंट हमेशा के लिए बंद किया जा सकता है।</li>
+            </ul>
+
+            <h2>6. हमारी ज़िम्मेदारी (Disclaimer)</h2>
+            <p>SakoonApp एक प्रोफेशनल मानसिक स्वास्थ्य सेवा नहीं है। हमारे Listeners प्रशिक्षित काउंसलर या थेरेपिस्ट नहीं हैं। आपातकालीन स्थिति में, कृपया किसी प्रोफेशनल से संपर्क करें।</p>
+
+            <h2>7. नियमों में बदलाव (Changes to Terms)</h2>
+            <p>हम इन नियमों को कभी भी बदल सकते हैं। बड़े बदलावों के बारे में आपको सूचित किया जाएगा।</p>
+
+            <h2>8. हमसे संपर्क करें (Contact Us)</h2>
+            <p>अगर आपका कोई सवाल है, तो हमें यहाँ ईमेल करें: <a href="mailto:sakoonapp.help@gmail.com">sakoonapp.help@gmail.com</a></p>
 
             <hr/>
-            <p className="italic">SakoonApp का उपयोग करके, आप acknowledge करते हैं कि आपने इन Terms and Conditions को पढ़ा, समझा है, और इनसे बाध्य होने के लिए सहमत हैं।</p>
-            <blockquote>“Respect users, maintain engagement, follow rules, grow your income safely.”</blockquote>
-        </PolicyPageLayout>
+            <blockquote className="border-l-4 border-primary-500 pl-4 italic">
+              “Users का सम्मान करें, नियमों का पालन करें और सुरक्षित रूप से अपनी आय बढ़ाएँ।”
+            </blockquote>
+        </>
     );
 };
 
+const TermsScreen: React.FC = () => {
+    return (
+        <PolicyPageLayout title="Terms & Conditions">
+            <TermsContent />
+        </PolicyPageLayout>
+    );
+};
 export default TermsScreen;
