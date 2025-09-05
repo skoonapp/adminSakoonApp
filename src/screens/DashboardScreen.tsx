@@ -1,220 +1,338 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import * as ReactRouterDom from 'react-router-dom';
+const { Link } = ReactRouterDom;
 import { useListener } from './../context/ListenerContext';
 import { db } from './../utils/firebase';
 import firebase from 'firebase/compat/app';
-import type { CallRecord, ListenerChatSession } from '../types';
-// FIX: Changed react-router-dom import to a namespace import to resolve module export errors for Link.
-import * as ReactRouterDom from 'react-router-dom';
-const { Link } = ReactRouterDom;
+import type { CallRecord, ListenerChatSession, ListenerStatus } from '../types';
 
-// FIX: Redefined Activity as a discriminated union to fix type errors.
+// Type definitions for combined activity feed
 type CallActivity = CallRecord & { type: 'call'; timestamp: firebase.firestore.Timestamp; };
 type ChatActivity = ListenerChatSession & { type: 'chat'; timestamp: firebase.firestore.Timestamp; };
 type Activity = CallActivity | ChatActivity;
 
-const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.ReactNode; color: string }> = ({ title, value, icon, color }) => (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center space-x-4">
-        <div className={`p-3 rounded-full ${color}`}>
-            {icon}
-        </div>
-        <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{title}</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{value}</p>
-        </div>
-    </div>
-);
+// --- Icon Components ---
+const RupeeIcon: React.FC<{className?: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-5 4h4m5 4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
+const PhoneIcon: React.FC<{className?: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>);
+const ChatIcon: React.FC<{className?: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>);
+const ClockIcon: React.FC<{className?: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
 
-const StatValue: React.FC<{ loading: boolean; value: string | number; prefix?: string; suffix?: string }> = ({ loading, value, prefix = '', suffix = '' }) => {
+// --- UI Sub-Components ---
+
+const StatValue: React.FC<{ loading: boolean; children: React.ReactNode }> = ({ loading, children }) => {
     if (loading) {
-        return <span className="inline-block h-6 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></span>;
+        return <div className="h-7 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>;
     }
-    return <>{prefix}{value}{suffix}</>;
+    return <>{children}</>;
+};
+
+const formatDuration = (seconds: number = 0): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    let result = '';
+    if (hours > 0) result += `${hours}h `;
+    result += `${minutes}m`;
+    return result;
+};
+
+type StatCardColor = 'blue' | 'indigo' | 'purple' | 'green';
+const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.ReactNode; color: StatCardColor; linkTo?: string; }> = ({ title, value, icon, color, linkTo }) => {
+    const colorClasses = {
+        blue: 'from-blue-50 to-sky-100 dark:from-blue-900/30 dark:to-sky-900/30 border-sky-200 dark:border-sky-800',
+        indigo: 'from-indigo-50 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30 border-violet-200 dark:border-violet-800',
+        purple: 'from-purple-50 to-fuchsia-100 dark:from-purple-900/30 dark:to-fuchsia-900/30 border-fuchsia-200 dark:border-fuchsia-800',
+        green: 'from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-emerald-200 dark:border-emerald-800',
+    };
+    
+    const content = (
+         <div className={`bg-gradient-to-br p-4 rounded-xl shadow-sm flex flex-col justify-between h-full border hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${colorClasses[color]}`}>
+            <div>
+                <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
+                    {icon}
+                </div>
+                <div className="text-3xl font-bold text-slate-800 dark:text-slate-200 mt-2">{value}</div>
+            </div>
+        </div>
+    );
+    
+    return linkTo ? <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl">{content}</Link> : content;
 };
 
 const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
     const isCall = activity.type === 'call';
-    const record = activity; // activity is already correctly typed as CallActivity or ChatActivity
+    const earnings = (activity as CallRecord).earnings ?? 0;
 
     return (
         <div className="flex items-center justify-between py-3">
-            <div className="flex items-center gap-3">
-                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCall ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-purple-100 dark:bg-purple-900/50'}`}>
-                    {isCall ? 
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg> : 
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                    }
-                 </div>
-                <div>
-                    <p className="font-semibold text-slate-700 dark:text-slate-300">
-                        {isCall ? `Call with ${record.userName}` : `Chat with ${record.userName}`}
+            <div className="flex items-center gap-3 overflow-hidden">
+                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCall ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-purple-100 dark:bg-purple-900/50'}`}>
+                    {isCall ? <PhoneIcon className="h-5 w-5 text-blue-600 dark:text-blue-300"/> : <ChatIcon className="h-5 w-5 text-purple-600 dark:text-purple-300"/>}
+                </div>
+                <div className="overflow-hidden">
+                    <p className="font-semibold text-slate-700 dark:text-slate-300 truncate">
+                        {isCall ? 'Call with' : 'Chat with'} {activity.userName}
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                        {activity.timestamp.toDate().toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
+                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                        {isCall ? `Duration: ${formatDuration((activity as CallActivity).durationSeconds)}` : (activity as ChatActivity).lastMessageText}
                     </p>
                 </div>
             </div>
+            {earnings > 0 && (
+                <p className="font-bold text-green-600 dark:text-green-400 text-sm shrink-0 ml-2">
+                    + ₹{earnings.toFixed(2)}
+                </p>
+            )}
+        </div>
+    );
+};
+
+
+const StatusToggle: React.FC = () => {
+    const { profile } = useListener();
+    
+    const handleStatusChange = async (newStatus: ListenerStatus) => {
+        if (profile) {
+            try {
+                await db.collection('listeners').doc(profile.uid).update({ status: newStatus });
+            } catch (error) {
+                console.error("Failed to update status:", error);
+                // Optionally show an error to the user
+            }
+        }
+    };
+    
+    if (!profile) {
+        return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+    }
+
+    const statuses: { label: string; value: ListenerStatus; indicatorColor: string; }[] = [
+        { label: 'Offline', value: 'Offline', indicatorColor: 'bg-red-500' },
+        { label: 'Busy', value: 'Busy', indicatorColor: 'bg-yellow-500' },
+        { label: 'Online', value: 'Available', indicatorColor: 'bg-green-500' },
+    ];
+    
+    // Treat 'Break' status as 'Busy' for UI purposes
+    const currentUiStatus = profile.status === 'Break' ? 'Busy' : profile.status;
+    const activeIndex = statuses.findIndex(s => s.value === currentUiStatus);
+
+    const getSliderPosition = () => {
+        if (activeIndex === 0) return 'translate-x-0';
+        if (activeIndex === 1) return 'translate-x-full';
+        if (activeIndex === 2) return 'translate-x-[200%]';
+        return 'opacity-0'; // Hide if no match
+    };
+
+    const getSliderColor = () => {
+        if (activeIndex === -1) return 'bg-transparent';
+        return statuses[activeIndex].indicatorColor;
+    };
+
+    const getSubtitle = () => {
+        switch (profile.status) {
+            case 'Available':
+                return 'You are ready to take calls';
+            case 'Busy':
+            case 'Break':
+                return 'You will not receive new calls';
+            case 'Offline':
+            default:
+                return 'Go online to start taking calls';
+        }
+    };
+
+    return (
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center justify-between">
             <div>
-                {isCall ? (
-                    <p className="font-bold text-green-600 dark:text-green-400 text-sm">
-                        + ₹{Number((record as CallRecord).earnings).toFixed(2)}
-                    </p>
-                ) : (
-                    <p className="text-sm text-slate-500 dark:text-slate-400 italic truncate max-w-[120px] sm:max-w-[150px]">
-                        {(record as ListenerChatSession).lastMessageText}
-                    </p>
-                )}
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center">
+                    Active Status
+                    <span className="ml-1.5 text-slate-400 cursor-help" title="Set your status to control incoming calls.">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
+                    </span>
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
+            </div>
+            
+            <div className="relative bg-slate-100 dark:bg-slate-700 rounded-full p-1 flex items-center w-[210px] h-[42px] border dark:border-slate-600">
+                <div className={`absolute top-1 left-1 h-9 w-[calc(100%/3-4px)] rounded-full transition-all duration-300 ease-in-out transform ${getSliderPosition()} ${getSliderColor()}`}></div>
+                {statuses.map((status, index) => (
+                    <button
+                        key={status.value}
+                        onClick={() => handleStatusChange(status.value)}
+                        className={`relative z-10 w-1/3 text-center text-sm font-bold py-1 rounded-full transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-primary-500
+                            ${activeIndex === index ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`}
+                    >
+                        {status.label}
+                    </button>
+                ))}
             </div>
         </div>
     );
 };
 
+
+// --- Main Dashboard Screen Component ---
 const DashboardScreen: React.FC = () => {
-    const { profile } = useListener();
-    const [stats, setStats] = useState({ callsToday: 0, minutesToday: 0, chatsToday: 0 });
-    const [earnings, setEarnings] = useState({ today: 0, week: 0, month: 0, total: 0 });
-    const [loadingStats, setLoadingStats] = useState(true);
-    const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
-    const [loadingRecent, setLoadingRecent] = useState(true);
+    const { profile, loading: profileLoading } = useListener();
+    const [allActivities, setAllActivities] = useState<Activity[]>([]);
+    const [loadingActivities, setLoadingActivities] = useState(true);
+    const [earningsData, setEarningsData] = useState<{ today: number, week: number }>({ today: 0, week: 0 });
+    const [loadingEarnings, setLoadingEarnings] = useState(true);
 
     useEffect(() => {
         if (!profile?.uid) {
-            setLoadingStats(false);
-            setLoadingRecent(false);
+            if (!profileLoading) setLoadingEarnings(false);
             return;
         }
+        setLoadingEarnings(true);
 
-        setLoadingStats(true);
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoTimestamp = firebase.firestore.Timestamp.fromDate(sevenDaysAgo);
 
-        const callsUnsubscribe = db.collection('calls')
-            .where('listenerId', '==', profile.uid)
-            .where('status', '==', 'completed')
-            .onSnapshot(snapshot => {
-                const now = new Date();
-                const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                const weekStartDate = new Date(now);
-                weekStartDate.setDate(now.getDate() - now.getDay()); // Assuming week starts Sunday
-                weekStartDate.setHours(0, 0, 0, 0);
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const earningsQuery = db.collection('listeners').doc(profile.uid).collection('earnings')
+            .where('timestamp', '>=', sevenDaysAgoTimestamp);
 
-                let callsToday = 0, minutesToday = 0, earningsToday = 0, earningsWeek = 0, earningsMonth = 0, earningsTotal = 0;
+        const unsubEarnings = earningsQuery.onSnapshot(snapshot => {
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const startOfWeek = new Date(startOfToday);
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Sunday as start of week
 
-                snapshot.forEach(doc => {
-                    const call = doc.data() as CallRecord;
-                    const callEarning = Number(call.earnings) || 0;
-                    const callDate = call.startTime.toDate();
+            let todayEarnings = 0;
+            let weekEarnings = 0;
 
-                    earningsTotal += callEarning;
-                    if (callDate >= monthStart) earningsMonth += callEarning;
-                    if (callDate >= weekStartDate) earningsWeek += callEarning;
-                    if (callDate >= todayStart) {
-                        callsToday++;
-                        minutesToday += Math.round((call.durationSeconds || 0) / 60);
-                        earningsToday += callEarning;
-                    }
-                });
-                
-                setStats(prev => ({ ...prev, callsToday, minutesToday }));
-                setEarnings({ today: earningsToday, week: earningsWeek, month: earningsMonth, total: earningsTotal });
-                setLoadingStats(false);
-            }, error => {
-                console.error("Error fetching call stats:", error);
-                setLoadingStats(false);
+            snapshot.docs.forEach(doc => {
+                const record = doc.data();
+                const amount = record.amount || 0;
+                const timestamp = record.timestamp.toDate();
+
+                if (timestamp >= startOfWeek) {
+                    weekEarnings += amount;
+                }
+                if (timestamp >= startOfToday) {
+                    todayEarnings += amount;
+                }
             });
+            
+            setEarningsData({ today: todayEarnings, week: weekEarnings });
+            setLoadingEarnings(false);
+        }, () => setLoadingEarnings(false));
 
-        const chatsUnsubscribe = db.collection('chats')
-            .where('listenerId', '==', profile.uid)
-            .onSnapshot(snapshot => {
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                let chatsToday = 0;
-                snapshot.forEach(doc => {
-                    if (doc.data().lastMessageTimestamp?.toDate() >= todayStart) {
-                        chatsToday++;
-                    }
-                });
-                setStats(prev => ({ ...prev, chatsToday }));
-            });
+        return () => unsubEarnings();
+    }, [profile?.uid, profileLoading]);
 
-        return () => {
-            callsUnsubscribe();
-            chatsUnsubscribe();
-        };
-    }, [profile?.uid]);
-    
     useEffect(() => {
-        if (!profile?.uid) return;
-        setLoadingRecent(true);
-        const fetchActivities = async () => {
-            try {
-                const callsPromise = db.collection('calls').where('listenerId', '==', profile.uid).where('status', '==', 'completed').orderBy('startTime', 'desc').limit(5).get();
-                const chatsPromise = db.collection('chats').where('listenerId', '==', profile.uid).orderBy('lastMessageTimestamp', 'desc').limit(5).get();
-                const [callsSnapshot, chatsSnapshot] = await Promise.all([callsPromise, chatsPromise]);
-                const calls: CallActivity[] = callsSnapshot.docs.map(doc => ({ ...(doc.data() as CallRecord), type: 'call' as const, timestamp: doc.data().startTime }));
-                const chats: ChatActivity[] = chatsSnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<ListenerChatSession, 'id'>), type: 'chat' as const, timestamp: doc.data().lastMessageTimestamp }));
-                const combined = [...calls, ...chats].sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
-                setRecentActivities(combined.slice(0, 7));
-            } catch (error) {
-                console.error("Error fetching recent activities:", error);
-            } finally {
-                setLoadingRecent(false);
-            }
+        if (!profile?.uid) {
+            if (!profileLoading) setLoadingActivities(false);
+            return;
+        }
+        setLoadingActivities(true);
+
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoTimestamp = firebase.firestore.Timestamp.fromDate(sevenDaysAgo);
+
+        const callsQuery = db.collection('calls').where('listenerId', '==', profile.uid).where('startTime', '>=', sevenDaysAgoTimestamp);
+        const chatsQuery = db.collection('chats').where('listenerId', '==', profile.uid).where('lastMessageTimestamp', '>=', sevenDaysAgoTimestamp);
+
+        let callsData: CallActivity[] = [];
+        let chatsData: ChatActivity[] = [];
+        
+        const combineAndUpdate = () => {
+             const combined = [...callsData, ...chatsData].sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
+             setAllActivities(combined);
+             setLoadingActivities(false);
         };
-        fetchActivities();
-    }, [profile?.uid]);
+
+        const unsubCalls = callsQuery.onSnapshot(snapshot => {
+            callsData = snapshot.docs.map(doc => ({ ...doc.data(), callId: doc.id, type: 'call', timestamp: doc.data().startTime } as CallActivity));
+            combineAndUpdate();
+        }, () => setLoadingActivities(false));
+        
+        const unsubChats = chatsQuery.onSnapshot(snapshot => {
+            chatsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, type: 'chat', timestamp: doc.data().lastMessageTimestamp } as ChatActivity));
+            combineAndUpdate();
+        }, () => setLoadingActivities(false));
+
+        return () => { unsubCalls(); unsubChats(); };
+    }, [profile?.uid, profileLoading]);
+
+    const { todayStats, weekStats, recentActivities } = useMemo(() => {
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startOfWeek = new Date(startOfToday);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Sunday as start of week
+
+        const todayActivities = allActivities.filter(a => a.timestamp.toDate() >= startOfToday);
+        const weekActivities = allActivities.filter(a => a.timestamp.toDate() >= startOfWeek);
+        
+        const todayCalls = todayActivities.filter(a => a.type === 'call') as CallActivity[];
+        const weekCalls = weekActivities.filter(a => a.type === 'call') as CallActivity[];
+        const todayChatsCount = todayActivities.filter(a => a.type === 'chat').length;
+
+        return {
+            todayStats: {
+                calls: todayCalls.length,
+                duration: todayCalls.reduce((sum, call) => sum + (call.durationSeconds || 0), 0),
+                chats: todayChatsCount,
+            },
+            weekStats: {
+                calls: weekCalls.length,
+                chats: weekActivities.filter(a => a.type === 'chat').length,
+                avgDuration: weekCalls.length > 0 ? (weekCalls.reduce((sum, call) => sum + (call.durationSeconds || 0), 0) / weekCalls.length) : 0,
+            },
+            recentActivities: allActivities.slice(0, 5)
+        };
+    }, [allActivities]);
 
     return (
         <div className="p-4 space-y-6">
-            <header>
-                <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Hello, {profile?.displayName || 'Listener'}!</h1>
-                <p className="text-slate-500 dark:text-slate-400">Here’s today’s performance snapshot.</p>
-            </header>
+            <StatusToggle />
             
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="Calls Today" value={<StatValue loading={loadingStats} value={stats.callsToday} />} color="bg-blue-100 dark:bg-blue-900/50" icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>} />
-                <StatCard title="Minutes Talked" value={<StatValue loading={loadingStats} value={stats.minutesToday} suffix=" min" />} color="bg-green-100 dark:bg-green-900/50" icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
-                <StatCard title="Chats Today" value={<StatValue loading={loadingStats} value={stats.chatsToday} />} color="bg-purple-100 dark:bg-purple-900/50" icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>} />
-                <StatCard title="Total Earnings" value={<StatValue loading={loadingStats} value={earnings.total.toFixed(2)} prefix="₹" />} color="bg-yellow-100 dark:bg-yellow-900/50" icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-5 4h4m5 4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
-                <div className="flex justify-between items-center mb-2">
-                     <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Earnings Snapshot</h3>
-                     <Link to="/earnings" className="text-sm font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">View Details &rarr;</Link>
-                </div>
-                 <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-slate-700">
-                     <div className="px-2 text-center"><p className="text-sm text-slate-500">Today</p><p className="font-bold text-lg">₹{earnings.today.toFixed(2)}</p></div>
-                     <div className="px-2 text-center"><p className="text-sm text-slate-500">This Week</p><p className="font-bold text-lg">₹{earnings.week.toFixed(2)}</p></div>
-                     <div className="px-2 text-center"><p className="text-sm text-slate-500">This Month</p><p className="font-bold text-lg">₹{earnings.month.toFixed(2)}</p></div>
-                 </div>
-            </div>
-
+            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+            
+            {/* Today's Summary */}
             <div>
-                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">Recent Activity</h3>
-                 <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
-                    {loadingRecent ? (
-                        <p className="text-center text-slate-500 p-4">Loading recent activity...</p>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Today's Summary</h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <StatCard title="Today's Calls" color="blue" linkTo="/calls" icon={<PhoneIcon className="h-5 w-5 text-blue-500"/>} value={<StatValue loading={loadingActivities}>{todayStats.calls}</StatValue>} />
+                    <StatCard title="Total Talk Time" color="indigo" icon={<ClockIcon className="h-5 w-5 text-indigo-500"/>} value={<StatValue loading={loadingActivities}>{formatDuration(todayStats.duration)}</StatValue>} />
+                    <StatCard title="Today's Chats" color="purple" linkTo="/chat" icon={<ChatIcon className="h-5 w-5 text-purple-500"/>} value={<StatValue loading={loadingActivities}>{todayStats.chats}</StatValue>} />
+                    <StatCard title="Today's Earnings" color="green" linkTo="/earnings" icon={<RupeeIcon className="h-5 w-5 text-green-500"/>} value={<StatValue loading={loadingEarnings}>₹{earningsData.today.toFixed(2)}</StatValue>} />
+                </div>
+            </div>
+
+            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+
+            {/* This Week's Performance */}
+             <div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">This Week's Performance</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <StatCard title="Total Calls" color="blue" linkTo="/calls" icon={<PhoneIcon className="h-5 w-5 text-blue-500"/>} value={<StatValue loading={loadingActivities}>{weekStats.calls}</StatValue>} />
+                    <StatCard title="Weekly Earnings" color="green" linkTo="/earnings" icon={<RupeeIcon className="h-5 w-5 text-green-500"/>} value={<StatValue loading={loadingEarnings}>₹{earningsData.week.toFixed(2)}</StatValue>} />
+                    <StatCard title="Total Chats" color="purple" linkTo="/chat" icon={<ChatIcon className="h-5 w-5 text-purple-500"/>} value={<StatValue loading={loadingActivities}>{weekStats.chats}</StatValue>} />
+                    <StatCard title="Avg. Call Duration" color="indigo" icon={<ClockIcon className="h-5 w-5 text-indigo-500"/>} value={<StatValue loading={loadingActivities}>{formatDuration(weekStats.avgDuration)}</StatValue>} />
+                </div>
+            </div>
+
+            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+
+            {/* Recent Activity */}
+            <div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Recent Activity</h3>
+                <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm divide-y divide-slate-200 dark:divide-slate-700">
+                    {loadingActivities ? (
+                         <div className="text-center py-10 text-slate-500 dark:text-slate-400">Loading activity...</div>
                     ) : recentActivities.length > 0 ? (
-                        <div className="divide-y divide-slate-200 dark:divide-slate-700">
-                            {/* FIX: Replaced the type guard function with an inline check on the discriminant property `type`
-                                to ensure correct type narrowing within the map function's key generation. */}
-                            {recentActivities.map(activity => <ActivityRow key={`${activity.type}-${activity.type === 'call' ? activity.callId : activity.id}`} activity={activity} />)}
-                        </div>
+                        recentActivities.map(activity => <ActivityRow key={`${activity.type}-${activity.type === 'call' ? (activity as CallActivity).callId : (activity as ChatActivity).id}`} activity={activity} />)
                     ) : (
-                        <div className="text-center p-4">
-                           <p className="text-slate-500 dark:text-slate-400">No recent activity to show.</p>
-                           <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Completed sessions will appear here.</p>
-                        </div>
+                        <div className="text-center py-10 text-slate-500 dark:text-slate-400">No recent activity.</div>
                     )}
-                 </div>
+                </div>
             </div>
         </div>
     );
 };
-
-// FIX: Update type guard to use the new discriminated union types.
-// Type guard to differentiate between CallRecord and ListenerChatSession inside the map key
-function isCallRecord(activity: Activity): activity is CallActivity {
-  return activity.type === 'call';
-}
 
 export default DashboardScreen;
