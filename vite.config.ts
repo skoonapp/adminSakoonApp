@@ -5,9 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   define: {
-    // This makes the environment variable available to the client-side code,
-    // resolving the "process is not defined" error that causes a blank screen.
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
+    // This makes the environment variable available to the client-side code.
+    // It uses the key from the build environment (like Netlify) if available,
+    // otherwise it falls back to the provided key for local development.
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY || "AIzaSyA3f_9xKL7YH8Rg6EuKtc5BNkxXWWwRUDs")
   },
   plugins: [
     react(),
