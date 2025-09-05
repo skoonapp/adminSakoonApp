@@ -99,6 +99,12 @@ const ActiveCallScreen: React.FC = () => {
             setPermissionStatus('denied');
         }
     }, []);
+    
+    useEffect(() => {
+        if (permissionStatus === 'idle') {
+            requestMicrophonePermission();
+        }
+    }, [permissionStatus, requestMicrophonePermission]);
 
     const handleLeave = useCallback(async () => {
         if (hasLeftRef.current || !callId) return;
@@ -107,17 +113,27 @@ const ActiveCallScreen: React.FC = () => {
 
         try {
             const callRef = db.collection('calls').doc(callId);
-            await callRef.update({
-                status: 'completed',
-                endTime: serverTimestamp(),
-                durationSeconds: callDuration
-            });
+            const doc = await callRef.get();
+            if (doc.exists) {
+                const data = doc.data() as CallRecord;
+                const startTime = data.startTime?.toDate().getTime();
+                let duration = 0;
+                if (startTime) {
+                    duration = Math.round((new Date().getTime() - startTime) / 1000);
+                }
+
+                await callRef.update({
+                    status: 'completed',
+                    endTime: serverTimestamp(),
+                    durationSeconds: duration
+                });
+            }
         } catch (error) {
             console.error("Failed to update call document on leave:", error);
         } finally {
             navigate('/dashboard');
         }
-    }, [callId, callDuration, navigate]);
+    }, [callId, navigate]);
 
     const endCall = useCallback(() => {
         if (zpInstanceRef.current) {
@@ -133,20 +149,33 @@ const ActiveCallScreen: React.FC = () => {
             return;
         }
         const callRef = db.collection('calls').doc(callId);
-        const unsubscribe = callRef.onSnapshot(async (doc) => {
+
+        callRef.get().then(doc => {
+            if (doc.exists && doc.data()?.status === 'initiated') {
+                callRef.update({ status: 'answered' }).catch(err => {
+                    console.error("Failed to update call status to answered:", err);
+                });
+            }
+        });
+
+        const unsubscribe = callRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data() as CallRecord;
                 setCallData(data);
-                if (data.status === 'initiated') {
-                    await callRef.update({ status: 'answered' });
+                if (data.status === 'completed' || data.status === 'missed' || data.status === 'rejected') {
+                    endCall();
                 }
             } else {
                 setStatus('error');
+                endCall();
             }
-        }, () => setStatus('error'));
+        }, (error) => {
+            console.error("Call document listener error:", error);
+            setStatus('error');
+        });
 
         return () => unsubscribe();
-    }, [callId]);
+    }, [callId, endCall]);
     
     useEffect(() => {
         let timerInterval: number;
@@ -159,7 +188,9 @@ const ActiveCallScreen: React.FC = () => {
     }, [status]);
     
     useEffect(() => {
-        if (!callData || !callId || status !== 'loading' || permissionStatus !== 'granted') return;
+        if (!callData || !callId || permissionStatus !== 'granted' || zpInstanceRef.current) {
+            return;
+        }
 
         let isMounted = true;
         const initZego = async () => {
@@ -168,6 +199,7 @@ const ActiveCallScreen: React.FC = () => {
             try {
                 const kitToken = await fetchZegoToken(callId);
                 if (!isMounted) return;
+                
                 const zp = window.ZegoUIKitPrebuilt.create(kitToken);
                 zpInstanceRef.current = zp;
 
@@ -177,15 +209,15 @@ const ActiveCallScreen: React.FC = () => {
                     showPreJoinView: false,
                     showScreenSharingButton: false,
                     showMyCameraToggleButton: false,
+                    turnOnMicrophoneWhenJoining: true,
                     onLeaveRoom: handleLeave,
                     onUserJoin: () => { if (isMounted) setStatus('connected'); },
                     onUserLeave: () => { if (isMounted) endCall(); },
                     onNetworkQuality: (_roomID: string, stats: { downlinkQualityLevel: number }) => {
-                        if (isMounted) {
-                           setNetworkQuality(stats.downlinkQualityLevel);
-                        }
+                        if (isMounted) setNetworkQuality(stats.downlinkQualityLevel);
                     },
                 });
+
                 if (isMounted && zp.getRemoteUsers().length > 0) {
                     setStatus('connected');
                 }
@@ -194,6 +226,7 @@ const ActiveCallScreen: React.FC = () => {
                 if (isMounted) setStatus('error');
             }
         };
+        
         initZego();
 
         return () => {
@@ -203,7 +236,7 @@ const ActiveCallScreen: React.FC = () => {
                 zpInstanceRef.current = null;
             }
         };
-    }, [callData, callId, status, handleLeave, endCall, permissionStatus]);
+    }, [callData, callId, permissionStatus, handleLeave, endCall]);
 
     const toggleMute = () => {
         if (!zpInstanceRef.current) return;
@@ -220,7 +253,7 @@ const ActiveCallScreen: React.FC = () => {
 
     const getStatusText = () => {
         switch(status) {
-            case 'loading': return 'Loading call...';
+            case 'loading': return 'Preparing call...';
             case 'connecting': return 'Connecting...';
             case 'connected': return formatTime(callDuration);
             case 'error': return 'Connection Failed';
