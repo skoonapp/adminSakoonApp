@@ -33,6 +33,10 @@ const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
+  const [resendTimer, setResendTimer] = useState(60);
+  const [resendAttempts, setResendAttempts] = useState(0);
+  const [showFinalError, setShowFinalError] = useState(false);
+
   useEffect(() => {
     if (!document.getElementById('recaptcha-container')) {
         const container = document.createElement('div');
@@ -49,6 +53,25 @@ const LoginScreen: React.FC = () => {
       window.recaptchaVerifier?.clear();
     };
   }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (step === 'otp' && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, resendTimer]);
+
+  useEffect(() => {
+      if (step === 'phone') {
+          setResendTimer(60);
+          setResendAttempts(0);
+          setShowFinalError(false);
+          setError('');
+      }
+  }, [step]);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +114,31 @@ const LoginScreen: React.FC = () => {
     }
   };
 
+  const handleResendOtp = async () => {
+    if (resendTimer > 0 || resendAttempts >= 2) return;
+    setLoading(true);
+    setError('');
+    setShowFinalError(false);
+
+    try {
+      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, window.recaptchaVerifier!);
+      window.confirmationResult = confirmationResult;
+      const newAttempts = resendAttempts + 1;
+      setResendAttempts(newAttempts);
+      
+      if (newAttempts === 1) {
+        setResendTimer(120);
+      } else {
+        setShowFinalError(true);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError('Failed to resend OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <div id="recaptcha-container" className="hidden"></div>
@@ -105,12 +153,12 @@ const LoginScreen: React.FC = () => {
       </div>
 
       <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-sm">
+        <div className="text-center mb-8">
+            <h1 className="text-5xl font-bold text-white">SakoonApp Admin</h1>
+            <p className="mt-3 text-lg text-cyan-200">Listener Portal Login</p>
+        </div>
         {step === 'phone' ? (
            <>
-              <div className="text-center mb-8">
-                <h1 className="text-5xl font-bold text-white">SakoonApp Admin</h1>
-                <p className="mt-3 text-lg text-cyan-200">Listener Portal Login</p>
-              </div>
               <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
                   <form onSubmit={handlePhoneSubmit}>
                       <div className="relative mb-4">
@@ -129,7 +177,7 @@ const LoginScreen: React.FC = () => {
                           />
                       </div>
                       <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
-                          {loading ? 'भेजा जा रहा है...' : 'OTP पाएं'}
+                          {loading ? 'Sending OTP...' : 'Get OTP'}
                       </button>
                   </form>
                   {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
@@ -137,11 +185,8 @@ const LoginScreen: React.FC = () => {
            </>
         ) : (
           <>
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-white">OTP Verification</h1>
-              <p className="mt-3 text-lg text-cyan-200">Enter the code sent to +91 {phoneNumber}</p>
-            </div>
             <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
+              <p className="text-center text-slate-300 mb-4">Enter the code sent to +91 {phoneNumber}</p>
               <form onSubmit={handleOtpSubmit}>
                   <div className="relative mb-4">
                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
@@ -151,20 +196,33 @@ const LoginScreen: React.FC = () => {
                           type="tel"
                           value={otp}
                           onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-                          placeholder="6-अंकीय OTP"
+                          placeholder="6-Digit OTP"
                           className="w-full bg-white/10 border border-white/20 text-white placeholder-cyan-200/50 text-lg rounded-xl tracking-[0.5em] text-center p-3.5 focus:ring-cyan-400 focus:border-cyan-400 focus:outline-none transition-colors"
                           required
                           maxLength={6}
                       />
                   </div>
                   <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
-                      {loading ? 'सत्यापित हो रहा है...' : 'सत्यापित करें'}
+                      {loading ? 'Verifying...' : 'Verify'}
                   </button>
               </form>
+              <div className="text-center mt-6">
+                {showFinalError ? (
+                    <p className="text-sm text-yellow-300">Please check your mobile number and try again after 15 minutes.</p>
+                ) : resendTimer > 0 ? (
+                    <p className="text-sm text-slate-400">Resend OTP in {resendTimer}s</p>
+                ) : (
+                    <button onClick={handleResendOtp} disabled={loading || resendAttempts >= 2} className="text-sm text-cyan-200 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
+                )}
+              </div>
                {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
-               <button onClick={() => { setStep('phone'); setError(''); }} className="w-full text-center mt-6 text-sm text-cyan-200 hover:text-white">
+               <button onClick={() => setStep('phone')} className="w-full text-center mt-4 text-sm text-slate-400 hover:text-cyan-200">
                 Change Number
               </button>
+            </div>
+            <div className="text-center mt-8 text-slate-300">
+                <p className="text-sm">🔐 Secure Login with OTP Authentication</p>
+                <p className="text-xs mt-2 text-slate-400">App Version: 1.0.0 (Beta)</p>
             </div>
           </>
         )}
