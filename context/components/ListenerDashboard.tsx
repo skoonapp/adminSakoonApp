@@ -1,1 +1,1 @@
-// This file is unused and slated for removal to improve codebase health.
+// This file is unused and can be removed.

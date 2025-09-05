@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useListener } from '../../ListenerContext';
 import { db } from '../../../utils/firebase';
-import NotificationPanel from './NotificationPanel';
+// import NotificationPanel from './NotificationPanel'; // File is missing from the provided directory structure, causing an error.
 
 // --- Icon Components ---
 const SunIcon: React.FC<{className?: string}> = ({className}) => (
@@ -26,8 +26,8 @@ const Header: React.FC = () => {
     const { profile } = useListener();
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches));
     const [unreadCount, setUnreadCount] = useState(0);
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const panelRef = useRef<HTMLDivElement>(null);
+    // const [isPanelOpen, setIsPanelOpen] = useState(false);
+    // const panelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         document.documentElement.classList.toggle('dark', isDarkMode);
@@ -43,29 +43,29 @@ const Header: React.FC = () => {
         return () => unsubscribe();
     }, [profile?.uid]);
     
-    // Close panel when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-                setIsPanelOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    // Close panel when clicking outside - Disabled due to missing component
+    // useEffect(() => {
+    //     const handleClickOutside = (event: MouseEvent) => {
+    //         if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+    //             setIsPanelOpen(false);
+    //         }
+    //     };
+    //     document.addEventListener('mousedown', handleClickOutside);
+    //     return () => document.removeEventListener('mousedown', handleClickOutside);
+    // }, []);
 
-    const handleBellClick = () => {
-        setIsPanelOpen(prev => !prev);
-    };
+    // const handleBellClick = () => {
+    //     setIsPanelOpen(prev => !prev);
+    // };
 
     return (
         <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-primary-600 to-indigo-700 dark:from-slate-900 dark:to-slate-800 shadow-md text-white z-50 flex items-center justify-between px-4">
             <h1 className="text-xl font-bold tracking-tight">SakoonApp Admin</h1>
             
             <div className="flex items-center gap-2 sm:gap-4">
-                <div ref={panelRef} className="relative">
+                <div className="relative">
                     <button
-                        onClick={handleBellClick}
+                        // onClick={handleBellClick} - Disabled due to missing component
                         className="w-10 h-10 flex items-center justify-center rounded-full text-indigo-200 hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors relative"
                         aria-label="Notifications"
                     >
@@ -74,7 +74,7 @@ const Header: React.FC = () => {
                             <span className="absolute top-1.5 right-1.5 block w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-current"></span>
                         )}
                     </button>
-                    <NotificationPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />
+                    {/* <NotificationPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} /> */}
                 </div>
                 <button
                     onClick={() => setIsDarkMode(!isDarkMode)}
