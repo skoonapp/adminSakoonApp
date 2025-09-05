@@ -1,0 +1,248 @@
+import React, { useState, useEffect } from 'react';
+// FIX: Use namespace import for react-router-dom to fix module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import { auth } from '../utils/firebase';
+
+// --- Icon Components ---
+const LockIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+);
+
+const WarningIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M8.257 3.099a.75.75 0 011.486 0l5.575 10.655a.75.75 0 01-.643 1.11H3.32a.75.75 0 01-.643-1.11L8.257 3.1zM9 12a1 1 0 112 0 1 1 0 01-2 0zm1-4a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0V8z" clipRule="evenodd" />
+    </svg>
+);
+
+
+declare global {
+  interface Window {
+    recaptchaVerifier?: firebase.auth.RecaptchaVerifier;
+    confirmationResult?: firebase.auth.ConfirmationResult;
+  }
+}
+
+const LoginScreen: React.FC = () => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const [resendTimer, setResendTimer] = useState(60);
+  const [resendAttempts, setResendAttempts] = useState(0);
+  const [showFinalError, setShowFinalError] = useState(false);
+
+  useEffect(() => {
+    if (!document.getElementById('recaptcha-container')) {
+        const container = document.createElement('div');
+        container.id = 'recaptcha-container';
+        document.body.appendChild(container);
+    }
+
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      'size': 'invisible',
+      'callback': () => { /* reCAPTCHA solved */ }
+    });
+
+    return () => {
+      window.recaptchaVerifier?.clear();
+    };
+  }, []);
+
+  useEffect(() => {
+    // FIX: Use `number` for interval ID type in browser environments instead of `NodeJS.Timeout`.
+    let interval: number;
+    if (step === 'otp' && resendTimer > 0) {
+      interval = window.setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, resendTimer]);
+
+  useEffect(() => {
+      if (step === 'phone') {
+          setResendTimer(60);
+          setResendAttempts(0);
+          setShowFinalError(false);
+          setError('');
+      }
+  }, [step]);
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    if (phoneNumber.length !== 10) {
+      setError('Please enter a valid 10-digit phone number.');
+      setLoading(false);
+      return;
+    }
+    try {
+      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, window.recaptchaVerifier!);
+      window.confirmationResult = confirmationResult;
+      setStep('otp');
+    } catch (err: any) {
+      console.error(err);
+      setError('Failed to send OTP. Please check your network and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    if (otp.length !== 6) {
+      setError('Please enter the 6-digit OTP.');
+      setLoading(false);
+      return;
+    }
+    try {
+      await window.confirmationResult?.confirm(otp);
+      // On successful login, the App.tsx router will handle navigation.
+    } catch (err) {
+      console.error(err);
+      setError('Invalid OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0 || resendAttempts >= 2) return;
+    setLoading(true);
+    setError('');
+    setShowFinalError(false);
+
+    try {
+      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, window.recaptchaVerifier!);
+      window.confirmationResult = confirmationResult;
+      const newAttempts = resendAttempts + 1;
+      setResendAttempts(newAttempts);
+      
+      if (newAttempts === 1) {
+        setResendTimer(120);
+      } else {
+        setShowFinalError(true);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError('Failed to resend OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-start pt-20 p-4 relative overflow-hidden">
+      <div id="recaptcha-container" className="hidden"></div>
+
+       {/* Background Image and Overlay */}
+      <div className="absolute inset-0 z-0">
+          <div 
+              className="absolute inset-0 bg-cover bg-center opacity-30" 
+              style={{backgroundImage: `url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1888&auto=format&fit=crop')`}}
+          ></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent"></div>
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-sm">
+        <div className="text-center mb-8">
+            <h1 className="text-5xl font-bold text-white">SakoonApp Admin</h1>
+            <p className="mt-3 text-lg text-cyan-200">Listener Portal Login</p>
+        </div>
+        {step === 'phone' ? (
+           <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
+               <form onSubmit={handlePhoneSubmit}>
+                   <div className="relative mb-4">
+                       <input 
+                         type="tel" 
+                         value={phoneNumber} 
+                         onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))} 
+                         placeholder="📞 +91  मोबाइल नंबर"
+                         className="w-full bg-white/10 border border-white/20 text-white placeholder-cyan-200/50 text-lg rounded-xl block p-3.5 focus:ring-cyan-400 focus:border-cyan-400 focus:outline-none transition-colors" 
+                         required 
+                         maxLength={10}
+                       />
+                   </div>
+                   <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
+                       {loading ? 'Sending OTP...' : 'OTP पाएं'}
+                   </button>
+               </form>
+               {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
+                <div className="text-center mt-6 pt-6 border-t border-white/10 text-slate-300">
+                    <p className="text-sm flex items-center justify-center gap-2">
+                        <span>🔐</span>
+                        <span>Secure Login with OTP Authentication</span>
+                    </p>
+                    <p className="text-xs mt-2 text-slate-400">App Version: 1.0.0 (Beta)</p>
+                </div>
+           </div>
+        ) : (
+          <>
+            <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
+              <div className="text-center mb-6">
+                <p className="text-slate-300">Enter the code sent to:</p>
+                <p className="font-bold text-white text-lg mt-1">+91 {phoneNumber}</p>
+              </div>
+              <form onSubmit={handleOtpSubmit} className="mb-4">
+                  <div className="relative mb-4">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                          <LockIcon className="w-5 h-5"/>
+                      </div>
+                      <input
+                          type="tel"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                          placeholder="6-Digit OTP"
+                          className="w-full bg-white/10 border border-white/20 text-white placeholder-cyan-200/50 text-lg rounded-xl tracking-[0.5em] text-center p-3.5 focus:ring-cyan-400 focus:border-cyan-400 focus:outline-none transition-colors"
+                          required
+                          maxLength={6}
+                      />
+                  </div>
+                  <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
+                      {loading ? 'Verifying...' : 'Verify'}
+                  </button>
+              </form>
+              {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
+              <hr className="border-t border-white/10 my-6" />
+              <div className="text-center">
+                {showFinalError ? (
+                    <div className="flex items-center justify-center gap-2 text-sm text-yellow-300">
+                        <WarningIcon className="w-5 h-5 flex-shrink-0"/>
+                        <span>Please check your mobile number and try again after 15 minutes.</span>
+                    </div>
+                ) : resendTimer > 0 ? (
+                    <p className="text-sm text-slate-400">Resend OTP in {resendTimer}s</p>
+                ) : (
+                    <button onClick={handleResendOtp} disabled={loading || resendAttempts >= 2} className="text-sm text-cyan-200 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
+                )}
+              </div>
+              <button onClick={() => setStep('phone')} className="w-full text-center mt-6 text-sm text-slate-400 hover:text-cyan-200">
+                Change Number
+              </button>
+            </div>
+            <div className="text-center mt-8 text-slate-300">
+                <p className="text-sm">🔐 Secure Login with OTP Authentication</p>
+                <p className="text-xs mt-2 text-slate-400">App Version: 1.0.0 (Beta)</p>
+            </div>
+          </>
+        )}
+      </div>
+      
+      <footer className="absolute bottom-0 left-0 right-0 p-4 text-center text-xs text-slate-400 z-10">
+        <p>SakoonApp by Metxfitt Pvt. Ltd. | © 2025 All Rights Reserved</p>
+        <p className="mt-1">Contact: support@sakoonapp.com | Follow us: @SakoonApp</p>
+      </footer>
+    </div>
+  );
+};
+
+export default LoginScreen;
