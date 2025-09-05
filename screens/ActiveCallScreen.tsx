@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+// FIX: Use namespace import for react-router-dom to fix module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { db, serverTimestamp } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
 import type { CallRecord } from '../types';
@@ -69,8 +70,8 @@ const NetworkQualityIndicator: React.FC<{ quality: number }> = ({ quality }) => 
 };
 
 const ActiveCallScreen: React.FC = () => {
-    const { callId } = useParams<{ callId: string }>();
-    const navigate = useNavigate();
+    const { callId } = ReactRouterDOM.useParams<{ callId: string }>();
+    const navigate = ReactRouterDOM.useNavigate();
     const zpInstanceRef = useRef<any>(null);
     const hasLeftRef = useRef(false);
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+// FIX: Use namespace import for react-router-dom to fix module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useListener } from './../context/ListenerContext';
 import { db } from './../utils/firebase';
 import firebase from 'firebase/compat/app';
@@ -55,7 +56,7 @@ const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.Re
         </div>
     );
     
-    return linkTo ? <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl">{content}</Link> : content;
+    return linkTo ? <ReactRouterDOM.Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl">{content}</ReactRouterDOM.Link> : content;
 };
 
 const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
@@ -89,19 +90,32 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 const StatusToggle: React.FC = () => {
     const { profile } = useListener();
+    const [optimisticStatus, setOptimisticStatus] = useState<ListenerStatus | null>(null);
+
+    // Sync local state with profile from context
+    useEffect(() => {
+        if (profile) {
+            setOptimisticStatus(profile.status);
+        }
+    }, [profile]);
     
     const handleStatusChange = async (newStatus: ListenerStatus) => {
-        if (profile) {
-            try {
-                await db.collection('listeners').doc(profile.uid).update({ status: newStatus });
-            } catch (error) {
-                console.error("Failed to update status:", error);
-                // Optionally show an error to the user
-            }
+        if (!profile || !optimisticStatus) return;
+
+        const previousStatus = optimisticStatus;
+        setOptimisticStatus(newStatus); // Optimistically update the UI
+
+        try {
+            await db.collection('listeners').doc(profile.uid).update({ status: newStatus });
+        } catch (error) {
+            console.error("Failed to update status:", error);
+            // Revert on error
+            setOptimisticStatus(previousStatus);
+            alert("Failed to update status. Please check your connection and try again.");
         }
     };
     
-    if (!profile) {
+    if (!profile || !optimisticStatus) {
         return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
     }
 
@@ -112,7 +126,7 @@ const StatusToggle: React.FC = () => {
     ];
     
     // Treat 'Break' status as 'Busy' for UI purposes
-    const currentUiStatus = profile.status === 'Break' ? 'Busy' : profile.status;
+    const currentUiStatus = optimisticStatus === 'Break' ? 'Busy' : optimisticStatus;
     const activeIndex = statuses.findIndex(s => s.value === currentUiStatus);
 
     const getSliderPosition = () => {
@@ -128,7 +142,7 @@ const StatusToggle: React.FC = () => {
     };
 
     const getSubtitle = () => {
-        switch (profile.status) {
+        switch (optimisticStatus) {
             case 'Available':
                 return 'You are ready to take calls';
             case 'Busy':

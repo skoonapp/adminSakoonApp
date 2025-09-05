@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+// FIX: Use namespace import for react-router-dom to fix module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth } from './utils/firebase';
 
@@ -34,44 +35,44 @@ const App: React.FC = () => {
   }
 
   return (
-    <HashRouter>
+    <ReactRouterDOM.HashRouter>
       <Suspense fallback={<SplashScreen />}>
-        <Routes>
+        <ReactRouterDOM.Routes>
           {user ? (
             // Authenticated Routes
             <>
-              <Route path="/call/:callId" element={
+              <ReactRouterDOM.Route path="/call/:callId" element={
                 <ListenerProvider user={user}>
                   <ActiveCallScreen />
                 </ListenerProvider>
               } />
-              <Route path="/" element={
+              <ReactRouterDOM.Route path="/" element={
                 <ListenerProvider user={user}>
                   <MainLayout />
                 </ListenerProvider>
               }>
-                <Route index element={<Navigate to="/dashboard" />} />
-                <Route path="dashboard" element={<DashboardScreen />} />
-                <Route path="calls" element={<CallsScreen />} />
-                <Route path="chat" element={<ChatScreen />} />
-                <Route path="earnings" element={<EarningsScreen />} />
-                <Route path="profile" element={<ProfileScreen />} />
-                <Route path="terms" element={<TermsScreen />} />
-                <Route path="privacy" element={<PrivacyPolicyScreen />} />
-              </Route>
+                <ReactRouterDOM.Route index element={<ReactRouterDOM.Navigate to="/dashboard" />} />
+                <ReactRouterDOM.Route path="dashboard" element={<DashboardScreen />} />
+                <ReactRouterDOM.Route path="calls" element={<CallsScreen />} />
+                <ReactRouterDOM.Route path="chat" element={<ChatScreen />} />
+                <ReactRouterDOM.Route path="earnings" element={<EarningsScreen />} />
+                <ReactRouterDOM.Route path="profile" element={<ProfileScreen />} />
+                <ReactRouterDOM.Route path="terms" element={<TermsScreen />} />
+                <ReactRouterDOM.Route path="privacy" element={<PrivacyPolicyScreen />} />
+              </ReactRouterDOM.Route>
               {/* Catch-all for authenticated users */}
-              <Route path="*" element={<Navigate to="/dashboard" />} />
+              <ReactRouterDOM.Route path="*" element={<ReactRouterDOM.Navigate to="/dashboard" />} />
             </>
           ) : (
             // Unauthenticated Routes
             <>
-              <Route path="/login" element={<LoginScreen />} />
-              <Route path="*" element={<Navigate to="/login" />} />
+              <ReactRouterDOM.Route path="/login" element={<LoginScreen />} />
+              <ReactRouterDOM.Route path="*" element={<ReactRouterDOM.Navigate to="/login" />} />
             </>
           )}
-        </Routes>
+        </ReactRouterDOM.Routes>
       </Suspense>
-    </HashRouter>
+    </ReactRouterDOM.HashRouter>
   );
 };
 
