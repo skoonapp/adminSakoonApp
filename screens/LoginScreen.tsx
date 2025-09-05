@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Use namespace import for react-router-dom to fix module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Use named imports for react-router-dom to fix module resolution errors.
+import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { auth } from '../utils/firebase';
@@ -18,6 +18,12 @@ const LockIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
+const WarningIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M8.257 3.099a.75.75 0 011.486 0l5.575 10.655a.75.75 0 01-.643 1.11H3.32a.75.75 0 01-.643-1.11L8.257 3.1zM9 12a1 1 0 112 0 1 1 0 01-2 0zm1-4a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0V8z" clipRule="evenodd" />
+    </svg>
+);
+
 
 declare global {
   interface Window {
@@ -27,7 +33,7 @@ declare global {
 }
 
 const LoginScreen: React.FC = () => {
-  const navigate = ReactRouterDOM.useNavigate();
+  const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -59,7 +65,7 @@ const LoginScreen: React.FC = () => {
     // FIX: Use `number` for interval ID type in browser environments instead of `NodeJS.Timeout`.
     let interval: number;
     if (step === 'otp' && resendTimer > 0) {
-      interval = setInterval(() => {
+      interval = window.setInterval(() => {
         setResendTimer((prev) => prev - 1);
       }, 1000);
     }
@@ -142,7 +148,7 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-start pt-20 p-4 relative overflow-hidden">
       <div id="recaptcha-container" className="hidden"></div>
 
        {/* Background Image and Overlay */}
@@ -188,8 +194,11 @@ const LoginScreen: React.FC = () => {
         ) : (
           <>
             <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
-              <p className="text-center text-slate-300 mb-4">Enter the code sent to +91 {phoneNumber}</p>
-              <form onSubmit={handleOtpSubmit}>
+              <div className="text-center mb-6">
+                <p className="text-slate-300">Enter the code sent to:</p>
+                <p className="font-bold text-white text-lg mt-1">+91 {phoneNumber}</p>
+              </div>
+              <form onSubmit={handleOtpSubmit} className="mb-4">
                   <div className="relative mb-4">
                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
                           <LockIcon className="w-5 h-5"/>
@@ -208,17 +217,21 @@ const LoginScreen: React.FC = () => {
                       {loading ? 'Verifying...' : 'Verify'}
                   </button>
               </form>
-              <div className="text-center mt-6">
+              {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
+              <hr className="border-t border-white/10 my-6" />
+              <div className="text-center">
                 {showFinalError ? (
-                    <p className="text-sm text-yellow-300">Please check your mobile number and try again after 15 minutes.</p>
+                    <div className="flex items-center justify-center gap-2 text-sm text-yellow-300">
+                        <WarningIcon className="w-5 h-5 flex-shrink-0"/>
+                        <span>Please check your mobile number and try again after 15 minutes.</span>
+                    </div>
                 ) : resendTimer > 0 ? (
                     <p className="text-sm text-slate-400">Resend OTP in {resendTimer}s</p>
                 ) : (
                     <button onClick={handleResendOtp} disabled={loading || resendAttempts >= 2} className="text-sm text-cyan-200 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
                 )}
               </div>
-               {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
-               <button onClick={() => setStep('phone')} className="w-full text-center mt-4 text-sm text-slate-400 hover:text-cyan-200">
+               <button onClick={() => setStep('phone')} className="w-full text-center mt-6 text-sm text-slate-400 hover:text-cyan-200">
                 Change Number
               </button>
             </div>

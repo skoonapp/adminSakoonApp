@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// FIX: Use namespace import for react-router-dom to fix module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Use named imports for react-router-dom to fix module resolution errors.
+import { Link } from 'react-router-dom';
 import { useListener } from './../context/ListenerContext';
 import { db } from './../utils/firebase';
 import firebase from 'firebase/compat/app';
@@ -56,7 +56,7 @@ const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.Re
         </div>
     );
     
-    return linkTo ? <ReactRouterDOM.Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl">{content}</ReactRouterDOM.Link> : content;
+    return linkTo ? <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl">{content}</Link> : content;
 };
 
 const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {

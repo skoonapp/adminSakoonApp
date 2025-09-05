@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Use namespace import for react-router-dom to fix module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Use named imports for react-router-dom to fix module resolution errors.
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';
 import Header from '../common/Header';
@@ -11,8 +11,8 @@ const SWIPE_THRESHOLD = 75; // Minimum pixels to move to trigger a navigation
 const DIRECTION_LOCK_THRESHOLD = 10; // Minimum pixels to move before locking swipe direction to horizontal/vertical
 
 const MainLayout: React.FC = () => {
-  const location = ReactRouterDOM.useLocation();
-  const navigate = ReactRouterDOM.useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const [touchState, setTouchState] = useState<{
     startX: number;
@@ -111,7 +111,7 @@ const MainLayout: React.FC = () => {
         onTouchEnd={handleTouchEnd}
       >
         <div style={swipeableStyle}>
-            <ReactRouterDOM.Outlet />
+            <Outlet />
         </div>
       </main>
       <BottomNav />
