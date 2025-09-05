@@ -16,7 +16,6 @@ const ProfileScreen = lazy(() => import('./screens/ProfileScreen'));
 const ActiveCallScreen = lazy(() => import('./screens/ActiveCallScreen'));
 const TermsScreen = lazy(() => import('./screens/TermsScreen'));
 const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'));
-const CommunityScreen = lazy(() => import('./screens/CommunityScreen'));
 
 const App: React.FC = () => {
   const [user, setUser] = useState<firebase.User | null>(null);
@@ -54,7 +53,6 @@ const App: React.FC = () => {
                 <Route index element={<Navigate to="/dashboard" />} />
                 <Route path="dashboard" element={<DashboardScreen />} />
                 <Route path="calls" element={<CallsScreen />} />
-                <Route path="community" element={<CommunityScreen />} />
                 <Route path="chat" element={<ChatScreen />} />
                 <Route path="earnings" element={<EarningsScreen />} />
                 <Route path="profile" element={<ProfileScreen />} />

@@ -5,7 +5,7 @@ import IncomingCallManager from '../calls/IncomingCallManager';
 import Header from '../common/Header';
 
 // The navigation order must match BottomNav to ensure correct swipe logic
-const NAV_ORDER = ['/dashboard', '/calls', '/community', '/chat', '/earnings', '/profile'];
+const NAV_ORDER = ['/dashboard', '/calls', '/chat', '/earnings', '/profile'];
 const SWIPE_THRESHOLD = 75; // Minimum pixels to move to trigger a navigation
 const DIRECTION_LOCK_THRESHOLD = 10; // Minimum pixels to move before locking swipe direction to horizontal/vertical
 
