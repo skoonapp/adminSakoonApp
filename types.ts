@@ -77,3 +77,26 @@ export interface Earnings {
   thisMonth: number;
   last7Days: { date: string, amount: number }[];
 }
+
+// Data model for a post in the community feed
+export interface CommunityPost {
+  id: string; // The document ID
+  authorId: string;
+  authorName: string;
+  authorPhotoURL: string | null;
+  text: string;
+  imageUrl?: string;
+  timestamp: Timestamp;
+  likeCount: number;
+  commentCount: number;
+}
+
+// Represents a comment on a community post
+export interface PostComment {
+  id: string; // The document ID
+  authorId: string;
+  authorName: string;
+  authorPhotoURL: string | null;
+  text: string;
+  timestamp: Timestamp;
+}
