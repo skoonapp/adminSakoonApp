@@ -41,6 +41,13 @@ const PlaceholderAvatar: React.FC<{className?: string}> = ({className}) => (
     </div>
 );
 
+const SettingsIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 5.85a1.5 1.5 0 002.32 1.325L13.14 5.43a1.875 1.875 0 012.41 2.41l-1.742 1.742a1.5 1.5 0 00-1.325 2.32l-1.952.175c-.896.081-1.567.864-1.567 1.85v2.228c0 .985.671 1.77 1.567 1.85l1.952.175a1.5 1.5 0 001.325 2.32l1.742-1.742a1.875 1.875 0 012.41 2.41l-1.768 1.768a1.875 1.875 0 01-2.652 0l-2.805-2.805a1.875 1.875 0 010-2.652l1.768-1.768a1.5 1.5 0 00-2.32-1.325L5.85 9.05a1.875 1.875 0 01-1.567-1.85v-2.25c0-.985.671-1.77 1.567-1.85L8.03 2.95a1.5 1.5 0 00-1.325-2.32L5.43 2.37a1.875 1.875 0 01-2.41-2.41l1.768-1.768a1.875 1.875 0 012.652 0l2.805 2.805c.781.781.781 2.047 0 2.828L8.293 3.75H4.5a.75.75 0 000 1.5h3.793l-1.03 1.03a.75.75 0 101.06 1.06l1.03-1.03v3.793l-1.03 1.03a.75.75 0 001.06 1.06l1.03-1.03h3.793l-1.03 1.03a.75.75 0 001.06 1.06l1.03-1.03v3.793l-1.03 1.03a.75.75 0 101.06 1.06l1.03-1.03H8.293l-1.03 1.03a.75.75 0 101.06 1.06l1.03-1.03V21a.75.75 0 001.5 0v-3.793l1.03-1.03a.75.75 0 101.06-1.06l-1.03-1.03h-3.793l1.03-1.03a.75.75 0 10-1.06-1.06l-1.03 1.03V8.293l1.03-1.03a.75.75 0 10-1.06-1.06l-1.03 1.03H3.75a.75.75 0 000-1.5h.75c.985 0 1.77-.671 1.85-1.567L6.37 2.37a1.875 1.875 0 012.41-2.41l1.742 1.742a1.5 1.5 0 002.32-1.325L12.95 1.05a1.875 1.875 0 011.85-1.567h2.228c.985 0 1.77.671 1.85 1.567l.175 1.952a1.5 1.5 0 002.32 1.325l1.742-1.742a1.875 1.875 0 012.41 2.41l-1.768 1.768a1.875 1.875 0 010 2.652l2.805 2.805a1.875 1.875 0 010 2.652l-1.768 1.768a1.875 1.875 0 01-2.41 2.41l-1.742-1.742a1.5 1.5 0 00-2.32 1.325l-.175 1.952c-.081.896-.864 1.567-1.85 1.567h-2.228c-.985 0-1.77-.671-1.85-1.567l-.175-1.952a1.5 1.5 0 00-2.32-1.325l-1.742 1.742a1.875 1.875 0 01-2.41-2.41l1.768-1.768a1.875 1.875 0 010-2.652l-2.805-2.805a1.875 1.875 0 010-2.652l1.768-1.768a1.875 1.875 0 012.41-2.41l1.742 1.742a1.5 1.5 0 002.32-1.325L11.05 3.85a1.875 1.875 0 011.85-1.567h2.25z" clipRule="evenodd" />
+    </svg>
+);
+
+
 const NetworkQualityIndicator: React.FC<{ quality: number }> = ({ quality }) => {
     const getQualityInfo = () => {
         switch (quality) {
@@ -79,7 +86,19 @@ const ActiveCallScreen: React.FC = () => {
     const [status, setStatus] = useState<'loading' | 'connecting' | 'connected' | 'error' | 'ended'>('loading');
     const [isMuted, setIsMuted] = useState(false);
     const [callDuration, setCallDuration] = useState(0);
-    const [networkQuality, setNetworkQuality] = useState(-1); // -1 for initial state
+    const [networkQuality, setNetworkQuality] = useState(-1);
+    const [permissionStatus, setPermissionStatus] = useState<'idle' | 'prompting' | 'granted' | 'denied'>('idle');
+
+    const requestMicrophonePermission = useCallback(async () => {
+        setPermissionStatus('prompting');
+        try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+            setPermissionStatus('granted');
+        } catch (error) {
+            console.error("Microphone permission denied:", error);
+            setPermissionStatus('denied');
+        }
+    }, []);
 
     const handleLeave = useCallback(async () => {
         if (hasLeftRef.current || !callId) return;
@@ -140,7 +159,7 @@ const ActiveCallScreen: React.FC = () => {
     }, [status]);
     
     useEffect(() => {
-        if (!callData || !callId || status !== 'loading') return;
+        if (!callData || !callId || status !== 'loading' || permissionStatus !== 'granted') return;
 
         let isMounted = true;
         const initZego = async () => {
@@ -184,7 +203,7 @@ const ActiveCallScreen: React.FC = () => {
                 zpInstanceRef.current = null;
             }
         };
-    }, [callData, callId, status, handleLeave, endCall]);
+    }, [callData, callId, status, handleLeave, endCall, permissionStatus]);
 
     const toggleMute = () => {
         if (!zpInstanceRef.current) return;
@@ -209,6 +228,39 @@ const ActiveCallScreen: React.FC = () => {
         }
     };
 
+    const PermissionRequestUI = () => (
+        <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md z-20 flex flex-col items-center justify-center p-8 text-center animate-fade-in">
+            <div className="w-20 h-20 mb-6 rounded-full bg-primary-500/20 flex items-center justify-center text-primary-300">
+                <MicOnIcon className="w-10 h-10" />
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-2">Microphone Access Required</h2>
+            <p className="text-slate-300 max-w-sm mb-8">SakoonApp needs access to your microphone to connect your call. Your privacy is important to us, and the microphone will only be used for the duration of the call.</p>
+            <button
+                onClick={requestMicrophonePermission}
+                disabled={permissionStatus === 'prompting'}
+                className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors disabled:bg-primary-800 disabled:cursor-wait"
+            >
+                {permissionStatus === 'prompting' ? 'Waiting...' : 'Grant Permission'}
+            </button>
+        </div>
+    );
+    
+    const PermissionDeniedUI = () => (
+        <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md z-20 flex flex-col items-center justify-center p-8 text-center animate-fade-in">
+            <div className="w-20 h-20 mb-6 rounded-full bg-red-500/20 flex items-center justify-center text-red-300">
+                <SettingsIcon className="w-10 h-10" />
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-2">Microphone Access Denied</h2>
+            <p className="text-slate-300 max-w-sm mb-8">To make calls, you need to enable microphone access in your browser or system settings. Please update your permissions and try again.</p>
+            <button
+                onClick={handleLeave}
+                className="bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors"
+            >
+                Leave Call
+            </button>
+        </div>
+    );
+
     if (status === 'loading' || !callData) {
         return <div className="fixed inset-0 bg-slate-900 text-white flex items-center justify-center"><p>Loading Call...</p></div>
     }
@@ -223,6 +275,13 @@ const ActiveCallScreen: React.FC = () => {
             }}
         >
             <div className="absolute inset-0 bg-black/70 backdrop-blur-xl"></div>
+            
+            {permissionStatus !== 'granted' && (
+                <>
+                    {permissionStatus === 'denied' ? <PermissionDeniedUI /> : <PermissionRequestUI />}
+                </>
+            )}
+
             <div className="relative z-10 flex flex-col items-center justify-center text-center flex-grow">
                 <div className="relative mb-6">
                     {(status === 'connecting') && <div className="absolute inset-0 rounded-full bg-green-500/20 animate-pulse-ring"></div>}
