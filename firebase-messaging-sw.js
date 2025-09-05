@@ -1,1 +1,0 @@
-// This file is unused and can be removed. Its logic is now part of public/sw.js.
