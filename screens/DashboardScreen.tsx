@@ -89,21 +89,40 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 };
 
 
+const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
+    <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm flex items-center justify-between opacity-60">
+        <div>
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center">
+                Active Status
+            </h3>
+            <p className="text-sm text-red-500 dark:text-red-400 mt-1">{message}</p>
+        </div>
+        
+        <div className="relative bg-slate-200 dark:bg-slate-700 rounded-full p-1 flex items-center w-[210px] h-[42px] border dark:border-slate-600 cursor-not-allowed">
+            <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Offline</div>
+            <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Busy</div>
+            <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Online</div>
+        </div>
+    </div>
+);
+
 const StatusToggle: React.FC = () => {
-    const { profile } = useListener();
+    const { profile, loading: profileLoading } = useListener();
     const [optimisticStatus, setOptimisticStatus] = useState<ListenerStatus | null>(null);
 
     // Sync local state with profile from context
     useEffect(() => {
-        if (profile) {
+        if (profile?.status) {
             setOptimisticStatus(profile.status);
+        } else if (!profileLoading && !profile) {
+            setOptimisticStatus(null);
         }
-    }, [profile]);
+    }, [profile, profileLoading]);
     
     const handleStatusChange = async (newStatus: ListenerStatus) => {
-        if (!profile || !optimisticStatus) return;
+        if (!profile) return;
 
-        const previousStatus = optimisticStatus;
+        const previousStatus = optimisticStatus || profile.status;
         setOptimisticStatus(newStatus); // Optimistically update the UI
 
         try {
@@ -116,8 +135,16 @@ const StatusToggle: React.FC = () => {
         }
     };
     
-    if (!profile || !optimisticStatus) {
+    if (profileLoading) {
         return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+    }
+
+    if (!profile) {
+        return <DisabledStatusToggle message="Listener profile could not be found." />;
+    }
+    
+    if (!optimisticStatus) {
+        return <DisabledStatusToggle message="Status could not be loaded from profile." />;
     }
 
     const statuses: { label: string; value: ListenerStatus; indicatorColor: string; }[] = [
