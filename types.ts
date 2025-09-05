@@ -59,6 +59,15 @@ export interface ListenerChatSession {
   lastMessageTimestamp: Timestamp;
 }
 
+// Represents a record of an earning transaction for a listener
+export interface EarningRecord {
+  id: string; // The document ID from the earnings subcollection
+  callId: string; // The ID of the call that generated this earning
+  amount: number;
+  timestamp: Timestamp;
+  userId: string; // The user who was in the call
+  userName: string;
+}
 
 // Data structure for listener earnings
 export interface Earnings {
