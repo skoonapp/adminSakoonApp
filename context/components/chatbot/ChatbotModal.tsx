@@ -50,11 +50,22 @@ Do not mention you are an AI model. Behave like a knowledgeable admin.`;
 
 // Conditionally initialize the AI client to prevent crashes if the API key is missing.
 let ai: GoogleGenAI | null = null;
-if (process.env.API_KEY) {
-  ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = process.env.API_KEY;
+
+// A more robust check to ensure the API key is a valid, non-placeholder string.
+// This prevents initialization if the key is missing, empty, or the literal string "undefined"
+// which can happen during the build process if the environment variable isn't set.
+if (apiKey && apiKey.startsWith('AIza') && apiKey.length > 30) {
+    try {
+        ai = new GoogleGenAI({ apiKey });
+    } catch (e) {
+        console.error("Failed to initialize GoogleGenAI, likely due to an invalid API key format.", e);
+        ai = null;
+    }
 } else {
-  console.error("SakoonApp FATAL: Gemini API Key is not configured. Chatbot will be disabled.");
+  console.error("SakoonApp FATAL: Gemini API Key is not configured correctly. Chatbot will be disabled.");
 }
+
 
 // --- Main Component ---
 const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
