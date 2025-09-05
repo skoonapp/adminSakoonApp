@@ -8,16 +8,18 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Use injectManifest to combine our custom SW logic with precaching
+      // Using injectManifest strategy to have full control over the service worker,
+      // including custom push notification logic, while still getting precaching.
       injectManifest: {
-        swSrc: 'public/sw.js',
+        swSrc: 'sw.js', // Using the new service worker at the project root
+        swDest: 'sw.js', // The output file will be dist/sw.js
       },
       manifest: {
         "name": "SakoonApp Admin",
-        "short_name": "Admin",
+        "short_name": "Sakoon Admin",
         "description": "The admin and management app for Sakoon Listeners.",
-        "theme_color": "#4f46e5",
-        "background_color": "#F1F5F9",
+        "theme_color": "#4338ca", // Darker color for a more integrated splash screen
+        "background_color": "#1e1b4b", // Dark background for splash screen to match app theme
         "display": "standalone",
         "scope": "/",
         "start_url": "/",

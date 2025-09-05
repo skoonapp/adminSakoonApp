@@ -1,5 +1,5 @@
 {
-  "name": "Copy of SakoonApp Admin",
+  "name": "SakoonApp Admin",
   "description": "The admin and management app for Sakoon Listeners.",
   "requestFramePermissions": [
     "microphone"
