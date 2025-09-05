@@ -48,7 +48,13 @@ When asked about earnings, ONLY state these final amounts. DO NOT mention gross 
 For example, if a user asks "How much do I earn?", you should say "You earn ₹${listenerCallEarning.toFixed(2)} per minute for calls and ₹${listenerChatEarning.toFixed(3)} per message you send."
 Do not mention you are an AI model. Behave like a knowledgeable admin.`;
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+// Conditionally initialize the AI client to prevent crashes if the API key is missing.
+let ai: GoogleGenAI | null = null;
+if (process.env.API_KEY) {
+  ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+} else {
+  console.error("SakoonApp FATAL: Gemini API Key is not configured. Chatbot will be disabled.");
+}
 
 // --- Main Component ---
 const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
@@ -61,8 +67,12 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       // Initialize with a welcome message when the chat opens
+      const initialMessage = ai 
+        ? "Hello! I'm the SakoonApp Admin assistant. How can I help you today?"
+        : "Sorry, the AI Support Chat is currently unavailable. Please contact support via WhatsApp.";
+      
       setMessages([
-        { id: 1, text: "Hello! I'm the SakoonApp Admin assistant. How can I help you today?", sender: 'bot', status: 'read' }
+        { id: 1, text: initialMessage, sender: 'bot', status: 'read' }
       ]);
       chatHistoryForAI.current = [];
     }
@@ -82,6 +92,14 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+
+    if (!ai) {
+      const errorMessage: ChatMessage = { id: Date.now() + 1, text: "I'm sorry, the support chat is currently offline. Please try again later.", sender: 'bot', status: 'read' };
+      // FIX: Explicitly type the mapped message to prevent TypeScript from widening the 'status' property to a generic string.
+      setMessages(prev => [...prev.map((m): ChatMessage => m.id === userMessage.id ? {...m, status: 'read'} : m), errorMessage]);
+      setIsLoading(false);
+      return;
+    }
 
     // Update conversational history for the AI
     chatHistoryForAI.current.push(`user: ${userMessageText}`);
@@ -182,11 +200,12 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your query here.."
               className="flex-grow bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full p-3 pl-4 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              disabled={!ai}
             />
             <button
               type="submit"
               className="w-11 h-11 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors disabled:bg-slate-400"
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input.trim() || !ai}
             >
               <SendIcon className="w-5 h-5" />
             </button>
