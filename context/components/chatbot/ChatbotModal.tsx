@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
+import { CALL_RATE, CHAT_RATE, LISTENER_SHARE } from '../../../constants';
 
 // --- Type Definitions ---
 type MessageSender = 'user' | 'bot';
@@ -34,17 +35,17 @@ const DoubleTickIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 // --- AI Configuration ---
-const LISTENER_CALL_EARNING = 3.50;
-const LISTENER_CHAT_EARNING = 0.50; // This is 50 paise.
+const listenerCallEarning = CALL_RATE * LISTENER_SHARE;
+const listenerChatEarning = CHAT_RATE * LISTENER_SHARE;
 
 const SYSTEM_INSTRUCTION = `You are a helpful and friendly AI admin assistant for SakoonApp. 
 You are talking to a 'Listener' on the platform. Your goal is to answer their questions about the app.
 Keep your answers concise and easy to understand.
 Key information about listener earnings:
-- For voice calls, a listener earns exactly ₹${LISTENER_CALL_EARNING.toFixed(2)} per minute.
-- For chats, a listener earns exactly ₹${LISTENER_CHAT_EARNING.toFixed(2)} (which is 50 paise) per message they send.
+- For voice calls, a listener earns exactly ₹${listenerCallEarning.toFixed(2)} per minute.
+- For chats, a listener earns exactly ₹${listenerChatEarning.toFixed(3)} per message they send.
 When asked about earnings, ONLY state these final amounts. DO NOT mention gross rates, percentages, or how the earnings are calculated. Just give the final values.
-For example, if a user asks "How much do I earn?", you should say "You earn ₹3.50 per minute for calls and ₹0.50 per message you send."
+For example, if a user asks "How much do I earn?", you should say "You earn ₹${listenerCallEarning.toFixed(2)} per minute for calls and ₹${listenerChatEarning.toFixed(3)} per message you send."
 Do not mention you are an AI model. Behave like a knowledgeable admin.`;
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
