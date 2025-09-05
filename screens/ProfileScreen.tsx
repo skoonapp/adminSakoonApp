@@ -51,8 +51,8 @@ const ToggleSwitch: React.FC<{ checked: boolean; onChange: (checked: boolean) =>
 );
 
 const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 448 512">
-        <path fill="currentColor" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zM223.9 439.6c-38.2 0-73.7-11.8-103.6-32.5l-7.4-4.4-77.1 20.3 20.7-75.2-4.9-7.8c-22.1-35.3-33.8-75.7-33.8-118.1 0-108.2 88.2-196.3 196.4-196.3 53 0 102.6 20.5 138.8 56.8 36.2 36.2 56.8 85.8 56.8 138.8-2.3 108.1-89.1 196.2-198.2 196.2zm101.7-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.48 3.4 1.27 4.88L2 22l5.29-1.38c1.39.71 2.99 1.14 4.75 1.14c5.46 0 9.91-4.45 9.91-9.85c0-5.46-4.45-9.9-9.91-9.9zM12.04 20.13c-1.56 0-3.03-.4-4.31-1.18l-.31-.18l-3.21.84l.85-3.13l-.2-.32c-.85-1.34-1.31-2.91-1.31-4.58c0-4.49 3.62-8.12 8.12-8.12c4.49 0 8.12 3.63 8.12 8.12c0 4.49-3.63 8.12-8.12 8.12zm4.18-5.32c-.22-.11-1.3-.65-1.5-.72c-.2-.07-.35-.11-.49.11c-.15.22-.57.72-.7 1.05c-.13.11-.25.13-.49.02c-.23-.11-1-.37-1.9-1.18c-.71-.63-1.18-1.41-1.32-1.65c-.13-.25-.01-.38.1-.5c.1-.11.22-.28.33-.42c.11-.13.15-.22.22-.38c.07-.15.04-.28-.02-.39c-.07-.11-.49-1.18-.68-1.61c-.18-.43-.37-.37-.49-.37c-.12 0-.25-.01-.38-.01c-.13 0-.35.05-.53.22c-.18.18-.7.68-.7 1.66c0 .98.72 1.93.82 2.07c.1.15 1.41 2.15 3.43 3.01c.48.21.87.33 1.16.42c.5.15 1 .13 1.38-.08c.43-.25.7-.57.8-1.1c.1-.53.1-.98.07-1.1c-.04-.12-.16-.18-.34-.29z" />
     </svg>
 );
 
@@ -110,28 +110,33 @@ const ProfileScreen: React.FC = () => {
 
     const sections = [
         <div key="profile" className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm">
-          <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary-500 dark:text-primary-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
+          <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary-500 dark:text-primary-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{profile?.displayName || 'Listener'}</h2>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{profile?.displayName || 'Listener'}</h2>
-              </div>
+              <button onClick={handleLogout} className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold py-2 px-4 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                Logout
+              </button>
           </div>
         </div>,
-        <div key="notifications" className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div key="notifications" className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
              <h3 className="p-4 text-lg font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700">Notification Settings</h3>
             <div className="divide-y divide-slate-200 dark:divide-slate-700">
                 <div className="flex justify-between items-center p-4">
                     <div>
-                        <p className="font-medium text-slate-700 dark:text-slate-300">Incoming Call Notifications</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Play a ringtone for new calls.</p>
+                        <p className="font-medium text-slate-700 dark:text-slate-300">Incoming Call Ringtones</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Play a sound for new calls.</p>
                     </div>
                     <ToggleSwitch checked={localSettings.calls} onChange={(v) => handleSettingsChange('calls', v)} disabled={loading} />
                 </div>
                  <div className="flex justify-between items-center p-4">
                     <div>
-                        <p className="font-medium text-slate-700 dark:text-slate-300">New Message Notifications</p>
+                        <p className="font-medium text-slate-700 dark:text-slate-300">New Message Sounds</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400">Play a sound for new messages.</p>
                     </div>
                     <ToggleSwitch checked={localSettings.messages} onChange={(v) => handleSettingsChange('messages', v)} disabled={loading} />
@@ -153,21 +158,11 @@ const ProfileScreen: React.FC = () => {
         <ListenerGuidelines key="guidelines" />,
         <Accordion key="terms" title="Terms & Conditions"><TermsContent /></Accordion>,
         <Accordion key="privacy" title="Privacy Policy"><PrivacyPolicyContent /></Accordion>,
-        <div key="logout">
-             <button onClick={handleLogout} className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
-                Logout
-            </button>
-        </div>
     ];
 
   return (
-    <div className="p-4">
-        {sections.map((section, index) => (
-            <React.Fragment key={index}>
-                {section}
-                {index < sections.length - 1 && <hr className="my-6 border-transparent" />}
-            </React.Fragment>
-        ))}
+    <div className="p-4 space-y-4">
+        {sections.map((section) => section)}
     </div>
   );
 };
