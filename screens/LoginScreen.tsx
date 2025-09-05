@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Use named imports for react-router-dom to fix module resolution errors.
-import { useNavigate } from 'react-router-dom';
+// FIX: Use namespace import for react-router-dom to fix module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { auth } from '../utils/firebase';
 
 // --- Icon Components ---
-const PhoneIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path fillRule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.298-.083.465a7.48 7.48 0 003.429 3.429c.167.081.364.052.465-.083l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C6.542 22.5 1.5 17.458 1.5 9.75V4.5z" clipRule="evenodd" />
-    </svg>
-);
-
 const LockIcon: React.FC<{className?: string}> = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
@@ -33,7 +27,7 @@ declare global {
 }
 
 const LoginScreen: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = ReactRouterDOM.useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -166,81 +160,77 @@ const LoginScreen: React.FC = () => {
             <p className="mt-3 text-lg text-cyan-200">Listener Portal Login</p>
         </div>
         {step === 'phone' ? (
-           <>
-              <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
-                  <form onSubmit={handlePhoneSubmit}>
-                      <div className="relative mb-4">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
-                              <PhoneIcon className="w-5 h-5" />
-                              <span className="ml-2 font-semibold">+91</span>
-                          </div>
-                          <input 
-                            type="tel" 
-                            value={phoneNumber} 
-                            onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))} 
-                            placeholder="मोबाइल नंबर" 
-                            className="w-full bg-white/10 border border-white/20 text-white placeholder-cyan-200/50 text-lg rounded-xl block pl-24 p-3.5 focus:ring-cyan-400 focus:border-cyan-400 focus:outline-none transition-colors" 
-                            required 
-                            maxLength={10}
-                          />
-                      </div>
-                      <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
-                          {loading ? 'Sending OTP...' : 'Get OTP'}
-                      </button>
-                  </form>
-                  {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
-              </div>
-           </>
-        ) : (
-          <>
-            <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
-              <div className="text-center mb-6">
-                <p className="text-slate-300">Enter the code sent to:</p>
-                <p className="font-bold text-white text-lg mt-1">+91 {phoneNumber}</p>
-              </div>
-              <form onSubmit={handleOtpSubmit} className="mb-4">
-                  <div className="relative mb-4">
+           <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
+               <form onSubmit={handlePhoneSubmit}>
+                   <div className="relative mb-4">
                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
-                          <LockIcon className="w-5 h-5"/>
-                      </div>
-                      <input
-                          type="tel"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-                          placeholder="6-Digit OTP"
-                          className="w-full bg-white/10 border border-white/20 text-white placeholder-cyan-200/50 text-lg rounded-xl tracking-[0.5em] text-center p-3.5 focus:ring-cyan-400 focus:border-cyan-400 focus:outline-none transition-colors"
-                          required
-                          maxLength={6}
-                      />
-                  </div>
-                  <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
-                      {loading ? 'Verifying...' : 'Verify'}
-                  </button>
-              </form>
-              {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
-              <hr className="border-t border-white/10 my-6" />
-              <div className="text-center">
-                {showFinalError ? (
-                    <div className="flex items-center justify-center gap-2 text-sm text-yellow-300">
-                        <WarningIcon className="w-5 h-5 flex-shrink-0"/>
-                        <span>Please check your mobile number and try again after 15 minutes.</span>
+                           <span className="text-xl">📞</span>
+                           <span className="ml-2 font-semibold">+91</span>
+                       </div>
+                       <input 
+                         type="tel" 
+                         value={phoneNumber} 
+                         onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))} 
+                         placeholder="मोबाइल नंबर" 
+                         className="w-full bg-white/10 border border-white/20 text-white placeholder-cyan-200/50 text-lg rounded-xl block pl-24 p-3.5 focus:ring-cyan-400 focus:border-cyan-400 focus:outline-none transition-colors" 
+                         required 
+                         maxLength={10}
+                       />
+                   </div>
+                   <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
+                       {loading ? 'Sending OTP...' : 'OTP पाएं'}
+                   </button>
+               </form>
+               {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
+           </div>
+        ) : (
+          <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-white/20 p-8 rounded-2xl">
+            <div className="text-center mb-6">
+              <p className="text-slate-300">Enter the code sent to:</p>
+              <p className="font-bold text-white text-lg mt-1">+91 {phoneNumber}</p>
+            </div>
+            <form onSubmit={handleOtpSubmit} className="mb-4">
+                <div className="relative mb-4">
+                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                        <LockIcon className="w-5 h-5"/>
                     </div>
-                ) : resendTimer > 0 ? (
-                    <p className="text-sm text-slate-400">Resend OTP in {resendTimer}s</p>
-                ) : (
-                    <button onClick={handleResendOtp} disabled={loading || resendAttempts >= 2} className="text-sm text-cyan-200 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
-                )}
-              </div>
-               <button onClick={() => setStep('phone')} className="w-full text-center mt-6 text-sm text-slate-400 hover:text-cyan-200">
-                Change Number
-              </button>
+                    <input
+                        type="tel"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                        placeholder="6-Digit OTP"
+                        className="w-full bg-white/10 border border-white/20 text-white placeholder-cyan-200/50 text-lg rounded-xl tracking-[0.5em] text-center p-3.5 focus:ring-cyan-400 focus:border-cyan-400 focus:outline-none transition-colors"
+                        required
+                        maxLength={6}
+                    />
+                </div>
+                <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
+                    {loading ? 'Verifying...' : 'Verify'}
+                </button>
+            </form>
+            {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
+            <hr className="border-t border-white/10 my-6" />
+            <div className="text-center">
+              {showFinalError ? (
+                  <div className="flex items-center justify-center gap-2 text-sm text-yellow-300">
+                      <WarningIcon className="w-5 h-5 flex-shrink-0"/>
+                      <span>Please check your mobile number and try again after 15 minutes.</span>
+                  </div>
+              ) : resendTimer > 0 ? (
+                  <p className="text-sm text-slate-400">Resend OTP in {resendTimer}s</p>
+              ) : (
+                  <button onClick={handleResendOtp} disabled={loading || resendAttempts >= 2} className="text-sm text-cyan-200 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
+              )}
             </div>
-            <div className="text-center mt-8 text-slate-300">
-                <p className="text-sm">🔐 Secure Login with OTP Authentication</p>
-                <p className="text-xs mt-2 text-slate-400">App Version: 1.0.0 (Beta)</p>
-            </div>
-          </>
+             <button onClick={() => setStep('phone')} className="w-full text-center mt-6 text-sm text-slate-400 hover:text-cyan-200">
+              Change Number
+            </button>
+          </div>
         )}
+        <div className="text-center mt-8 text-slate-300">
+            <p className="text-sm">🔐 Secure Login with OTP Authentication</p>
+            <p className="text-xs mt-2 text-slate-400">App Version: 1.0.0 (Beta)</p>
+        </div>
       </div>
       
       <footer className="absolute bottom-0 left-0 right-0 p-4 text-center text-xs text-slate-400 z-10">
