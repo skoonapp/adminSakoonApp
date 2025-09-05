@@ -1,7 +1,7 @@
 import React from 'react';
 import PolicyPageLayout from '../context/components/common/PolicyPageLayout';
 
-const PrivacyPolicyContent: React.FC = () => {
+export const PrivacyPolicyContent: React.FC = () => {
     const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
     return (
