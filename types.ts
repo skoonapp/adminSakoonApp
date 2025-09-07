@@ -28,16 +28,16 @@ export interface Caller {
   photoURL: string | null;
 }
 
-// Represents a message within a chat session
+// Represents a message within a chat session, enhanced for WhatsApp-like features
 export interface ChatMessage {
   id: string;
+  senderId: string;
   text: string;
-  sender: {
-    uid: string;
-    name: string;
-  };
-  timestamp: number;
-  status?: 'sent' | 'read';
+  timestamp: firebase.firestore.Timestamp;
+  type: 'text' | 'audio';
+  status: 'sent' | 'delivered' | 'read';
+  audioUrl?: string; // URL to the audio file in Firebase Storage
+  duration?: number; // Duration of the audio message in seconds
 }
 
 // A record of a call, stored in Firestore
@@ -87,7 +87,7 @@ export interface Earnings {
 
 // Data model for a post in the community feed
 export interface CommunityPost {
-  id: string; // The document ID
+  id:string; // The document ID
   authorId: string;
   authorName: string;
   authorPhotoURL: string | null;
