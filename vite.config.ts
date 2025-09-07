@@ -26,19 +26,25 @@ export default defineConfig({
         "orientation": "portrait-primary",
         "icons": [
           {
-            "src": "pwa-icon-192.png",
+            "src": "https://listenerimages.netlify.app/images/icon3.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any"
           },
           {
-            "src": "pwa-icon-512.png",
+            "src": "https://listenerimages.netlify.app/images/icon2.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"
           },
+           {
+            "src": "https://listenerimages.netlify.app/images/icon.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any"
+          },
           {
-            "src": "pwa-maskable-icon-512.png",
+            "src": "https://listenerimages.netlify.app/images/icon2.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
