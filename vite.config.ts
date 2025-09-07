@@ -16,7 +16,7 @@ export default defineConfig({
       },
       manifest: {
         "name": "SakoonApp Admin",
-        "short_name": "Sakoon Admin",
+        "short_name": "SakoonApp Admin",
         "description": "The admin and management app for Sakoon Listeners.",
         "theme_color": "#0891b2",
         "background_color": "#0F172A",
