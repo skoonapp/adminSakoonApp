@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-// FIX: Use named imports for react-router-dom to fix module resolution errors.
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, serverTimestamp } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
@@ -87,7 +86,24 @@ const ActiveCallScreen: React.FC = () => {
     const [isMuted, setIsMuted] = useState(false);
     const [callDuration, setCallDuration] = useState(0);
     const [networkQuality, setNetworkQuality] = useState(-1);
-    const [permissionStatus, setPermissionStatus] = useState<'idle' | 'prompting' | 'granted' | 'denied'>('idle');
+    const [permissionStatus, setPermissionStatus] = useState<'checking' | 'idle' | 'prompting' | 'granted' | 'denied'>('checking');
+
+    useEffect(() => {
+        const checkPermissions = async () => {
+            if (typeof navigator.permissions?.query !== 'function') {
+                setPermissionStatus('idle'); // Fallback for browsers without Permissions API
+                return;
+            }
+            try {
+                const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+                setPermissionStatus(permission.state === 'prompt' ? 'idle' : permission.state);
+            } catch (error) {
+                console.error("Could not query microphone permissions:", error);
+                setPermissionStatus('idle'); // Fallback to prompting
+            }
+        };
+        checkPermissions();
+    }, []);
 
     const requestMicrophonePermission = useCallback(async () => {
         setPermissionStatus('prompting');
@@ -159,7 +175,7 @@ const ActiveCallScreen: React.FC = () => {
     }, [status]);
     
     useEffect(() => {
-        if (!callData || !callId || status !== 'loading' || permissionStatus !== 'granted') return;
+        if (!callData || !callId || permissionStatus !== 'granted' || (status !== 'loading' && status !== 'error')) return;
 
         let isMounted = true;
         const initZego = async () => {
@@ -203,7 +219,7 @@ const ActiveCallScreen: React.FC = () => {
                 zpInstanceRef.current = null;
             }
         };
-    }, [callData, callId, status, handleLeave, endCall, permissionStatus]);
+    }, [callData, callId, handleLeave, endCall, permissionStatus, status]);
 
     const toggleMute = () => {
         if (!zpInstanceRef.current) return;
@@ -261,7 +277,7 @@ const ActiveCallScreen: React.FC = () => {
         </div>
     );
 
-    if (status === 'loading' || !callData) {
+    if (permissionStatus === 'checking' || !callData) {
         return <div className="fixed inset-0 bg-slate-900 text-white flex items-center justify-center"><p>Loading Call...</p></div>
     }
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Use named imports for react-router-dom to fix module resolution errors.
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';

@@ -1,4 +1,7 @@
-import { Timestamp } from 'firebase/firestore';
+// Fix: Use firebase compat import for Timestamp type to match the rest of the project.
+// The previous import `import { Timestamp } from 'firebase/firestore'` uses the v9 modular API,
+// but the project is configured to use the v8 compat API. This change aligns the type definitions.
+import type firebase from 'firebase/compat/app';
 
 // Core data model for the logged-in Listener
 export type ListenerStatus = 'Available' | 'Busy' | 'Break' | 'Offline';
@@ -11,8 +14,7 @@ export interface ListenerProfile {
   bio: string;
   status: ListenerStatus;
   fcmTokens?: string[];
-  createdAt: Timestamp;
-  // FIX: Add notificationSettings to ListenerProfile to resolve type errors in ProfileScreen.tsx.
+  createdAt: firebase.firestore.Timestamp;
   notificationSettings?: {
     calls?: boolean;
     messages?: boolean;
@@ -45,8 +47,8 @@ export interface CallRecord {
   userId: string;
   userName: string;
   userAvatar: string | null;
-  startTime: Timestamp;
-  endTime?: Timestamp;
+  startTime: firebase.firestore.Timestamp;
+  endTime?: firebase.firestore.Timestamp;
   durationSeconds?: number;
   earnings?: number;
   userRating?: 1 | 2 | 3 | 4 | 5;
@@ -61,7 +63,7 @@ export interface ListenerChatSession {
   userName: string;
   userAvatar: string | null;
   lastMessageText: string;
-  lastMessageTimestamp: Timestamp;
+  lastMessageTimestamp: firebase.firestore.Timestamp;
 }
 
 // Represents a record of an earning transaction for a listener
@@ -69,7 +71,7 @@ export interface EarningRecord {
   id: string; // The document ID from the earnings subcollection
   callId: string; // The ID of the call that generated this earning
   amount: number;
-  timestamp: Timestamp;
+  timestamp: firebase.firestore.Timestamp;
   userId: string; // The user who was in the call
   userName: string;
 }
@@ -91,7 +93,7 @@ export interface CommunityPost {
   authorPhotoURL: string | null;
   text: string;
   imageUrl?: string;
-  timestamp: Timestamp;
+  timestamp: firebase.firestore.Timestamp;
   likeCount: number;
   commentCount: number;
 }
@@ -103,5 +105,5 @@ export interface PostComment {
   authorName: string;
   authorPhotoURL: string | null;
   text: string;
-  timestamp: Timestamp;
+  timestamp: firebase.firestore.Timestamp;
 }

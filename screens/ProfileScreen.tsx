@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../utils/firebase';
-// FIX: Use named imports for react-router-dom to fix module resolution errors.
 import { useNavigate } from 'react-router-dom';
 import ListenerGuidelines from '../context/components/profile/ListenerGuidelines';
 import { useListener } from '../context/ListenerContext';

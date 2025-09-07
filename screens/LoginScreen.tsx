@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Use namespace import for react-router-dom to fix module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { auth } from '../utils/firebase';
@@ -55,7 +53,7 @@ const LoginScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // FIX: Use `number` for interval ID type in browser environments instead of `NodeJS.Timeout`.
+    // Use `number` for interval ID type in browser environments instead of `NodeJS.Timeout`.
     let interval: number;
     if (step === 'otp' && resendTimer > 0) {
       interval = window.setInterval(() => {

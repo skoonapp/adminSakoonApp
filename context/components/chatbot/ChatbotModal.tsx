@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Chat } from '@google/genai';
 import { CALL_RATE, CHAT_RATE, LISTENER_SHARE } from '../../../constants';
 
 // --- Type Definitions ---
@@ -73,19 +73,26 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatHistoryForAI = useRef<string[]>([]);
+  const chatInstance = useRef<Chat | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      // Initialize with a welcome message when the chat opens
-      const initialMessage = ai 
-        ? "Hello! I'm the SakoonApp Admin assistant. How can I help you today?"
-        : "Sorry, the AI Support Chat is currently unavailable. Please contact support via WhatsApp.";
-      
-      setMessages([
-        { id: 1, text: initialMessage, sender: 'bot', status: 'read' }
-      ]);
-      chatHistoryForAI.current = [];
+      if (ai) {
+        chatInstance.current = ai.chats.create({
+          model: 'gemini-2.5-flash',
+          config: { systemInstruction: SYSTEM_INSTRUCTION },
+        });
+        setMessages([
+          { id: 1, text: "Hello! I'm the SakoonApp Admin assistant. How can I help you today?", sender: 'bot', status: 'read' }
+        ]);
+      } else {
+        setMessages([
+          { id: 1, text: "Sorry, the AI Support Chat is currently unavailable. Please contact support via WhatsApp.", sender: 'bot', status: 'read' }
+        ]);
+      }
+    } else {
+      chatInstance.current = null;
+      setMessages([]);
     }
   }, [isOpen]);
 
@@ -104,32 +111,19 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
     setInput('');
     setIsLoading(true);
 
-    if (!ai) {
+    if (!ai || !chatInstance.current) {
       const errorMessage: ChatMessage = { id: Date.now() + 1, text: "I'm sorry, the support chat is currently offline. Please try again later.", sender: 'bot', status: 'read' };
-      // FIX: Explicitly type the mapped message to prevent TypeScript from widening the 'status' property to a generic string.
       setMessages(prev => [...prev.map((m): ChatMessage => m.id === userMessage.id ? {...m, status: 'read'} : m), errorMessage]);
       setIsLoading(false);
       return;
     }
-
-    // Update conversational history for the AI
-    chatHistoryForAI.current.push(`user: ${userMessageText}`);
-
+    
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [...chatHistoryForAI.current, `user: ${userMessageText}`].join('\n'),
-        config: { systemInstruction: SYSTEM_INSTRUCTION },
-      });
-      
+      const response = await chatInstance.current.sendMessage({ message: userMessageText });
       const botResponseText = response.text;
-      chatHistoryForAI.current.push(`model: ${botResponseText}`);
-
       const botMessage: ChatMessage = { id: Date.now() + 1, text: botResponseText, sender: 'bot', status: 'read' };
       
       setMessages(prev => {
-        // Mark the user's last message as 'read'
-        // FIX: Explicitly type the mapped message to prevent TypeScript from widening the 'status' property to a generic string.
         const updatedMessages = prev.map((msg): ChatMessage =>
           msg.id === userMessage.id ? { ...msg, status: 'read' } : msg
         );
@@ -139,7 +133,7 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error("Gemini API error:", error);
       const errorMessage: ChatMessage = { id: Date.now() + 1, text: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.", sender: 'bot', status: 'read' };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev.map((m): ChatMessage => m.id === userMessage.id ? {...m, status: 'read'} : m), errorMessage]);
     } finally {
       setIsLoading(false);
     }

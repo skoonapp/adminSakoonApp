@@ -1,5 +1,4 @@
 import React from 'react';
-// FIX: Use named imports for react-router-dom to fix module resolution errors.
 import { NavLink } from 'react-router-dom';
 
 const navItems = [

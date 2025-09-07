@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-// FIX: Use named imports for react-router-dom to fix module resolution errors.
 import { useNavigate, useLocation } from 'react-router-dom';
 import { messaging, db } from '../../../utils/firebase';
 import { useListener } from '../../ListenerContext';

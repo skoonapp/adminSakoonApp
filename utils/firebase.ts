@@ -1,4 +1,3 @@
-// FIX: Switched to firebase/compat to match other files and fix module errors.
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
@@ -28,7 +27,6 @@ export const rtdb = firebase.database();
 export const storage = firebase.storage();
 export const functions = app.functions('asia-south1');
 export const messaging = firebase.messaging.isSupported() ? firebase.messaging() : null;
-// FIX: Export serverTimestamp to be used in other files.
 export const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
 
 // Uncomment the following lines to use Firebase Emulators in development
