@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useListener } from '../context/ListenerContext';
 import { db } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
+import type { CallRecord } from '../types';
 
 // --- Icons ---
 const EndCallIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 17.657A8 8 0 016.343 6.343m11.314 0A8 8 0 016.343 17.657m0-11.314L6.343 6.343m11.314 11.314L17.657 17.657" /></svg>;
@@ -17,6 +18,7 @@ const ActiveCallScreen: React.FC = () => {
     const [status, setStatus] = useState<'loading' | 'connecting' | 'connected' | 'error'>('loading');
     const [error, setError] = useState<string | null>(null);
     const [callDetails, setCallDetails] = useState<{ userName?: string }>({});
+    const [isNewUser, setIsNewUser] = useState(false);
 
     useEffect(() => {
         if (!callId || !profile || !zegoContainerRef.current) {
@@ -29,22 +31,30 @@ const ActiveCallScreen: React.FC = () => {
             try {
                 setStatus('connecting');
                 
-                // Fetch call details to display user name
+                // Fetch call details to display user name and check if it's a new user
                 const callDoc = await db.collection('calls').doc(callId).get();
                 if (callDoc.exists) {
-                    setCallDetails({ userName: callDoc.data()?.userName });
+                    const callData = callDoc.data() as CallRecord;
+                    setCallDetails({ userName: callData.userName });
+
+                    // Check for prior completed calls with this user
+                    if (callData.userId) {
+                        const priorCallsQuery = db.collection('calls')
+                            .where('listenerId', '==', profile.uid)
+                            .where('userId', '==', callData.userId)
+                            .where('status', '==', 'completed')
+                            .limit(1);
+                        
+                        const priorCallsSnapshot = await priorCallsQuery.get();
+                        if (priorCallsSnapshot.empty) {
+                            setIsNewUser(true);
+                        }
+                    }
                 }
 
                 const token = await fetchZegoToken(callId);
-                const kitToken = window.ZegoUIKitPrebuilt.generateKitTokenForTest(
-                    211183350, // App ID
-                    '00707567e411b988f72ab0f501867ac067300c3c54d7f57a66c40e1b5b94f09d', // Server Secret
-                    callId,
-                    profile.uid,
-                    profile.displayName
-                );
                 
-                zp = window.ZegoUIKitPrebuilt.create(kitToken);
+                zp = window.ZegoUIKitPrebuilt.create(token);
 
                 zp.joinRoom({
                     container: zegoContainerRef.current,
@@ -91,12 +101,19 @@ const ActiveCallScreen: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white flex flex-col">
+        <div className={`min-h-screen text-white flex flex-col transition-colors duration-500 ${isNewUser ? 'bg-new-user-gradient animate-gradient-flow' : 'bg-slate-900'}`}>
              {/* Header Section */}
-            <div className="p-4 text-center bg-black/30">
+            <div className={`p-4 text-center ${isNewUser ? 'bg-white/10' : 'bg-black/30'}`}>
                 <h1 className="text-2xl font-bold">{callDetails.userName || 'Connecting...'}</h1>
                 <p className="text-slate-300">Active Call</p>
             </div>
+            
+            {isNewUser && (
+                <div className="absolute top-20 right-4 bg-yellow-400 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-fade-in z-20">
+                    ✨ New Caller
+                </div>
+            )}
+
 
             {/* Main Content Area */}
             <div className="flex-grow relative">
@@ -110,6 +127,7 @@ const ActiveCallScreen: React.FC = () => {
                             <>
                                 <ConnectingIcon />
                                 <p className="mt-4 text-lg">Connecting your call...</p>
+                                {isNewUser && <p className="mt-2 text-yellow-300">Say hello to a new user!</p>}
                             </>
                         )}
                          {status === 'error' && (
