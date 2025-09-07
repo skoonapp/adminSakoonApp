@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { FORBIDDEN_CONTENT_PATTERN } from '../../../utils/chatSecurity';
+import type { ChatMessage } from '../../../types';
 
 // --- Icons ---
 const SendIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -20,22 +22,18 @@ const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
-// --- Regular Expression for validation ---
-// This regex detects common URL formats and sequences of 7 or more digits (phone numbers).
-const FORBIDDEN_PATTERN = new RegExp(
-    /(?:(?:https?|ftp):\/\/|www\.|[a-z0-9.-]+\.(?:com|org|net|in|co|io))\S*|\b\d{7,}\b/gi
-);
 
 interface ChatInputProps {
     onSendText: (text: string) => void;
     onSendAudio: (audioBlob: Blob, duration: number) => void;
+    recentMessages: ChatMessage[];
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendText, onSendAudio }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSendText, onSendAudio, recentMessages }) => {
     const [text, setText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
-    const [showValidationError, setShowValidationError] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
     
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordingTimerRef = useRef<number | null>(null);
@@ -53,22 +51,41 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendText, onSendAudio }) => {
 
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value);
-        if (showValidationError) {
-            setShowValidationError(false);
+        if (validationError) {
+            setValidationError(null);
         }
     };
     
-    // Validate message content before sending
+    const triggerValidationError = (message: string) => {
+        setValidationError(message);
+        setTimeout(() => setValidationError(null), 3500);
+    };
+
+    // Advanced validation logic
     const validateAndSend = () => {
-        if (FORBIDDEN_PATTERN.test(text)) {
-            setShowValidationError(true);
-            setTimeout(() => setShowValidationError(false), 3000);
+        const currentText = text.trim();
+        if (!currentText) return;
+
+        // Reset the regex index to avoid issues with the 'g' flag
+        FORBIDDEN_CONTENT_PATTERN.lastIndex = 0;
+
+        // Check 1: Standard forbidden content in the current message
+        if (FORBIDDEN_CONTENT_PATTERN.test(currentText)) {
+            triggerValidationError("Sending links, numbers, or inappropriate language is not allowed.");
             return;
         }
-        if (text.trim()) {
-            onSendText(text.trim());
-            setText('');
+
+        // Check 2: Advanced check for fragmented phone numbers across recent messages
+        const combinedText = [...recentMessages.map(m => m.text), currentText].join(' ');
+        const digitsOnly = combinedText.replace(/\D/g, '');
+        if (/\d{7,}/.test(digitsOnly)) {
+            triggerValidationError("Sending phone numbers, even in parts, is not allowed.");
+            return;
         }
+
+        // If all checks pass
+        onSendText(currentText);
+        setText('');
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -148,9 +165,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendText, onSendAudio }) => {
                         className="flex-grow bg-transparent focus:outline-none p-2 resize-none max-h-32"
                     />
                 )}
-                 {showValidationError && (
-                     <div className="absolute bottom-full left-0 w-full p-2 mb-1 text-xs text-center text-red-700 bg-red-100 dark:text-red-200 dark:bg-red-900/50 rounded-md">
-                         Sending links or phone numbers is not allowed.
+                 {validationError && (
+                     <div className="absolute bottom-full left-0 w-full p-2 mb-1 text-xs text-center text-red-700 bg-red-100 dark:text-red-200 dark:bg-red-900/50 rounded-md animate-fade-in">
+                         {validationError}
                      </div>
                  )}
             </div>

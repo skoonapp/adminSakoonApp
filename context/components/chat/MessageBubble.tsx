@@ -1,6 +1,8 @@
 import React from 'react';
 import type { ChatMessage } from '../../../types';
 import AudioPlayer from './AudioPlayer';
+import { filterInappropriateContent } from '../../../utils/chatSecurity';
+
 
 interface MessageBubbleProps {
     message: ChatMessage;
@@ -42,7 +44,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage }) 
         if (message.type === 'audio' && message.audioUrl) {
             return <AudioPlayer audioUrl={message.audioUrl} duration={message.duration || 0} />;
         }
-        return <p className="whitespace-pre-wrap break-words">{message.text}</p>;
+        // Sanitize the text content before displaying it, especially for incoming messages.
+        const sanitizedText = isOwnMessage ? message.text : filterInappropriateContent(message.text);
+        return <p className="whitespace-pre-wrap break-words">{sanitizedText}</p>;
     };
 
     return (
