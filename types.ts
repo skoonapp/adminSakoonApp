@@ -1,91 +1,83 @@
 import type firebase from 'firebase/compat/app';
 
-// The status of a listener, controlling their availability for calls.
+// Fix: Define all application-wide TypeScript types in this file to resolve module errors.
+
+// Status for the listener's application/account, managed by admins.
+export type ListenerAccountStatus = 'pending' | 'active' | 'suspended' | 'rejected';
+
+// Status for the listener's availability in the app, controlled by the listener.
 export type ListenerAppStatus = 'Available' | 'Busy' | 'Offline' | 'Break';
-export type ListenerProfileStatus = 'pending' | 'active' | 'suspended' | 'rejected';
 
-
-// Represents the main profile document for a listener in Firestore.
 export interface ListenerProfile {
   uid: string;
   displayName: string;
+  phone?: string;
+  avatarUrl: string;
+  city: string;
+  age: number;
+  status: ListenerAccountStatus;
   appStatus: ListenerAppStatus;
-  status: ListenerProfileStatus; // Overall profile status (pending, active, etc.)
   onboardingComplete: boolean;
-  isAdmin?: boolean; // For admin role access
-  
-  // Details from onboarding
-  city?: string;
-  age?: number;
-  avatarUrl?: string;
-
-  // Notification preferences for the listener.
-  notificationSettings?: {
-    calls?: boolean;
-    messages?: boolean;
-  };
-  // FCM tokens for push notifications.
+  createdAt: firebase.firestore.FieldValue | firebase.firestore.Timestamp;
+  isAdmin?: boolean;
   fcmTokens?: string[];
-  
-  createdAt: firebase.firestore.Timestamp;
+  notificationSettings?: {
+    calls: boolean;
+    messages: boolean;
+  };
 }
 
-// Represents the read-only data for a listener before they've onboarded.
 export interface UnverifiedListener {
     realName: string;
     bankAccount: string;
     upiId: string;
 }
 
-// Represents a single call record in the 'calls' collection.
+export type CallStatus = 'completed' | 'missed' | 'rejected';
+
 export interface CallRecord {
   callId: string;
-  listenerId: string;
-  userId: string;
-  userName:string;
-  startTime: firebase.firestore.Timestamp;
-  endTime?: firebase.firestore.Timestamp;
-  durationSeconds?: number;
-  status: 'completed' | 'missed' | 'rejected' | 'ongoing';
-  earnings?: number;
-  type?: 'free_reverse';
-}
-
-// Represents a chat session between a listener and a user.
-export interface ListenerChatSession {
-  id: string; // Document ID
-  listenerId: string;
   userId: string;
   userName: string;
   userAvatar?: string;
+  listenerId: string;
+  startTime: firebase.firestore.Timestamp;
+  endTime?: firebase.firestore.Timestamp;
+  durationSeconds?: number;
+  status: CallStatus;
+  earnings?: number;
+}
+
+export interface ListenerChatSession {
+  id: string; // doc id
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  listenerId: string;
   lastMessageText: string;
   lastMessageTimestamp: firebase.firestore.Timestamp;
+  unreadByUser: boolean;
   unreadByListener: boolean;
 }
 
-// Represents a single earning transaction in the listener's subcollection.
-export interface EarningRecord {
-  id: string; // Document ID
-  callId: string;
-  amount: number;
-  timestamp: firebase.firestore.Timestamp;
-  userName: string; // User's name from the call for context
-}
+export type MessageType = 'text' | 'audio';
+export type MessageStatus = 'sent' | 'delivered' | 'read';
 
-// Represents a single message within a chat session.
 export interface ChatMessage {
-    id: string;
-    senderId: string; // 'listener' or the user's UID
+    id: string; // doc id
+    senderId: string; // either user or listener uid
     text: string;
-    timestamp: firebase.firestore.Timestamp;
-    status: 'sent' | 'delivered' | 'read';
-    type: 'text' | 'audio';
+    timestamp: firebase.firestore.FieldValue | firebase.firestore.Timestamp;
+    type: MessageType;
+    status: MessageStatus;
     audioUrl?: string;
-    duration?: number; // duration in seconds for audio messages
+    duration?: number; // for audio messages, in seconds
 }
 
-// Represents the daily free call statistics for a listener.
-export interface FreeCallStats {
-    count: number;
-    lastReset: firebase.firestore.Timestamp;
+export interface EarningRecord {
+    id: string; // doc id
+    amount: number;
+    callId: string;
+    timestamp: firebase.firestore.Timestamp;
+    userName: string; // user from the call
 }
