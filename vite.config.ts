@@ -4,11 +4,6 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  define: {
-    // This makes the environment variable available to the client-side code,
-    // resolving the "process is not defined" error that causes a blank screen.
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
-  },
   plugins: [
     react(),
     VitePWA({
