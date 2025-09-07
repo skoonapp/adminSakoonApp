@@ -48,22 +48,17 @@ When asked about earnings, ONLY state these final amounts. DO NOT mention gross 
 For example, if a user asks "How much do I earn?", you should say "You earn ₹${listenerCallEarning.toFixed(2)} per minute for calls and ₹${listenerChatEarning.toFixed(3)} per message you send."
 Do not mention you are an AI model. Behave like a knowledgeable admin.`;
 
-// Conditionally initialize the AI client to prevent crashes if the API key is missing.
 let ai: GoogleGenAI | null = null;
-const apiKey = process.env.API_KEY;
-
-// A more robust check to ensure the API key is a valid, non-placeholder string.
-// This prevents initialization if the key is missing, empty, or the literal string "undefined"
-// which can happen during the build process if the environment variable isn't set.
-if (apiKey && apiKey.startsWith('AIza') && apiKey.length > 30) {
-    try {
-        ai = new GoogleGenAI({ apiKey });
-    } catch (e) {
-        console.error("Failed to initialize GoogleGenAI, likely due to an invalid API key format.", e);
-        ai = null;
+try {
+    const apiKey = process.env.API_KEY;
+    // This check ensures that the key is not missing, empty, or the literal string "undefined".
+    if (!apiKey || apiKey === "undefined" || apiKey.length < 30) {
+        throw new Error("Gemini API Key is missing or invalid.");
     }
-} else {
-  console.error("SakoonApp FATAL: Gemini API Key is not configured correctly. Chatbot will be disabled.");
+    ai = new GoogleGenAI({ apiKey });
+} catch (e) {
+    console.error("SakoonApp FATAL: Failed to initialize GoogleGenAI. Chatbot will be disabled.", e);
+    ai = null;
 }
 
 
@@ -130,9 +125,13 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
         return [...updatedMessages, botMessage];
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gemini API error:", error);
-      const errorMessage: ChatMessage = { id: Date.now() + 1, text: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.", sender: 'bot', status: 'read' };
+      let errorMessageText = "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.";
+      if (error?.message?.includes('API key not valid')) {
+          errorMessageText = "It seems there's an issue with the API configuration. Please contact support.";
+      }
+      const errorMessage: ChatMessage = { id: Date.now() + 1, text: errorMessageText, sender: 'bot', status: 'read' };
       setMessages(prev => [...prev.map((m): ChatMessage => m.id === userMessage.id ? {...m, status: 'read'} : m), errorMessage]);
     } finally {
       setIsLoading(false);
@@ -204,7 +203,7 @@ const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your query here.."
-              className="flex-grow bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full p-3 pl-4 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              className="flex-grow bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full p-3 pl-4 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none"
               disabled={!ai}
             />
             <button

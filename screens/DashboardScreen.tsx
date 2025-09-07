@@ -37,7 +37,7 @@ const formatDuration = (seconds: number = 0): string => {
 type StatCardColor = 'blue' | 'indigo' | 'purple' | 'green';
 const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.ReactNode; color: StatCardColor; linkTo?: string; }> = ({ title, value, icon, color, linkTo }) => {
     const colorClasses = {
-        blue: 'from-blue-50 to-sky-100 dark:from-blue-900/30 dark:to-sky-900/30 border-sky-200 dark:border-sky-800',
+        blue: 'from-cyan-50 to-sky-100 dark:from-cyan-900/30 dark:to-sky-900/30 border-sky-200 dark:border-sky-800',
         indigo: 'from-indigo-50 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30 border-violet-200 dark:border-violet-800',
         purple: 'from-purple-50 to-fuchsia-100 dark:from-purple-900/30 dark:to-fuchsia-900/30 border-fuchsia-200 dark:border-fuchsia-800',
         green: 'from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-emerald-200 dark:border-emerald-800',
@@ -55,7 +55,7 @@ const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.Re
         </div>
     );
     
-    return linkTo ? <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl">{content}</Link> : content;
+    return linkTo ? <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl">{content}</Link> : content;
 };
 
 const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
@@ -65,8 +65,8 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
     return (
         <div className="flex items-center justify-between py-3">
             <div className="flex items-center gap-3 overflow-hidden">
-                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCall ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-purple-100 dark:bg-purple-900/50'}`}>
-                    {isCall ? <PhoneIcon className="h-5 w-5 text-blue-600 dark:text-blue-300"/> : <ChatIcon className="h-5 w-5 text-purple-600 dark:text-purple-300"/>}
+                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCall ? 'bg-cyan-100 dark:bg-cyan-900/50' : 'bg-purple-100 dark:bg-purple-900/50'}`}>
+                    {isCall ? <PhoneIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-300"/> : <ChatIcon className="h-5 w-5 text-purple-600 dark:text-purple-300"/>}
                 </div>
                 <div className="overflow-hidden">
                     <p className="font-semibold text-slate-700 dark:text-slate-300 truncate">
@@ -198,7 +198,7 @@ const StatusToggle: React.FC = () => {
                     <button
                         key={status.value}
                         onClick={() => handleStatusChange(status.value)}
-                        className={`relative z-10 w-1/3 text-center text-sm font-bold py-1 rounded-full transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-primary-500
+                        className={`relative z-10 w-1/3 text-center text-sm font-bold py-1 rounded-full transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500
                             ${activeIndex === index ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`}
                     >
                         {status.label}
@@ -335,7 +335,7 @@ const DashboardScreen: React.FC = () => {
             <div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Today's Summary</h3>
                 <div className="grid grid-cols-2 gap-4">
-                    <StatCard title="Today's Calls" color="blue" linkTo="/calls" icon={<PhoneIcon className="h-5 w-5 text-blue-500"/>} value={<StatValue loading={loadingActivities}>{todayStats.calls}</StatValue>} />
+                    <StatCard title="Today's Calls" color="blue" linkTo="/calls" icon={<PhoneIcon className="h-5 w-5 text-cyan-500"/>} value={<StatValue loading={loadingActivities}>{todayStats.calls}</StatValue>} />
                     <StatCard title="Total Talk Time" color="indigo" icon={<ClockIcon className="h-5 w-5 text-indigo-500"/>} value={<StatValue loading={loadingActivities}>{formatDuration(todayStats.duration)}</StatValue>} />
                     <StatCard title="Today's Chats" color="purple" linkTo="/chat" icon={<ChatIcon className="h-5 w-5 text-purple-500"/>} value={<StatValue loading={loadingActivities}>{todayStats.chats}</StatValue>} />
                     <StatCard title="Today's Earnings" color="green" linkTo="/earnings" icon={<RupeeIcon className="h-5 w-5 text-green-500"/>} value={<StatValue loading={loadingEarnings}>₹{earningsData.today.toFixed(2)}</StatValue>} />
@@ -348,7 +348,7 @@ const DashboardScreen: React.FC = () => {
              <div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">This Week's Performance</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <StatCard title="Total Calls" color="blue" linkTo="/calls" icon={<PhoneIcon className="h-5 w-5 text-blue-500"/>} value={<StatValue loading={loadingActivities}>{weekStats.calls}</StatValue>} />
+                    <StatCard title="Total Calls" color="blue" linkTo="/calls" icon={<PhoneIcon className="h-5 w-5 text-cyan-500"/>} value={<StatValue loading={loadingActivities}>{weekStats.calls}</StatValue>} />
                     <StatCard title="Weekly Earnings" color="green" linkTo="/earnings" icon={<RupeeIcon className="h-5 w-5 text-green-500"/>} value={<StatValue loading={loadingEarnings}>₹{earningsData.week.toFixed(2)}</StatValue>} />
                     <StatCard title="Total Chats" color="purple" linkTo="/chat" icon={<ChatIcon className="h-5 w-5 text-purple-500"/>} value={<StatValue loading={loadingActivities}>{weekStats.chats}</StatValue>} />
                     <StatCard title="Avg. Call Duration" color="indigo" icon={<ClockIcon className="h-5 w-5 text-indigo-500"/>} value={<StatValue loading={loadingActivities}>{formatDuration(weekStats.avgDuration)}</StatValue>} />

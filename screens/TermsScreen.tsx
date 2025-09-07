@@ -8,9 +8,9 @@ export const TermsContent: React.FC = () => {
         <>
             <p className="text-sm"><em>Last Updated: {today}</em></p>
             
-            <div className="p-4 rounded-lg bg-primary-50 dark:bg-slate-800 border border-primary-200 dark:border-primary-700/50 my-6">
-                <h3 className="text-lg font-bold text-primary-800 dark:text-primary-300">सबसे ज़रूरी बातें (Key Points)</h3>
-                <ul className="list-disc pl-5 mt-2 space-y-1 text-primary-700 dark:text-primary-300/90">
+            <div className="p-4 rounded-lg bg-cyan-50 dark:bg-slate-800 border border-cyan-200 dark:border-cyan-700/50 my-6">
+                <h3 className="text-lg font-bold text-cyan-800 dark:text-cyan-300">सबसे ज़रूरी बातें (Key Points)</h3>
+                <ul className="list-disc pl-5 mt-2 space-y-1 text-cyan-700 dark:text-cyan-300/90">
                     <li><strong className="text-green-600 dark:text-green-400">हमेशा करें:</strong> User की इज़्ज़त करें, अच्छे से बात करें, और नियमों का पालन करें।</li>
                     <li><strong className="text-red-500 dark:text-red-400">कभी न करें:</strong> अपनी पर्सनल जानकारी (नंबर, सोशल मीडिया) शेयर न करें, गलत भाषा का इस्तेमाल न करें, और कॉल/चैट बीच में न काटें।</li>
                     <li><strong className="text-yellow-600 dark:text-yellow-400">पेमेंट याद रखें:</strong> पेमेंट हर हफ़्ते सोमवार को होता है। Minimum Payout ₹699 है। नियम तोड़ने पर आपकी कमाई 'Hold' हो सकती है और 20% पेनल्टी लग सकती है।</li>
@@ -81,7 +81,7 @@ export const TermsContent: React.FC = () => {
             <p>अगर आपका कोई सवाल है, तो हमें यहाँ ईमेल करें: <a href="mailto:sakoonapp.help@gmail.com">sakoonapp.help@gmail.com</a></p>
 
             <hr/>
-            <blockquote className="border-l-4 border-primary-500 pl-4 italic">
+            <blockquote className="border-l-4 border-cyan-500 pl-4 italic">
               “Users का सम्मान करें, नियमों का पालन करें और सुरक्षित रूप से अपनी आय बढ़ाएँ।”
             </blockquote>
         </>

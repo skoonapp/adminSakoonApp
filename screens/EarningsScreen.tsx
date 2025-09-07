@@ -113,7 +113,7 @@ const EarningsScreen: React.FC = () => {
             </header>
 
             {/* Total Earnings Card */}
-            <div className="bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between">
+            <div className="bg-gradient-to-br from-cyan-600 to-teal-500 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between">
                 <div>
                     <p className="text-lg font-medium text-white/80">Total Earnings</p>
                     {loading ? 

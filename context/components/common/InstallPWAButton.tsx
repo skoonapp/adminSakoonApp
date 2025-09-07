@@ -86,7 +86,7 @@ const InstallPWAButton: React.FC = () => {
             <div className="flex items-center gap-2">
                  <button
                     onClick={handleInstallClick}
-                    className="flex-shrink-0 bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
+                    className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
                 >
                     Install
                 </button>

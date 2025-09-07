@@ -23,8 +23,8 @@ export default defineConfig({
         "name": "SakoonApp Admin",
         "short_name": "Sakoon Admin",
         "description": "The admin and management app for Sakoon Listeners.",
-        "theme_color": "#4338ca", // Darker color for a more integrated splash screen
-        "background_color": "#1e1b4b", // Dark background for splash screen to match app theme
+        "theme_color": "#0891b2",
+        "background_color": "#0F172A",
         "display": "standalone",
         "scope": "/",
         "start_url": "/",

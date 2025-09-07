@@ -101,7 +101,7 @@ const ChatScreen: React.FC = () => {
                             <div
                                 key={session.id}
                                 onClick={() => setSelectedSessionId(session.id)}
-                                className={`p-4 cursor-pointer border-l-4 ${selectedSessionId === session.id ? 'border-primary-500 bg-slate-100 dark:bg-slate-700/50' : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/30'}`}
+                                className={`p-4 cursor-pointer border-l-4 ${selectedSessionId === session.id ? 'border-cyan-500 bg-slate-100 dark:bg-slate-700/50' : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/30'}`}
                             >
                                 <p className="font-bold text-slate-800 dark:text-slate-200">{session.userName}</p>
                                 <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{session.lastMessageText}</p>
@@ -125,7 +125,7 @@ const ChatScreen: React.FC = () => {
                            {loadingMessages ? <p className="text-center text-slate-500">Loading messages...</p> :
                                 messages.map(msg => (
                                     <div key={msg.id} className={`flex my-2 ${msg.senderId === profile?.uid ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-xs md:max-w-md p-3 rounded-xl ${msg.senderId === profile?.uid ? 'bg-primary-500 text-white rounded-br-none' : 'bg-white dark:bg-gradient-to-br dark:from-slate-700 dark:to-slate-600 rounded-bl-none'}`}>
+                                        <div className={`max-w-xs md:max-w-md p-3 rounded-xl ${msg.senderId === profile?.uid ? 'bg-cyan-500 text-white rounded-br-none' : 'bg-white dark:bg-gradient-to-br dark:from-slate-700 dark:to-slate-600 rounded-bl-none'}`}>
                                             <p>{msg.text}</p>
                                         </div>
                                     </div>
@@ -140,9 +140,9 @@ const ChatScreen: React.FC = () => {
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Type a message..."
-                                    className="flex-grow bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                                    className="flex-grow bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
                                 />
-                                <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">Send</button>
+                                <button type="submit" className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">Send</button>
                             </form>
                         </footer>
                     </>

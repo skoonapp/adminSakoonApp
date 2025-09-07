@@ -35,7 +35,7 @@ export const PrivacyPolicyContent: React.FC = () => {
             </ul>
 
             <h2>4. आपकी जानकारी किसके साथ शेयर होती है?</h2>
-            <p className="font-semibold text-primary-700 dark:text-primary-300">हम आपकी व्यक्तिगत संपर्क जानकारी (जैसे फ़ोन नंबर) कभी भी Users के साथ शेयर नहीं करते हैं। आपकी पहचान गोपनीय रखी जाती है।</p>
+            <p className="font-semibold text-cyan-700 dark:text-cyan-300">हम आपकी व्यक्तिगत संपर्क जानकारी (जैसे फ़ोन नंबर) कभी भी Users के साथ शेयर नहीं करते हैं। आपकी पहचान गोपनीय रखी जाती है।</p>
             <p>आपकी जानकारी केवल कानूनी ज़रूरतों या सुरक्षा खतरों की स्थिति में ही किसी तीसरे पक्ष के साथ शेयर की जा सकती है।</p>
 
             <h2>5. आपकी बातचीत की निगरानी</h2>
@@ -58,7 +58,7 @@ export const PrivacyPolicyContent: React.FC = () => {
                 </ul>
             </div>
             
-            <blockquote className="border-l-4 border-primary-500 pl-4 italic">
+            <blockquote className="border-l-4 border-cyan-500 pl-4 italic">
               "आपकी प्राइवेसी हमारी प्राथमिकता है - सुरक्षित रूप से जुड़ें, बिना चिंता के कमाएँ।"
             </blockquote>
         </>

@@ -246,7 +246,7 @@ const ActiveCallScreen: React.FC = () => {
 
     const PermissionRequestUI = () => (
         <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md z-20 flex flex-col items-center justify-center p-8 text-center animate-fade-in">
-            <div className="w-20 h-20 mb-6 rounded-full bg-primary-500/20 flex items-center justify-center text-primary-300">
+            <div className="w-20 h-20 mb-6 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-300">
                 <MicOnIcon className="w-10 h-10" />
             </div>
             <h2 className="text-3xl font-bold text-white mb-2">Microphone Access Required</h2>
@@ -254,7 +254,7 @@ const ActiveCallScreen: React.FC = () => {
             <button
                 onClick={requestMicrophonePermission}
                 disabled={permissionStatus === 'prompting'}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors disabled:bg-primary-800 disabled:cursor-wait"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors disabled:bg-cyan-800 disabled:cursor-wait"
             >
                 {permissionStatus === 'prompting' ? 'Waiting...' : 'Grant Permission'}
             </button>

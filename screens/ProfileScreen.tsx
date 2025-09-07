@@ -20,7 +20,7 @@ const Accordion: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
         <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex justify-between items-center text-left p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-lg"
+                className="w-full flex justify-between items-center text-left p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg"
                 aria-expanded={isOpen}
             >
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{title}</h2>
@@ -41,7 +41,7 @@ const ToggleSwitch: React.FC<{ checked: boolean; onChange: (checked: boolean) =>
         type="button"
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${checked ? 'bg-primary-600' : 'bg-slate-400 dark:bg-slate-600'} ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+        className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 ${checked ? 'bg-cyan-600' : 'bg-slate-400 dark:bg-slate-600'} ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
         aria-checked={checked}
     >
         <span
@@ -105,8 +105,8 @@ const ProfileScreen: React.FC = () => {
         <div key="profile" className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm">
           <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary-500 dark:text-primary-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
+                <div className="w-14 h-14 bg-cyan-100 dark:bg-cyan-900/50 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-cyan-500 dark:text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{profile?.displayName || 'Listener'}</h2>

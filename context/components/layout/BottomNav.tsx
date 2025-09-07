@@ -12,11 +12,11 @@ const navItems = [
 
 const BottomNav: React.FC = () => {
   const baseClasses = "relative flex flex-col items-center justify-center w-full h-full transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
-  const inactiveClasses = "text-indigo-200 hover:text-white";
+  const inactiveClasses = "text-cyan-200 hover:text-white";
   const activeClasses = "text-white";
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-r from-primary-600 to-indigo-700 dark:from-slate-900 dark:to-slate-800 shadow-[0_-2px_15px_-5px_rgba(0,0,0,0.2)] border-t border-black/10 dark:border-white/10 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-r from-cyan-600 to-teal-500 dark:from-slate-900 dark:to-slate-800 shadow-[0_-2px_15px_-5px_rgba(0,0,0,0.2)] border-t border-black/10 dark:border-white/10 z-50">
       <div className="flex justify-around h-full">
         {navItems.map(({ path, label, icon }) => (
             <NavLink
