@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-// The BeforeInstallPromptEvent is not a standard event type, so we define it here.
+// The BeforeInstallPromptEvent is not a standard event type, so we define it here for clarity.
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: Array<string>;
   readonly userChoice: Promise<{
@@ -11,68 +11,73 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const InstallPWAButton: React.FC = () => {
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showBanner, setShowBanner] = useState(false);
+  // State to hold the event that triggers the install prompt.
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
+    // This function handles the browser's 'beforeinstallprompt' event.
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile.
       e.preventDefault();
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-      if (!isStandalone) {
-        setInstallPrompt(e as BeforeInstallPromptEvent);
-      }
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
+    // Listen for the event.
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+    // This function is called when the PWA is successfully installed.
     const handleAppInstalled = () => {
-      setInstallPrompt(null);
-      setShowBanner(false);
+      // Clear the deferredPrompt so the banner doesn't show again.
+      setDeferredPrompt(null);
     };
 
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // Cleanup listeners when the component unmounts.
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
-  useEffect(() => {
-    const dismissedUntil = localStorage.getItem('pwaInstallDismissedUntil');
-    if (installPrompt && (!dismissedUntil || new Date().getTime() > Number(dismissedUntil))) {
-      setShowBanner(true);
-    } else {
-      setShowBanner(false);
-    }
-  }, [installPrompt]);
-
+  // This function is triggered when the user clicks the "Install" button.
   const handleInstallClick = useCallback(async () => {
-    if (!installPrompt) return;
+    if (!deferredPrompt) {
+      // If the prompt isn't available, do nothing.
+      return;
+    }
     
-    await installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
+    // Show the native installation prompt.
+    await deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt.
+    const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
       console.log('User accepted the PWA installation');
     } else {
       console.log('User dismissed the PWA installation');
     }
-    setInstallPrompt(null);
-    setShowBanner(false);
-  }, [installPrompt]);
 
+    // The prompt can only be used once, so we clear it.
+    setDeferredPrompt(null);
+  }, [deferredPrompt]);
+
+  // Hides the banner for the current session if dismissed.
   const handleDismiss = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Dismiss for 7 days
-    const expiry = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
-    localStorage.setItem('pwaInstallDismissedUntil', String(expiry));
-    setShowBanner(false);
+    setDeferredPrompt(null);
   };
+  
+  // Check if the app is already running in standalone mode (installed).
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
 
-  if (!showBanner) {
+  // Don't show the button if the prompt isn't ready or if the app is already installed.
+  if (!deferredPrompt || isStandalone) {
     return null;
   }
 
+  // Render the installation banner.
   return (
     <div className="fixed bottom-20 left-4 right-4 z-40 animate-fade-in" aria-live="polite">
         <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
