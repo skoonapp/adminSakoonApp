@@ -8,18 +8,8 @@ interface ProfileStepProps {
   setFormData: React.Dispatch<React.SetStateAction<OnboardingData>>;
 }
 
-const AVATAR_IMAGES = [
-  'https://listenerimages.netlify.app/images/listener1.webp',
-  'https://listenerimages.netlify.app/images/listener2.webp',
-  'https://listenerimages.netlify.app/images/listener3.webp',
-  'https://listenerimages.netlify.app/images/listener4.webp',
-  'https://listenerimages.netlify.app/images/listener5.webp',
-  'https://listenerimages.netlify.app/images/listener6.webp',
-  'https://listenerimages.netlify.app/images/listener7.webp',
-  'https://listenerimages.netlify.app/images/listener8.webp',
-  'https://listenerimages.netlify.app/images/listener9.webp',
-  'https://listenerimages.netlify.app/images/listener10.webp',
-];
+// Generate the list of 1000 avatar images as requested.
+const AVATAR_IMAGES = Array.from({ length: 1000 }, (_, i) => `https://listenerimages.netlify.app/images/listener${i + 1}.webp`);
 
 
 const ProfileStep: React.FC<ProfileStepProps> = ({ nextStep, prevStep, formData, setFormData }) => {
@@ -55,15 +45,15 @@ const ProfileStep: React.FC<ProfileStepProps> = ({ nextStep, prevStep, formData,
             )}
         </div>
 
-        {/* Image Selection Grid */}
-        <div className="grid grid-cols-5 gap-3 mt-4">
+        {/* Scrollable Image Selection Grid */}
+        <div className="h-48 overflow-y-auto grid grid-cols-5 gap-3 mt-4 p-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50">
             {AVATAR_IMAGES.map(avatar => (
                 <button 
                     key={avatar} 
                     onClick={() => handleSelectAvatar(avatar)}
                     className={`rounded-full focus:outline-none transition-all duration-200 ${formData.selectedAvatar === avatar ? 'ring-2 ring-cyan-500 ring-offset-2 dark:ring-offset-slate-800' : 'ring-2 ring-transparent hover:ring-slate-300'}`}
                 >
-                    <img src={avatar} alt="Avatar option" className="w-full h-auto aspect-square rounded-full border-2 border-white dark:border-slate-700 object-cover" />
+                    <img src={avatar} alt="Avatar option" className="w-full h-auto aspect-square rounded-full border-2 border-white dark:border-slate-700 object-cover" loading="lazy" />
                 </button>
             ))}
         </div>
