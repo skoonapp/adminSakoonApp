@@ -20,8 +20,9 @@ const TermsScreen = lazy(() => import('./screens/TermsScreen'));
 const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'));
 const OnboardingScreen = lazy(() => import('./screens/OnboardingScreen'));
 const PendingApprovalScreen = lazy(() => import('./screens/PendingApprovalScreen'));
+const AdminDashboardScreen = lazy(() => import('./screens/AdminDashboard'));
 
-type AuthStatus = 'loading' | 'unauthenticated' | 'needs_onboarding' | 'pending_approval' | 'active';
+type AuthStatus = 'loading' | 'unauthenticated' | 'needs_onboarding' | 'pending_approval' | 'active' | 'admin';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<firebase.User | null>(null);
@@ -37,13 +38,17 @@ const App: React.FC = () => {
           
           if (doc.exists) {
             const data = doc.data() as ListenerProfile;
-            if (data.status === 'pending') {
+
+            // Admin check takes highest priority
+            if (data.isAdmin === true) {
+              setAuthStatus('admin');
+            } else if (data.status === 'pending') {
               setAuthStatus('pending_approval');
             } else if (data.status === 'active') {
               setAuthStatus('active');
             } else {
-              // Handle other statuses like 'suspended' by logging them out
-              console.warn(`User ${firebaseUser.uid} has an unhandled status: ${data.status}`);
+              // Handle other statuses like 'suspended' or 'rejected' by logging them out
+              console.warn(`User ${firebaseUser.uid} has an unhandled or rejected status: ${data.status}`);
               await auth.signOut();
               setAuthStatus('unauthenticated');
             }
@@ -90,6 +95,13 @@ const App: React.FC = () => {
              <>
               <Route path="/pending-approval" element={<PendingApprovalScreen />} />
               <Route path="*" element={<Navigate to="/pending-approval" replace />} />
+            </>
+          )}
+
+          {authStatus === 'admin' && (
+            <>
+              <Route path="/admin" element={<AdminDashboardScreen />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
             </>
           )}
 

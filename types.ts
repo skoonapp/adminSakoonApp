@@ -12,6 +12,7 @@ export interface ListenerProfile {
   appStatus: ListenerAppStatus;
   status: ListenerProfileStatus; // Overall profile status (pending, active, etc.)
   onboardingComplete: boolean;
+  isAdmin?: boolean; // For admin role access
   
   // Details from onboarding
   city?: string;
