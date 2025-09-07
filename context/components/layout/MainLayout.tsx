@@ -3,7 +3,6 @@ import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';
 import Header from '../common/Header';
-import InstallPWAButton from '../common/InstallPWAButton';
 
 // --- Icon Components (for previews) ---
 const IconDashboard: React.FC<{ active: boolean }> = ({ active }) => (
@@ -176,7 +175,6 @@ const MainLayout: React.FC = () => {
       </main>
       <BottomNav />
       <IncomingCallManager />
-      <InstallPWAButton />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { db } from './../utils/firebase';
 import firebase from 'firebase/compat/app';
 // Fix: Use ListenerAppStatus instead of the non-existent ListenerStatus.
 import type { CallRecord, ListenerChatSession, ListenerAppStatus } from '../types';
+import InstallPWAButton from '../context/components/common/InstallPWAButton';
 
 // Type definitions for combined activity feed
 // Fix: Use Omit to prevent type conflict on 'type' property from CallRecord.
@@ -335,6 +336,7 @@ const DashboardScreen: React.FC = () => {
 
     return (
         <div className="p-4 space-y-6">
+            <InstallPWAButton />
             <StatusToggle />
             
             <hr className="my-6 border-slate-200 dark:border-slate-700" />
