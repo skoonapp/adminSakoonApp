@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { useListener } from './../context/ListenerContext';
 import { db } from './../utils/firebase';
 import firebase from 'firebase/compat/app';
-import type { CallRecord, ListenerChatSession, ListenerStatus } from '../types';
+// Fix: Use ListenerAppStatus instead of the non-existent ListenerStatus.
+import type { CallRecord, ListenerChatSession, ListenerAppStatus } from '../types';
 
 // Type definitions for combined activity feed
-type CallActivity = CallRecord & { type: 'call'; timestamp: firebase.firestore.Timestamp; };
+// Fix: Use Omit to prevent type conflict on 'type' property from CallRecord.
+type CallActivity = Omit<CallRecord, 'type'> & { type: 'call'; timestamp: firebase.firestore.Timestamp; };
 type ChatActivity = ListenerChatSession & { type: 'chat'; timestamp: firebase.firestore.Timestamp; };
 type Activity = CallActivity | ChatActivity;
 
@@ -58,9 +60,9 @@ const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.Re
     return linkTo ? <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl">{content}</Link> : content;
 };
 
+// Fix: Refactor ActivityRow to safely access properties based on activity type.
 const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
     const isCall = activity.type === 'call';
-    const earnings = (activity as CallRecord).earnings ?? 0;
 
     return (
         <div className="flex items-center justify-between py-3">
@@ -73,13 +75,13 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
                         {isCall ? 'Call with' : 'Chat with'} {activity.userName}
                     </p>
                     <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                        {isCall ? `Duration: ${formatDuration((activity as CallActivity).durationSeconds)}` : (activity as ChatActivity).lastMessageText}
+                        {isCall ? `Duration: ${formatDuration(activity.durationSeconds)}` : activity.lastMessageText}
                     </p>
                 </div>
             </div>
-            {earnings > 0 && (
+            {isCall && activity.earnings != null && activity.earnings > 0 && (
                 <p className="font-bold text-green-600 dark:text-green-400 text-sm shrink-0 ml-2">
-                    + ₹{earnings.toFixed(2)}
+                    + ₹{activity.earnings.toFixed(2)}
                 </p>
             )}
         </div>
@@ -106,25 +108,30 @@ const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
 
 const StatusToggle: React.FC = () => {
     const { profile, loading: profileLoading } = useListener();
-    const [optimisticStatus, setOptimisticStatus] = useState<ListenerStatus | null>(null);
+    // Fix: Use ListenerAppStatus type.
+    const [optimisticStatus, setOptimisticStatus] = useState<ListenerAppStatus | null>(null);
 
     // Sync local state with profile from context
     useEffect(() => {
-        if (profile?.status) {
-            setOptimisticStatus(profile.status);
+        // Fix: Use profile.appStatus instead of profile.status.
+        if (profile?.appStatus) {
+            setOptimisticStatus(profile.appStatus);
         } else if (!profileLoading && !profile) {
             setOptimisticStatus(null);
         }
     }, [profile, profileLoading]);
     
-    const handleStatusChange = async (newStatus: ListenerStatus) => {
+    // Fix: Use ListenerAppStatus type.
+    const handleStatusChange = async (newStatus: ListenerAppStatus) => {
         if (!profile) return;
 
-        const previousStatus = optimisticStatus || profile.status;
+        // Fix: Use profile.appStatus instead of profile.status.
+        const previousStatus = optimisticStatus || profile.appStatus;
         setOptimisticStatus(newStatus); // Optimistically update the UI
 
         try {
-            await db.collection('listeners').doc(profile.uid).update({ status: newStatus });
+            // Fix: Update appStatus field instead of status.
+            await db.collection('listeners').doc(profile.uid).update({ appStatus: newStatus });
         } catch (error) {
             console.error("Failed to update status:", error);
             // Revert on error
@@ -145,7 +152,8 @@ const StatusToggle: React.FC = () => {
         return <DisabledStatusToggle message="Status could not be loaded from profile." />;
     }
 
-    const statuses: { label: string; value: ListenerStatus; indicatorColor: string; }[] = [
+    // Fix: Use ListenerAppStatus type.
+    const statuses: { label: string; value: ListenerAppStatus; indicatorColor: string; }[] = [
         { label: 'Offline', value: 'Offline', indicatorColor: 'bg-red-500' },
         { label: 'Busy', value: 'Busy', indicatorColor: 'bg-yellow-500' },
         { label: 'Online', value: 'Available', indicatorColor: 'bg-green-500' },
@@ -306,8 +314,8 @@ const DashboardScreen: React.FC = () => {
         const todayActivities = allActivities.filter(a => a.timestamp.toDate() >= startOfToday);
         const weekActivities = allActivities.filter(a => a.timestamp.toDate() >= startOfWeek);
         
-        const todayCalls = todayActivities.filter(a => a.type === 'call') as CallActivity[];
-        const weekCalls = weekActivities.filter(a => a.type === 'call') as CallActivity[];
+        const todayCalls = todayActivities.filter((a): a is CallActivity => a.type === 'call');
+        const weekCalls = weekActivities.filter((a): a is CallActivity => a.type === 'call');
         const todayChatsCount = todayActivities.filter(a => a.type === 'chat').length;
 
         return {

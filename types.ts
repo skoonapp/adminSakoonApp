@@ -1,13 +1,23 @@
 import type firebase from 'firebase/compat/app';
 
 // The status of a listener, controlling their availability for calls.
-export type ListenerStatus = 'Available' | 'Busy' | 'Offline' | 'Break';
+export type ListenerAppStatus = 'Available' | 'Busy' | 'Offline' | 'Break';
+export type ListenerProfileStatus = 'pending' | 'active' | 'suspended' | 'rejected';
+
 
 // Represents the main profile document for a listener in Firestore.
 export interface ListenerProfile {
   uid: string;
   displayName: string;
-  status: ListenerStatus;
+  appStatus: ListenerAppStatus;
+  status: ListenerProfileStatus; // Overall profile status (pending, active, etc.)
+  onboardingComplete: boolean;
+  
+  // Details from onboarding
+  city?: string;
+  age?: number;
+  avatarUrl?: string;
+
   // Notification preferences for the listener.
   notificationSettings?: {
     calls?: boolean;
@@ -15,6 +25,15 @@ export interface ListenerProfile {
   };
   // FCM tokens for push notifications.
   fcmTokens?: string[];
+  
+  createdAt: firebase.firestore.Timestamp;
+}
+
+// Represents the read-only data for a listener before they've onboarded.
+export interface UnverifiedListener {
+    realName: string;
+    bankAccount: string;
+    upiId: string;
 }
 
 // Represents a single call record in the 'calls' collection.
@@ -22,12 +41,13 @@ export interface CallRecord {
   callId: string;
   listenerId: string;
   userId: string;
-  userName: string;
+  userName:string;
   startTime: firebase.firestore.Timestamp;
   endTime?: firebase.firestore.Timestamp;
   durationSeconds?: number;
   status: 'completed' | 'missed' | 'rejected' | 'ongoing';
   earnings?: number;
+  type?: 'free_reverse';
 }
 
 // Represents a chat session between a listener and a user.
@@ -61,4 +81,10 @@ export interface ChatMessage {
     type: 'text' | 'audio';
     audioUrl?: string;
     duration?: number; // duration in seconds for audio messages
+}
+
+// Represents the daily free call statistics for a listener.
+export interface FreeCallStats {
+    count: number;
+    lastReset: firebase.firestore.Timestamp;
 }
