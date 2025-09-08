@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../utils/firebase';
 import firebase from 'firebase/compat/app';
 import type { ListenerProfile } from '../types';
-// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+import { Link } from 'react-router-dom';
 
 // Icons
 const UserCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
@@ -27,7 +27,7 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.Re
     );
 
     if (linkTo) {
-        return <ReactRouterDOM.Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl">{content}</ReactRouterDOM.Link>;
+        return <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl">{content}</Link>;
     }
     return content;
 };

@@ -1,6 +1,6 @@
 import React from 'react';
-// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+import { NavLink } from 'react-router-dom';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: (active: boolean) => <IconDashboard active={active} /> },
@@ -20,7 +20,7 @@ const BottomNav: React.FC = () => {
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-r from-cyan-600 to-teal-500 dark:from-slate-900 dark:to-slate-800 shadow-[0_-2px_15px_-5px_rgba(0,0,0,0.2)] border-t border-black/10 dark:border-white/10 z-50">
       <div className="flex justify-around h-full">
         {navItems.map(({ path, label, icon }) => (
-            <ReactRouterDOM.NavLink
+            <NavLink
               key={path}
               to={path}
               className={({ isActive }) => `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
@@ -32,7 +32,7 @@ const BottomNav: React.FC = () => {
                   <span className={`text-xs mt-0.5 font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
                 </>
               )}
-            </ReactRouterDOM.NavLink>
+            </NavLink>
         ))}
       </div>
     </nav>

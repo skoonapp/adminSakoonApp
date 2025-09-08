@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+import { useParams, useNavigate } from 'react-router-dom';
 import { useListener } from '../context/ListenerContext';
 import { db } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
@@ -12,8 +12,8 @@ const ConnectingIcon = () => <svg className="animate-spin h-10 w-10 text-white" 
 
 
 const ActiveCallScreen: React.FC = () => {
-    const { callId } = ReactRouterDOM.useParams<{ callId: string }>();
-    const navigate = ReactRouterDOM.useNavigate();
+    const { callId } = useParams<{ callId: string }>();
+    const navigate = useNavigate();
     const { profile } = useListener();
     const zegoContainerRef = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<'loading' | 'connecting' | 'connected' | 'error'>('loading');
@@ -59,6 +59,7 @@ const ActiveCallScreen: React.FC = () => {
 
                 zp.joinRoom({
                     container: zegoContainerRef.current,
+                    userName: profile.displayName, // Set the listener's display name
                     scenario: {
                         mode: window.ZegoUIKitPrebuilt.OneONoneCall,
                     },

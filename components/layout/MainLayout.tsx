@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';
 import Header from '../common/Header';
@@ -35,8 +35,8 @@ const SWIPE_THRESHOLD = 75;
 const DIRECTION_LOCK_THRESHOLD = 10;
 
 const MainLayout: React.FC = () => {
-  const location = ReactRouterDOM.useLocation();
-  const navigate = ReactRouterDOM.useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const [touchState, setTouchState] = useState<{
     startX: number;
@@ -171,7 +171,7 @@ const MainLayout: React.FC = () => {
         )}
 
         <div style={swipeableStyle} className="bg-slate-50 dark:bg-slate-950">
-            <ReactRouterDOM.Outlet />
+            <Outlet />
         </div>
       </main>
       <BottomNav />

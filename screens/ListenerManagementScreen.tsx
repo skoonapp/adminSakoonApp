@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
-import * as ReactRouterDOM from 'react-router-dom';
+// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+import { Link } from 'react-router-dom';
 import { db } from '../utils/firebase';
 import type { ListenerProfile, ListenerAccountStatus } from '../types';
 import ListenerRow from '../components/admin/ListenerRow';
@@ -53,9 +53,9 @@ const ListenerManagementScreen: React.FC = () => {
             <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                  <div>
                     <div className="flex items-center gap-2">
-                         <ReactRouterDOM.Link to="/admin" className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 -ml-2">
+                         <Link to="/admin" className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 -ml-2">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                        </ReactRouterDOM.Link>
+                        </Link>
                         <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Listener Management</h1>
                     </div>
                     <p className="text-slate-500 dark:text-slate-400 mt-1 ml-10">View, manage, and update all listener accounts.</p>
