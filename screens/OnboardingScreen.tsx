@@ -108,7 +108,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
   const totalSteps = 4;
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-sans">
         <div className="w-full max-w-md mx-auto">
             <header className="text-center mb-4">
                 <h1 className="text-3xl font-bold text-cyan-700 dark:text-cyan-400">SakoonApp</h1>

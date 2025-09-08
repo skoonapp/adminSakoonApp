@@ -121,7 +121,7 @@ const ChatScreen: React.FC = () => {
 
     if (activeSession) {
         return (
-            <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-900">
+            <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900">
                 {/* Header */}
                 <header className="flex items-center p-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm sticky top-16 z-10">
                     <button onClick={() => setActiveSession(null)} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 mr-2"><BackIcon /></button>
@@ -142,7 +142,7 @@ const ChatScreen: React.FC = () => {
                     )}
                 </main>
                 {/* Input Area */}
-                <footer className="p-3 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
+                <footer className="p-3 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
                     <ChatInput onSendText={handleSendMessage} onSendAudio={handleSendAudio} recentMessages={messages} />
                 </footer>
             </div>

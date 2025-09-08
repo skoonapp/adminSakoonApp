@@ -80,7 +80,7 @@ const AdminDashboardScreen: React.FC = () => {
 
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 bg-slate-100 dark:bg-slate-900 min-h-full">
+    <div className="p-4 sm:p-6 space-y-6 bg-slate-50 dark:bg-slate-900 min-h-full">
         <header>
             <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Admin Dashboard</h1>
             <p className="text-slate-500 dark:text-slate-400">Welcome, Admin. Here's your overview.</p>
