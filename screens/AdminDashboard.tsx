@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/firebase';
+import firebase from 'firebase/compat/app';
 import type { ListenerProfile } from '../types';
 // Fix: Use namespace import for react-router-dom to resolve module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
@@ -31,16 +32,60 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.Re
     return content;
 };
 
+const AnalyticsChart: React.FC<{ data: { day: string; count: number }[], loading: boolean }> = ({ data, loading }) => {
+    if (loading) {
+        return (
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+                <div className="h-8 w-48 mb-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                <div className="h-48 w-full bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse"></div>
+            </div>
+        );
+    }
+    
+    if (data.length === 0) {
+        return (
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">Weekly Call Volume</h3>
+                <div className="text-center py-10 text-slate-500 dark:text-slate-400">No call data for the past week.</div>
+            </div>
+        );
+    }
+
+    const maxCount = Math.max(...data.map(d => d.count), 1); // Avoid division by zero
+
+    return (
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">Weekly Call Volume</h3>
+            <div className="flex justify-around items-end h-48 border-l border-b border-slate-200 dark:border-slate-700 pl-2 pb-1">
+                {data.map(({ day, count }) => (
+                    <div key={day} className="flex flex-col items-center h-full justify-end group w-1/7">
+                        <div className="relative">
+                            <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                {count} call{count !== 1 && 's'}
+                            </span>
+                            <div
+                                className="w-6 sm:w-8 bg-cyan-500 hover:bg-cyan-400 rounded-t-md transition-all duration-300"
+                                style={{ height: `${(count / maxCount) * 100}%` }}
+                            ></div>
+                        </div>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 mt-2">{day}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const AdminDashboardScreen: React.FC = () => {
   const [pendingListeners, setPendingListeners] = useState<ListenerProfile[]>([]);
-  const [stats, setStats] = useState({ activeListeners: 0, callsToday: 0 });
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ activeListeners: 0 });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [analyticsData, setAnalyticsData] = useState<{ day: string; count: number }[]>([]);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    setLoadingStats(true);
+    setLoadingAnalytics(true);
 
     // Fetch pending listeners
     const unsubPending = db.collection('listeners').where('status', '==', 'pending')
@@ -53,15 +98,63 @@ const AdminDashboardScreen: React.FC = () => {
     const unsubActive = db.collection('listeners').where('status', '==', 'active')
       .onSnapshot(snapshot => {
          setStats(prev => ({...prev, activeListeners: snapshot.size}));
-      }, (error) => console.error("Error fetching active listeners:", error));
+         setLoadingStats(false);
+      }, (error) => {
+          console.error("Error fetching active listeners:", error)
+          setLoadingStats(false);
+      });
+      
+    // Fetch analytics data for last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const sevenDaysAgoTimestamp = firebase.firestore.Timestamp.fromDate(sevenDaysAgo);
 
-    // Simulate loading completion for placeholder stats
-    const timer = setTimeout(() => setLoading(false), 1500);
+    const unsubAnalytics = db.collection('calls')
+        .where('startTime', '>=', sevenDaysAgoTimestamp)
+        .onSnapshot(snapshot => {
+            const countsByDay: { [key: string]: number } = {};
+            const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            // Initialize counts for the last 7 days
+            for (let i = 0; i < 7; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dayKey = dayLabels[d.getDay()];
+                countsByDay[dayKey] = 0;
+            }
+
+            snapshot.docs.forEach(doc => {
+                const call = doc.data();
+                if (call.startTime) {
+                    const callDate = call.startTime.toDate();
+                    const dayKey = dayLabels[callDate.getDay()];
+                    if (countsByDay.hasOwnProperty(dayKey)) {
+                        countsByDay[dayKey]++;
+                    }
+                }
+            });
+
+            // Format data for the chart, in correct order of last 7 days
+            const formattedData = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dayKey = dayLabels[d.getDay()];
+                formattedData.push({ day: dayKey, count: countsByDay[dayKey] });
+            }
+
+            setAnalyticsData(formattedData);
+            setLoadingAnalytics(false);
+        }, (error) => {
+            console.error("Error fetching analytics data:", error);
+            setLoadingAnalytics(false);
+        });
 
     return () => {
       unsubPending();
       unsubActive();
-      clearTimeout(timer);
+      unsubAnalytics();
     };
   }, []);
 
@@ -88,11 +181,14 @@ const AdminDashboardScreen: React.FC = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Pending Approvals" value={pendingListeners.length} icon={<UserClockIcon />} loading={loading} />
-            <StatCard title="Active Listeners" value={stats.activeListeners} icon={<UserCheckIcon />} loading={loading} />
-            <StatCard title="Manage All Listeners" value="View & Edit" icon={<UsersIcon />} loading={loading} linkTo="/admin/listeners" />
-            <StatCard title="Calls Today" value="--" icon={<PhoneIcon />} loading={loading} />
+            <StatCard title="Pending Approvals" value={pendingListeners.length} icon={<UserClockIcon />} loading={loadingStats} />
+            <StatCard title="Active Listeners" value={stats.activeListeners} icon={<UserCheckIcon />} loading={loadingStats} />
+            <StatCard title="Manage All Listeners" value="View & Edit" icon={<UsersIcon />} loading={loadingStats} linkTo="/admin/listeners" />
+            <StatCard title="Calls Today" value={analyticsData.length > 0 ? analyticsData[6].count : '--'} icon={<PhoneIcon />} loading={loadingAnalytics} />
         </div>
+        
+        {/* Weekly Analytics Section */}
+        <AnalyticsChart data={analyticsData} loading={loadingAnalytics} />
 
         {/* Pending Listeners Table */}
         <div>
@@ -109,7 +205,7 @@ const AdminDashboardScreen: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {loading ? (
+                            {loadingStats ? (
                                 [...Array(3)].map((_, i) => (
                                     <tr key={i} className="bg-white dark:bg-slate-800 border-b dark:border-slate-700">
                                         <td className="px-6 py-4"><div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div></td>

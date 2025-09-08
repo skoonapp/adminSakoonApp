@@ -77,8 +77,24 @@ self.addEventListener('notificationclick', (event) => {
       const targetUrl = new URL(`/#/call/${callId}`, self.location.origin).href;
       event.waitUntil(clients.openWindow(targetUrl));
   } else if (event.action === 'reject') {
-      // TODO: Implement call rejection logic (e.g., update Firestore doc)
       console.log('Call rejected by listener from notification.');
+      if (callId) {
+          // Promise to update Firestore
+          const rejectCallPromise = firebase.firestore().collection('calls').doc(callId).get().then(doc => {
+              // Check if the call is still in a pending-like state before rejecting to avoid race conditions
+              if (doc.exists && (doc.data().status !== 'completed' && doc.data().status !== 'rejected')) {
+                  return doc.ref.update({ status: 'rejected' }).then(() => {
+                      console.log(`Call ${callId} status updated to rejected.`);
+                  });
+              } else {
+                  console.log(`Call ${callId} was already handled or does not exist.`);
+              }
+          }).catch(err => {
+              console.error(`Failed to reject call ${callId}:`, err);
+          });
+          // Ensure the service worker lives long enough to perform the update.
+          event.waitUntil(rejectCallPromise);
+      }
   } else {
     // Default click action if not an action button
     const defaultPath = callId ? `/#/call/${callId}` : '/#/';
