@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FORBIDDEN_CONTENT_PATTERN } from '../../../utils/chatSecurity';
-import type { ChatMessage } from '../../../types';
+import { FORBIDDEN_CONTENT_PATTERN } from '../../utils/chatSecurity';
+import type { ChatMessage } from '../../types';
 
 // --- Icons ---
 const SendIcon: React.FC<{ className?: string }> = ({ className }) => (

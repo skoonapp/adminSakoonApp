@@ -1,7 +1,7 @@
 import React from 'react';
-import type { ChatMessage } from '../../../types';
+import type { ChatMessage } from '../../types';
 import AudioPlayer from './AudioPlayer';
-import { filterInappropriateContent } from '../../../utils/chatSecurity';
+import { filterInappropriateContent } from '../../utils/chatSecurity';
 
 
 interface MessageBubbleProps {
