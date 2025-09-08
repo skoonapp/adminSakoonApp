@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { db } from '../utils/firebase';
 import type { ListenerProfile, ListenerAccountStatus } from '../types';
-import ListenerRow from '../context/components/admin/ListenerRow';
+import ListenerRow from '../components/admin/ListenerRow';
 
 type StatusFilter = 'all' | ListenerAccountStatus;
 

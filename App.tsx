@@ -5,8 +5,8 @@ import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
 
 import LoginScreen from './screens/LoginScreen';
-import MainLayout from './context/components/layout/MainLayout';
-import SplashScreen from './context/components/common/SplashScreen';
+import MainLayout from './components/layout/MainLayout';
+import SplashScreen from './components/common/SplashScreen';
 import { ListenerProvider } from './context/ListenerContext';
 import type { ListenerProfile } from './types';
 

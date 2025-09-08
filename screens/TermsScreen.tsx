@@ -1,5 +1,5 @@
 import React from 'react';
-import PolicyPageLayout from '../context/components/common/PolicyPageLayout';
+import PolicyPageLayout from '../components/common/PolicyPageLayout';
 
 export const TermsContent: React.FC = () => {
     const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });

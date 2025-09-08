@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../utils/firebase';
 // Fix: Use namespace import for react-router-dom to resolve module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
-import ListenerGuidelines from '../context/components/profile/ListenerGuidelines';
+import ListenerGuidelines from '../components/profile/ListenerGuidelines';
 import { useListener } from '../context/ListenerContext';
 import { TermsContent } from './TermsScreen';
 import { PrivacyPolicyContent } from './PrivacyPolicyScreen';

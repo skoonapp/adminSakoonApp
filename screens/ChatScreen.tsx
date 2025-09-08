@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useListener } from '../context/ListenerContext';
 import { db, storage, serverTimestamp } from '../utils/firebase';
 import type { ListenerChatSession, ChatMessage } from '../types';
-import ChatInput from '../context/components/chat/ChatInput';
-import MessageBubble from '../context/components/chat/MessageBubble';
+import ChatInput from '../components/chat/ChatInput';
+import MessageBubble from '../components/chat/MessageBubble';
 import { v4 as uuidv4 } from 'uuid';
 
 // --- Icons ---

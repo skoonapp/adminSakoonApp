@@ -5,11 +5,11 @@ import firebase from 'firebase/compat/app';
 import { db, serverTimestamp } from '../utils/firebase';
 import type { UnverifiedListener } from '../types';
 
-import WelcomeStep from '../context/components/onboarding/WelcomeStep';
-import ProfileStep from '../context/components/onboarding/ProfileStep';
-import RulesStep from '../context/components/onboarding/RulesStep';
-import ConsentStep from '../context/components/onboarding/ConsentStep';
-import StepProgress from '../context/components/onboarding/StepProgress';
+import WelcomeStep from '../components/onboarding/WelcomeStep';
+import ProfileStep from '../components/onboarding/ProfileStep';
+import RulesStep from '../components/onboarding/RulesStep';
+import ConsentStep from '../components/onboarding/ConsentStep';
+import StepProgress from '../components/onboarding/StepProgress';
 
 interface OnboardingScreenProps {
   user: firebase.User;

@@ -6,7 +6,7 @@ import { db } from './../utils/firebase';
 import firebase from 'firebase/compat/app';
 // Fix: Use ListenerAppStatus instead of the non-existent ListenerStatus.
 import type { CallRecord, ListenerChatSession, ListenerAppStatus } from '../types';
-import InstallPWAButton from '../context/components/common/InstallPWAButton';
+import InstallPWAButton from '../components/common/InstallPWAButton';
 
 // Type definitions for combined activity feed
 // Fix: Use Omit to prevent type conflict on 'type' property from CallRecord.

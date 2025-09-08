@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../utils/firebase';
 import { useListener } from '../context/ListenerContext';
 import type { CallRecord } from '../types';
-import CallHistoryCard from '../context/components/calls/CallHistoryCard';
+import CallHistoryCard from '../components/calls/CallHistoryCard';
 
 type StatusFilter = 'all' | 'completed' | 'missed' | 'rejected';
 type DateFilter = 'all' | 'today' | '7d' | '30d';
