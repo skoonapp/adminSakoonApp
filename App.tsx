@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
 
@@ -21,6 +22,7 @@ const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'));
 const OnboardingScreen = lazy(() => import('./screens/OnboardingScreen'));
 const PendingApprovalScreen = lazy(() => import('./screens/PendingApprovalScreen'));
 const AdminDashboardScreen = lazy(() => import('./screens/AdminDashboard'));
+const ListenerManagementScreen = lazy(() => import('./screens/ListenerManagementScreen'));
 
 type AuthStatus = 'loading' | 'unauthenticated' | 'needs_onboarding' | 'pending_approval' | 'active' | 'admin';
 
@@ -74,64 +76,65 @@ const App: React.FC = () => {
   }
 
   return (
-    <HashRouter>
+    <ReactRouterDOM.HashRouter>
       <Suspense fallback={<SplashScreen />}>
-        <Routes>
+        <ReactRouterDOM.Routes>
           {authStatus === 'unauthenticated' && (
             <>
-              <Route path="/login" element={<LoginScreen />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <ReactRouterDOM.Route path="/login" element={<LoginScreen />} />
+              <ReactRouterDOM.Route path="*" element={<ReactRouterDOM.Navigate to="/login" replace />} />
             </>
           )}
 
           {authStatus === 'needs_onboarding' && user && (
             <>
-              <Route path="/onboarding" element={<OnboardingScreen user={user} />} />
-              <Route path="*" element={<Navigate to="/onboarding" replace />} />
+              <ReactRouterDOM.Route path="/onboarding" element={<OnboardingScreen user={user} />} />
+              <ReactRouterDOM.Route path="*" element={<ReactRouterDOM.Navigate to="/onboarding" replace />} />
             </>
           )}
 
           {authStatus === 'pending_approval' && (
              <>
-              <Route path="/pending-approval" element={<PendingApprovalScreen />} />
-              <Route path="*" element={<Navigate to="/pending-approval" replace />} />
+              <ReactRouterDOM.Route path="/pending-approval" element={<PendingApprovalScreen />} />
+              <ReactRouterDOM.Route path="*" element={<ReactRouterDOM.Navigate to="/pending-approval" replace />} />
             </>
           )}
 
           {authStatus === 'admin' && (
             <>
-              <Route path="/admin" element={<AdminDashboardScreen />} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
+              <ReactRouterDOM.Route path="/admin" element={<AdminDashboardScreen />} />
+              <ReactRouterDOM.Route path="/admin/listeners" element={<ListenerManagementScreen />} />
+              <ReactRouterDOM.Route path="*" element={<ReactRouterDOM.Navigate to="/admin" replace />} />
             </>
           )}
 
           {authStatus === 'active' && user && (
             <>
-              <Route path="/call/:callId" element={
+              <ReactRouterDOM.Route path="/call/:callId" element={
                 <ListenerProvider user={user}>
                   <ActiveCallScreen />
                 </ListenerProvider>
               } />
-              <Route path="/" element={
+              <ReactRouterDOM.Route path="/" element={
                 <ListenerProvider user={user}>
                   <MainLayout />
                 </ListenerProvider>
               }>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<DashboardScreen />} />
-                <Route path="calls" element={<CallsScreen />} />
-                <Route path="chat" element={<ChatScreen />} />
-                <Route path="earnings" element={<EarningsScreen />} />
-                <Route path="profile" element={<ProfileScreen />} />
-                <Route path="terms" element={<TermsScreen />} />
-                <Route path="privacy" element={<PrivacyPolicyScreen />} />
-              </Route>
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                <ReactRouterDOM.Route index element={<ReactRouterDOM.Navigate to="/dashboard" replace />} />
+                <ReactRouterDOM.Route path="dashboard" element={<DashboardScreen />} />
+                <ReactRouterDOM.Route path="calls" element={<CallsScreen />} />
+                <ReactRouterDOM.Route path="chat" element={<ChatScreen />} />
+                <ReactRouterDOM.Route path="earnings" element={<EarningsScreen />} />
+                <ReactRouterDOM.Route path="profile" element={<ProfileScreen />} />
+                <ReactRouterDOM.Route path="terms" element={<TermsScreen />} />
+                <ReactRouterDOM.Route path="privacy" element={<PrivacyPolicyScreen />} />
+              </ReactRouterDOM.Route>
+              <ReactRouterDOM.Route path="*" element={<ReactRouterDOM.Navigate to="/dashboard" replace />} />
             </>
           )}
-        </Routes>
+        </ReactRouterDOM.Routes>
       </Suspense>
-    </HashRouter>
+    </ReactRouterDOM.HashRouter>
   );
 };
 

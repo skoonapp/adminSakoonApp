@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { db, serverTimestamp } from '../utils/firebase';
 import type { UnverifiedListener } from '../types';
@@ -22,7 +23,7 @@ export interface OnboardingData {
 }
 
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
-  const navigate = useNavigate();
+  const navigate = ReactRouterDOM.useNavigate();
   const [step, setStep] = useState(1);
   const [unverifiedData, setUnverifiedData] = useState<UnverifiedListener | null>(null);
   const [loading, setLoading] = useState(true);

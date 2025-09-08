@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { useListener } from '../context/ListenerContext';
 import { db } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
@@ -11,8 +12,8 @@ const ConnectingIcon = () => <svg className="animate-spin h-10 w-10 text-white" 
 
 
 const ActiveCallScreen: React.FC = () => {
-    const { callId } = useParams<{ callId: string }>();
-    const navigate = useNavigate();
+    const { callId } = ReactRouterDOM.useParams<{ callId: string }>();
+    const navigate = ReactRouterDOM.useNavigate();
     const { profile } = useListener();
     const zegoContainerRef = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<'loading' | 'connecting' | 'connected' | 'error'>('loading');

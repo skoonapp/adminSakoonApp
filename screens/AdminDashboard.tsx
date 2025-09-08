@@ -1,30 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/firebase';
 import type { ListenerProfile } from '../types';
+// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 
 // Icons
 const UserCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const UserClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const PhoneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>;
-const RupeeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-5 4h4m5 4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 
 
-const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; loading: boolean; }> = ({ title, value, icon, loading }) => (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center gap-4">
-        <div className="flex-shrink-0">{icon}</div>
-        <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{title}</p>
-            {loading ? 
-                <div className="h-7 w-20 mt-1 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div> :
-                <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{value}</p>
-            }
+const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; loading: boolean; linkTo?: string; }> = ({ title, value, icon, loading, linkTo }) => {
+    const content = (
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center gap-4 h-full hover:shadow-md transition-shadow">
+            <div className="flex-shrink-0">{icon}</div>
+            <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{title}</p>
+                {loading ?
+                    <div className="h-7 w-20 mt-1 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div> :
+                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{value}</p>
+                }
+            </div>
         </div>
-    </div>
-);
+    );
+
+    if (linkTo) {
+        return <ReactRouterDOM.Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl">{content}</ReactRouterDOM.Link>;
+    }
+    return content;
+};
 
 const AdminDashboardScreen: React.FC = () => {
   const [pendingListeners, setPendingListeners] = useState<ListenerProfile[]>([]);
-  const [stats, setStats] = useState({ activeListeners: 0, callsToday: 0, revenueToday: 0 });
+  const [stats, setStats] = useState({ activeListeners: 0, callsToday: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -81,8 +90,8 @@ const AdminDashboardScreen: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Pending Approvals" value={pendingListeners.length} icon={<UserClockIcon />} loading={loading} />
             <StatCard title="Active Listeners" value={stats.activeListeners} icon={<UserCheckIcon />} loading={loading} />
+            <StatCard title="Manage All Listeners" value="View & Edit" icon={<UsersIcon />} loading={loading} linkTo="/admin/listeners" />
             <StatCard title="Calls Today" value="--" icon={<PhoneIcon />} loading={loading} />
-            <StatCard title="Revenue Today" value="₹--.--" icon={<RupeeIcon />} loading={loading} />
         </div>
 
         {/* Pending Listeners Table */}

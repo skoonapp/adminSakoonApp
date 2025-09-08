@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import type { OnboardingData } from '../../../screens/OnboardingScreen';
 
 interface ConsentStepProps {
@@ -31,9 +32,9 @@ const ConsentStep: React.FC<ConsentStepProps> = ({ handleSubmit, prevStep, formD
                 />
                 <span className="text-slate-700 dark:text-slate-300">
                     मैं 
-                    <Link to="/terms" target="_blank" className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline mx-1">नियम और शर्तों</Link> 
+                    <ReactRouterDOM.Link to="/terms" target="_blank" className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline mx-1">नियम और शर्तों</ReactRouterDOM.Link> 
                     और 
-                    <Link to="/privacy" target="_blank" className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline mx-1">गोपनीयता नीति</Link> 
+                    <ReactRouterDOM.Link to="/privacy" target="_blank" className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline mx-1">गोपनीयता नीति</ReactRouterDOM.Link> 
                     से सहमत हूँ।
                 </span>
             </label>

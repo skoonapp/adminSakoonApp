@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../utils/firebase';
-import { useNavigate } from 'react-router-dom';
+// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import ListenerGuidelines from '../context/components/profile/ListenerGuidelines';
 import { useListener } from '../context/ListenerContext';
 import { TermsContent } from './TermsScreen';
@@ -58,7 +59,7 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
 
 
 const ProfileScreen: React.FC = () => {
-    const navigate = useNavigate();
+    const navigate = ReactRouterDOM.useNavigate();
     const { profile, loading } = useListener();
     const isInitialLoad = useRef(true);
 

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+// Fix: Use namespace import for react-router-dom to resolve module resolution issues.
+import * as ReactRouterDOM from 'react-router-dom';
 import { messaging, db } from '../../../utils/firebase';
 import { useListener } from '../../ListenerContext';
 import firebase from 'firebase/compat/app';
@@ -95,8 +96,8 @@ const playMessageTone = () => {
 
 const IncomingCallManager: React.FC = () => {
   const { profile } = useListener();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = ReactRouterDOM.useNavigate();
+  const location = ReactRouterDOM.useLocation();
 
   useEffect(() => {
     if (!messaging || !profile) {
