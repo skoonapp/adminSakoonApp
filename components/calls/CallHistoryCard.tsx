@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CallRecord } from '../../../types';
+import type { CallRecord } from '../../types';
 
 interface CallHistoryCardProps {
     call: CallRecord;

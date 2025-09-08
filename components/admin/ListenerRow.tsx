@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { db } from '../../../utils/firebase';
-import type { ListenerProfile, ListenerAccountStatus } from '../../../types';
+import { db } from '../../utils/firebase';
+import type { ListenerProfile, ListenerAccountStatus } from '../../types';
 
 interface ListenerRowProps {
   listener: ListenerProfile;

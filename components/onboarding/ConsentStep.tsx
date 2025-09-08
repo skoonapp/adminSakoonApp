@@ -1,7 +1,7 @@
 import React from 'react';
 // Fix: Use namespace import for react-router-dom to resolve module resolution issues.
 import * as ReactRouterDOM from 'react-router-dom';
-import type { OnboardingData } from '../../../screens/OnboardingScreen';
+import type { OnboardingData } from '../../screens/OnboardingScreen';
 
 interface ConsentStepProps {
   handleSubmit: () => void;

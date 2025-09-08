@@ -1,5 +1,5 @@
 import React from 'react';
-import type { UnverifiedListener } from '../../../types';
+import type { UnverifiedListener } from '../../types';
 
 interface WelcomeStepProps {
   nextStep: () => void;
