@@ -16,6 +16,23 @@ const WarningIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
+const SecurityBadge: React.FC = () => (
+    <div className="flex justify-center items-center space-x-8 my-6 text-slate-300 animate-fade-in">
+        <div className="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-green-400">
+                <path fillRule="evenodd" d="M9.661 2.231a.75.75 0 0 1 .678 0 11.947 11.947 0 0 0 7.078 2.802.75.75 0 0 1 .466.71-12.034 12.034 0 0 1-7.58 10.923.75.75 0 0 1-.662 0A12.034 12.034 0 0 1 2.117 5.743a.75.75 0 0 1 .466-.71 11.947 11.947 0 0 0 7.078-2.802ZM12.23 8.23a.75.75 0 0 0-1.06-1.06L9.5 8.94 8.23 7.67a.75.75 0 0 0-1.06 1.06l1.75 1.75a.75.75 0 0 0 1.06 0l2.25-2.25Z" clipRule="evenodd" />
+            </svg>
+            <span className="text-xs font-medium">Secure Login</span>
+        </div>
+        <div className="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-indigo-400">
+                <path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6z" clipRule="evenodd" />
+            </svg>
+            <span className="text-xs font-medium">Privacy Protected</span>
+        </div>
+    </div>
+);
+
 
 declare global {
   interface Window {
@@ -175,7 +192,8 @@ const LoginScreen: React.FC = () => {
                    </button>
                </form>
                {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
-                <div className="text-center mt-6 pt-6 border-t border-white/10 text-slate-300">
+               <SecurityBadge />
+                <div className="text-center pt-6 border-t border-white/10 text-slate-300">
                     <p className="text-sm flex items-center justify-center gap-2">
                         <span>🔐</span>
                         <span>Secure Login with OTP Authentication</span>
@@ -210,8 +228,9 @@ const LoginScreen: React.FC = () => {
                   </button>
               </form>
               {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
-              <hr className="border-t border-white/10 my-6" />
-              <div className="text-center">
+              <SecurityBadge />
+              <hr className="border-t border-white/10" />
+              <div className="text-center pt-6">
                 {showFinalError ? (
                     <div className="flex items-center justify-center gap-2 text-sm text-yellow-300">
                         <WarningIcon className="w-5 h-5 flex-shrink-0"/>
