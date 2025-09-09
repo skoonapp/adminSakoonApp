@@ -176,7 +176,7 @@ const ApplyAsListener: React.FC = () => {
             <button
                 id="apply-now-button"
                 onClick={() => setShowForm(true)}
-                className="w-full bg-slate-700 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-slate-600 transition-colors shadow-lg"
+                className="w-full bg-white text-black font-bold py-3 px-8 rounded-lg text-lg hover:bg-slate-200 transition-colors shadow-lg"
             >
                 Apply Now
             </button>
