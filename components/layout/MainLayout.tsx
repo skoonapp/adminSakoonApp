@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+// FIX: Use named imports for react-router-dom v6 components and hooks.
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+// FIX: Use named imports for react-router-dom v6 hooks.
 import { useParams, useNavigate } from 'react-router-dom';
 import { useListener } from '../context/ListenerContext';
 import { db } from '../utils/firebase';

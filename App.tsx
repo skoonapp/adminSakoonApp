@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+// FIX: Use named imports for react-router-dom v6.
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
@@ -44,6 +44,8 @@ const App: React.FC = () => {
             // Admin check takes highest priority
             if (data.isAdmin === true) {
               setAuthStatus('admin');
+            } else if (data.status === 'onboarding_required') {
+              setAuthStatus('needs_onboarding');
             } else if (data.status === 'pending') {
               setAuthStatus('pending_approval');
             } else if (data.status === 'active') {
@@ -55,8 +57,11 @@ const App: React.FC = () => {
               setAuthStatus('unauthenticated');
             }
           } else {
-            // No listener document means they need to go through onboarding.
-            setAuthStatus('needs_onboarding');
+            // If an auth user exists but has no listener doc, they are unauthorized for this app.
+            // This can happen if an application was rejected and the auth user was not cleaned up.
+            console.warn(`No listener document found for authenticated user ${firebaseUser.uid}. Logging out.`);
+            await auth.signOut();
+            setAuthStatus('unauthenticated');
           }
         } catch (error) {
             console.error("Error checking listener status:", error);

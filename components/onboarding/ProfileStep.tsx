@@ -8,9 +8,11 @@ interface ProfileStepProps {
   setFormData: React.Dispatch<React.SetStateAction<OnboardingData>>;
 }
 
-// Generate the list of 1000 avatar images as requested.
-const AVATAR_IMAGES = Array.from({ length: 1000 }, (_, i) => `https://listenerimages.netlify.app/images/listener${i + 1}.webp`);
-
+// Show two specific avatar images for selection as requested.
+const AVATAR_IMAGES = [
+    'https://listenerimages.netlify.app/images/listener1.webp',
+    'https://listenerimages.netlify.app/images/listener2.webp',
+];
 
 const ProfileStep: React.FC<ProfileStepProps> = ({ nextStep, prevStep, formData, setFormData }) => {
 
@@ -34,26 +36,15 @@ const ProfileStep: React.FC<ProfileStepProps> = ({ nextStep, prevStep, formData,
       <div className="mt-6">
         <label className="text-sm font-medium text-slate-600 dark:text-slate-400">अपनी प्रोफ़ाइल फोटो चुनें</label>
         
-        {/* Selected Image Preview */}
-        <div className="mt-4 flex justify-center">
-            {formData.selectedAvatar ? (
-                <img src={formData.selectedAvatar} alt="Selected Avatar" className="w-32 h-32 rounded-full border-4 border-cyan-500 object-cover shadow-lg" />
-            ) : (
-                <div className="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                </div>
-            )}
-        </div>
-
-        {/* Scrollable Image Selection Grid */}
-        <div className="h-48 overflow-y-auto grid grid-cols-5 gap-3 mt-4 p-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50">
+        {/* Image Selection */}
+        <div className="mt-4 flex justify-center gap-6">
             {AVATAR_IMAGES.map(avatar => (
                 <button 
                     key={avatar} 
                     onClick={() => handleSelectAvatar(avatar)}
-                    className={`rounded-full focus:outline-none transition-all duration-200 ${formData.selectedAvatar === avatar ? 'ring-2 ring-cyan-500 ring-offset-2 dark:ring-offset-slate-800' : 'ring-2 ring-transparent hover:ring-slate-300'}`}
+                    className={`rounded-full focus:outline-none transition-all duration-200 ${formData.selectedAvatar === avatar ? 'ring-4 ring-cyan-500 ring-offset-2 dark:ring-offset-slate-800' : 'ring-2 ring-transparent hover:ring-slate-300'}`}
                 >
-                    <img src={avatar} alt="Avatar option" className="w-full h-auto aspect-square rounded-full border-2 border-white dark:border-slate-700 object-cover" loading="lazy" />
+                    <img src={avatar} alt="Avatar option" className="w-32 h-32 rounded-full border-2 border-white dark:border-slate-700 object-cover" loading="lazy" />
                 </button>
             ))}
         </div>

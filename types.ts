@@ -3,7 +3,7 @@ import type firebase from 'firebase/compat/app';
 // Fix: Define all application-wide TypeScript types in this file to resolve module errors.
 
 // Status for the listener's application/account, managed by admins.
-export type ListenerAccountStatus = 'pending' | 'active' | 'suspended' | 'rejected';
+export type ListenerAccountStatus = 'pending' | 'active' | 'suspended' | 'rejected' | 'onboarding_required';
 
 // Status for the listener's availability in the app, controlled by the listener.
 export type ListenerAppStatus = 'Available' | 'Busy' | 'Offline' | 'Break';
@@ -12,9 +12,9 @@ export interface ListenerProfile {
   uid: string;
   displayName: string;
   phone?: string;
-  avatarUrl: string;
-  city: string;
-  age: number;
+  avatarUrl?: string; // Made optional for onboarding
+  city?: string; // Made optional, will be set during onboarding
+  age?: number; // Made optional, will be set during onboarding
   status: ListenerAccountStatus;
   appStatus: ListenerAppStatus;
   onboardingComplete: boolean;
@@ -25,6 +25,14 @@ export interface ListenerProfile {
     calls: boolean;
     messages: boolean;
   };
+  // Fields from application form
+  realName?: string;
+  profession?: string;
+  languages?: string[];
+  bankAccount?: string;
+  ifsc?: string;
+  bankName?: string;
+  upiId?: string;
 }
 
 export interface UnverifiedListener {
@@ -80,4 +88,19 @@ export interface EarningRecord {
     callId: string;
     timestamp: firebase.firestore.Timestamp;
     userName: string; // user from the call
+}
+
+export interface Application {
+    id: string;
+    fullName: string;
+    displayName: string;
+    phone: string;
+    profession: string;
+    languages: string[];
+    bankAccount?: string;
+    ifsc?: string;
+    bankName?: string;
+    upiId?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    createdAt: firebase.firestore.Timestamp;
 }

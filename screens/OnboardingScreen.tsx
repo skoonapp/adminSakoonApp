@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+// FIX: Use named imports for react-router-dom v6 hooks.
 import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { db, serverTimestamp } from '../utils/firebase';
-import type { UnverifiedListener } from '../types';
+import type { ListenerProfile } from '../types';
 
 import WelcomeStep from '../components/onboarding/WelcomeStep';
 import ProfileStep from '../components/onboarding/ProfileStep';
@@ -25,7 +25,7 @@ export interface OnboardingData {
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [unverifiedData, setUnverifiedData] = useState<UnverifiedListener | null>(null);
+  const [listenerData, setListenerData] = useState<ListenerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,24 +37,23 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
   });
 
   useEffect(() => {
-    const fetchUnverifiedData = async () => {
+    const fetchListenerData = async () => {
       try {
-        // NOTE: The document ID in 'unverifiedListeners' must match the user's auth UID.
-        const docRef = db.collection('unverifiedListeners').doc(user.uid);
+        const docRef = db.collection('listeners').doc(user.uid);
         const doc = await docRef.get();
         if (doc.exists) {
-          setUnverifiedData(doc.data() as UnverifiedListener);
+          setListenerData(doc.data() as ListenerProfile);
         } else {
-          setError('Your registration data was not found. Please contact support.');
+          setError('Your partially approved profile was not found. Please contact support.');
         }
       } catch (err) {
-        console.error("Error fetching pre-filled data:", err);
+        console.error("Error fetching listener data:", err);
         setError('Could not load your information. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
-    fetchUnverifiedData();
+    fetchListenerData();
   }, [user.uid]);
 
   const nextStep = () => setStep(prev => prev + 1);
@@ -64,23 +63,16 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
     setLoading(true);
     setError(null);
     try {
-      const listenerProfile = {
-        uid: user.uid,
-        displayName: unverifiedData?.realName || 'New Listener',
-        phone: user.phoneNumber,
+      const listenerUpdate = {
         avatarUrl: formData.selectedAvatar,
         city: formData.city,
         age: parseInt(formData.age, 10),
-        status: 'pending',
-        appStatus: 'Offline',
+        status: 'pending', // Set to pending for final admin approval
         onboardingComplete: true,
-        createdAt: serverTimestamp(),
       };
 
-      await db.collection('listeners').doc(user.uid).set(listenerProfile);
+      await db.collection('listeners').doc(user.uid).update(listenerUpdate);
       
-      // Navigate to the pending approval screen, which will handle the rest.
-      // The App.tsx router will automatically pick up the new status on next load/refresh.
       navigate('/pending-approval', { replace: true });
 
     } catch (err) {
@@ -93,7 +85,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <WelcomeStep nextStep={nextStep} userData={unverifiedData} />;
+        return <WelcomeStep nextStep={nextStep} userData={listenerData} />;
       case 2:
         return <ProfileStep nextStep={nextStep} prevStep={prevStep} formData={formData} setFormData={setFormData} />;
       case 3:

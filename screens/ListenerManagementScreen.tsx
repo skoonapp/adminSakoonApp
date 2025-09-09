@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// Fix: Use named imports for react-router-dom to resolve module resolution issues.
+// FIX: Use named imports for react-router-dom v6 components.
 import { Link } from 'react-router-dom';
 import { db } from '../utils/firebase';
 import type { ListenerProfile, ListenerAccountStatus } from '../types';
