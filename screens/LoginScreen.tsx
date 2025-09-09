@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { auth } from '../utils/firebase';
+import ApplyAsListener from '../components/auth/ApplyAsListener';
 
 // --- Icon Components ---
 const LockIcon: React.FC<{className?: string}> = ({className}) => (
@@ -191,6 +192,15 @@ const LoginScreen: React.FC = () => {
                        {loading ? 'Sending OTP...' : 'OTP पाएं'}
                    </button>
                </form>
+
+               <div className="relative flex py-5 items-center">
+                  <div className="flex-grow border-t border-white/20"></div>
+                  <span className="flex-shrink mx-4 text-slate-400 text-sm">OR</span>
+                  <div className="flex-grow border-t border-white/20"></div>
+                </div>
+
+                <ApplyAsListener />
+
                {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
                <SecurityBadge />
                 <div className="text-center pt-6 border-t border-white/10 text-slate-300">
