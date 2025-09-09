@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { db, serverTimestamp } from '../../utils/firebase';
 
@@ -53,6 +54,8 @@ const ApplyAsListener: React.FC = () => {
   const [error, setError] = useState('');
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const languageDropdownRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,6 +68,23 @@ const ApplyAsListener: React.FC = () => {
         document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    const handleClickOutsideForm = (event: MouseEvent) => {
+        const applyButton = document.getElementById('apply-now-button');
+        if (applyButton && applyButton.contains(event.target as Node)) {
+            return;
+        }
+        if (showForm && formRef.current && !formRef.current.contains(event.target as Node)) {
+            setShowForm(false);
+        }
+    };
+    document.addEventListener('mousedown', handleClickOutsideForm);
+    return () => {
+        document.removeEventListener('mousedown', handleClickOutsideForm);
+    };
+  }, [showForm]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -153,7 +173,8 @@ const ApplyAsListener: React.FC = () => {
   if (!showForm) {
     return (
         <div className="text-center">
-            <button 
+            <button
+                id="apply-now-button"
                 onClick={() => setShowForm(true)}
                 className="w-full bg-slate-700 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-slate-600 transition-colors shadow-lg"
             >
@@ -165,7 +186,7 @@ const ApplyAsListener: React.FC = () => {
 
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-slate-900/50 p-4 -m-4 rounded-lg">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6 bg-slate-900/50 p-4 -m-4 rounded-lg">
       <div className="text-center">
           <p className="font-bold text-lg text-slate-300">Step {step} of 2</p>
           <div className="w-full bg-slate-700 rounded-full h-2.5 mt-1">
