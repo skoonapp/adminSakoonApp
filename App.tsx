@@ -23,8 +23,9 @@ const OnboardingScreen = lazy(() => import('./screens/OnboardingScreen'));
 const PendingApprovalScreen = lazy(() => import('./screens/PendingApprovalScreen'));
 const AdminDashboardScreen = lazy(() => import('./screens/AdminDashboard'));
 const ListenerManagementScreen = lazy(() => import('./screens/ListenerManagementScreen'));
+const UnauthorizedScreen = lazy(() => import('./screens/UnauthorizedScreen'));
 
-type AuthStatus = 'loading' | 'unauthenticated' | 'needs_onboarding' | 'pending_approval' | 'active' | 'admin';
+type AuthStatus = 'loading' | 'unauthenticated' | 'needs_onboarding' | 'pending_approval' | 'active' | 'admin' | 'unauthorized';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<firebase.User | null>(null);
@@ -51,22 +52,18 @@ const App: React.FC = () => {
             } else if (data.status === 'active') {
               setAuthStatus('active');
             } else {
-              // Handle other statuses like 'suspended' or 'rejected' by logging them out
+              // Handle other statuses like 'suspended' or 'rejected' by showing an unauthorized screen
               console.warn(`User ${firebaseUser.uid} has an unhandled or rejected status: ${data.status}`);
-              await auth.signOut();
-              setAuthStatus('unauthenticated');
+              setAuthStatus('unauthorized');
             }
           } else {
             // If an auth user exists but has no listener doc, they are unauthorized for this app.
-            // This can happen if an application was rejected and the auth user was not cleaned up.
-            console.warn(`No listener document found for authenticated user ${firebaseUser.uid}. Logging out.`);
-            await auth.signOut();
-            setAuthStatus('unauthenticated');
+            console.warn(`No listener document found for authenticated user ${firebaseUser.uid}.`);
+            setAuthStatus('unauthorized');
           }
         } catch (error) {
             console.error("Error checking listener status:", error);
-            await auth.signOut();
-            setAuthStatus('unauthenticated');
+            setAuthStatus('unauthorized');
         }
       } else {
         setUser(null);
@@ -110,6 +107,13 @@ const App: React.FC = () => {
               <Route path="/admin" element={<AdminDashboardScreen />} />
               <Route path="/admin/listeners" element={<ListenerManagementScreen />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
+            </>
+          )}
+          
+          {authStatus === 'unauthorized' && (
+             <>
+              <Route path="/unauthorized" element={<UnauthorizedScreen />} />
+              <Route path="*" element={<Navigate to="/unauthorized" replace />} />
             </>
           )}
 
