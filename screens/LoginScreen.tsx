@@ -256,10 +256,6 @@ const LoginScreen: React.FC = () => {
                 Change Number
               </button>
             </div>
-            <div className="text-center mt-8 text-slate-300">
-                <p className="text-sm">🔐 Secure Login with OTP Authentication</p>
-                <p className="text-xs mt-2 text-slate-400">App Version: 1.0.0 (Beta)</p>
-            </div>
           </>
         )}
       </div>
