@@ -47,9 +47,10 @@ const LoginScreen: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
   
-  const [resendTimer, setResendTimer] = useState(60);
+  const [resendTimer, setResendTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
   // This useEffect is to clean up the reCAPTCHA verifier when the component unmounts.
@@ -74,7 +75,7 @@ const LoginScreen: React.FC = () => {
 
   useEffect(() => {
       if (step === 'phone') {
-          setResendTimer(60);
+          setResendTimer(30);
           setCanResend(false);
           setError('');
       }
@@ -98,30 +99,39 @@ const LoginScreen: React.FC = () => {
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setLoadingMessage('Sending OTP...');
     setError('');
     if (phoneNumber.length !== 10) {
       setError('Please enter a valid 10-digit phone number.');
       setLoading(false);
       return;
     }
+    
+    const secureCheckTimer = setTimeout(() => {
+        setLoadingMessage('Performing security check...');
+    }, 7000);
+
     try {
       const verifier = setupRecaptcha();
       window.recaptchaVerifier = verifier;
       const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
       window.confirmationResult = confirmationResult;
       setStep('otp');
-      setResendTimer(60); // Reset timer on new send
+      setResendTimer(30); // Reset timer on new send
     } catch (err: any) {
       console.error("Error sending OTP:", err);
-      setError('Failed to send OTP. Please check the phone number and try again.');
+      setError('Failed to send OTP. Please check the number or try again later.');
     } finally {
+      clearTimeout(secureCheckTimer);
       setLoading(false);
+      setLoadingMessage('');
     }
   };
   
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setLoadingMessage('Verifying...');
     setError('');
 
     if (!window.confirmationResult) {
@@ -135,35 +145,45 @@ const LoginScreen: React.FC = () => {
       setLoading(false);
       return;
     }
+
     try {
       await window.confirmationResult.confirm(otp);
-      // On successful login, the App.tsx router will handle navigation.
+      // On success, keep loading and show a success message.
+      // The App.tsx router will handle navigation.
+      setLoadingMessage('Success! Logging in...');
     } catch (err) {
       console.error("Error verifying OTP:", err);
       setError('Invalid OTP. Please check the code and try again.');
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only set loading to false on error.
+      setLoadingMessage('');
     }
   };
 
   const handleResendOtp = async () => {
-    if (!canResend) return;
+    if (!canResend || loading) return;
     
     setLoading(true);
+    setLoadingMessage('Resending OTP...');
     setError('');
+
+    const secureCheckTimer = setTimeout(() => {
+        setLoadingMessage('Performing security check...');
+    }, 7000);
 
     try {
       const verifier = setupRecaptcha();
       window.recaptchaVerifier = verifier;
       const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
       window.confirmationResult = confirmationResult;
-      setResendTimer(60); // Reset timer
+      setResendTimer(30); // Reset timer
       setCanResend(false);
     } catch (err: any) {
       console.error("Error resending OTP:", err);
       setError('Failed to resend OTP. Please try again after some time.');
     } finally {
+      clearTimeout(secureCheckTimer);
       setLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -200,7 +220,7 @@ const LoginScreen: React.FC = () => {
                        />
                    </div>
                    <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
-                       {loading ? 'Sending OTP...' : 'OTP पाएं'}
+                       {loading ? loadingMessage : 'OTP पाएं'}
                    </button>
                </form>
 
@@ -254,7 +274,7 @@ const LoginScreen: React.FC = () => {
                       />
                   </div>
                   <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
-                      {loading ? 'Verifying...' : 'Verify'}
+                      {loading ? loadingMessage : 'Verify'}
                   </button>
               </form>
               {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
