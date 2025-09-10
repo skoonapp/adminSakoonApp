@@ -53,25 +53,19 @@ const LoginScreen: React.FC = () => {
   const [resendAttempts, setResendAttempts] = useState(0);
   const [showFinalError, setShowFinalError] = useState(false);
 
+  // Ensure the reCAPTCHA container exists
   useEffect(() => {
     if (!document.getElementById('recaptcha-container')) {
         const container = document.createElement('div');
         container.id = 'recaptcha-container';
         document.body.appendChild(container);
     }
-
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      'size': 'invisible',
-      'callback': () => { /* reCAPTCHA solved */ }
-    });
-
     return () => {
-      window.recaptchaVerifier?.clear();
+        window.recaptchaVerifier?.clear();
     };
   }, []);
 
   useEffect(() => {
-    // Use `number` for interval ID type in browser environments instead of `NodeJS.Timeout`.
     let interval: number;
     if (step === 'otp' && resendTimer > 0) {
       interval = window.setInterval(() => {
@@ -90,6 +84,15 @@ const LoginScreen: React.FC = () => {
       }
   }, [step]);
 
+  const setupRecaptcha = () => {
+      // Clear any previous instance before creating a new one
+      window.recaptchaVerifier?.clear();
+      return new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+          'size': 'invisible',
+          'callback': () => { /* reCAPTCHA solved */ }
+      });
+  };
+
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -100,7 +103,9 @@ const LoginScreen: React.FC = () => {
       return;
     }
     try {
-      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, window.recaptchaVerifier!);
+      const verifier = setupRecaptcha();
+      window.recaptchaVerifier = verifier;
+      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
       window.confirmationResult = confirmationResult;
       setStep('otp');
     } catch (err: any) {
@@ -138,7 +143,9 @@ const LoginScreen: React.FC = () => {
     setShowFinalError(false);
 
     try {
-      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, window.recaptchaVerifier!);
+      const verifier = setupRecaptcha();
+      window.recaptchaVerifier = verifier;
+      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
       window.confirmationResult = confirmationResult;
       const newAttempts = resendAttempts + 1;
       setResendAttempts(newAttempts);
@@ -158,7 +165,7 @@ const LoginScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-start pt-20 p-4 relative overflow-hidden">
-      <div id="recaptcha-container" className="hidden"></div>
+      <div id="recaptcha-container"></div>
 
        {/* Background Image and Overlay */}
       <div className="absolute inset-0 z-0">
