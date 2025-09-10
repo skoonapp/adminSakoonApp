@@ -53,13 +53,8 @@ const LoginScreen: React.FC = () => {
   const [resendAttempts, setResendAttempts] = useState(0);
   const [showFinalError, setShowFinalError] = useState(false);
 
-  // Ensure the reCAPTCHA container exists
+  // This useEffect is to clean up the reCAPTCHA verifier when the component unmounts.
   useEffect(() => {
-    if (!document.getElementById('recaptcha-container')) {
-        const container = document.createElement('div');
-        container.id = 'recaptcha-container';
-        document.body.appendChild(container);
-    }
     return () => {
         window.recaptchaVerifier?.clear();
     };
@@ -209,6 +204,15 @@ const LoginScreen: React.FC = () => {
                 <ApplyAsListener />
 
                {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
+               
+               <p className="text-xs text-slate-400 text-center mt-4 px-4">
+                  This site is protected by reCAPTCHA and the Google
+                  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-cyan-200"> Privacy Policy </a> 
+                  and 
+                  <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-cyan-200"> Terms of Service </a> 
+                  apply.
+                </p>
+
                <SecurityBadge />
                 <div className="text-center pt-6 border-t border-white/10 text-slate-300">
                     <p className="text-sm flex items-center justify-center gap-2">
