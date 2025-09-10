@@ -102,67 +102,62 @@ const ApplyAsListener: React.FC = () => {
         }
     });
   };
-  
-  const handleNext = () => {
-    // Step 1 Validation
-    if (!formData.fullName.trim()) {
-        setError("कृपया अपना पूरा नाम दर्ज करें।");
-        return;
-    }
-    if (!formData.displayName.trim()) {
-        setError("कृपया प्रदर्शित नाम दर्ज करें।");
-        return;
-    }
-    if (!/^\d{10}$/.test(formData.phone.trim())) {
-        setError("कृपया एक मान्य 10-अंकीय मोबाइल नंबर दर्ज करें।");
-        return;
-    }
-     if (!formData.profession) {
-        setError("कृपया अपना पेशा चुनें।");
-        return;
-    }
-    setError('');
-    setStep(2);
-  };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Fix: Route form submission based on the current step.
-    // This prevents submitting the form prematurely by pressing Enter on step 1.
     if (step === 1) {
-      handleNext();
-      return;
-    }
-    
-    // Step 2 Validation
-    if (formData.languages.length === 0) {
-        setError("कृपया कम से कम एक भाषा चुनें।");
-        return;
-    }
-    const hasBankDetails = formData.bankAccount.trim() && formData.ifsc.trim() && formData.bankName.trim();
-    const hasUpi = formData.upiId.trim();
-    if (!hasBankDetails && !hasUpi) {
-        setError("कृपया भुगतान के लिए बैंक विवरण या UPI ID प्रदान करें।");
+        // Step 1 Validation
+        if (!formData.fullName.trim()) {
+            setError("कृपया अपना पूरा नाम दर्ज करें।");
+            return;
+        }
+        if (!formData.displayName.trim()) {
+            setError("कृपया प्रदर्शित नाम दर्ज करें।");
+            return;
+        }
+        if (!/^\d{10}$/.test(formData.phone.trim())) {
+            setError("कृपया एक मान्य 10-अंकीय मोबाइल नंबर दर्ज करें।");
+            return;
+        }
+         if (!formData.profession) {
+            setError("कृपया अपना पेशा चुनें।");
+            return;
+        }
+        setError('');
+        setStep(2);
         return;
     }
 
-    setLoading(true);
-    setError('');
+    if (step === 2) {
+        // Step 2 Validation
+        if (formData.languages.length === 0) {
+            setError("कृपया कम से कम एक भाषा चुनें।");
+            return;
+        }
+        const hasBankDetails = formData.bankAccount.trim() && formData.ifsc.trim() && formData.bankName.trim();
+        const hasUpi = formData.upiId.trim();
+        if (!hasBankDetails && !hasUpi) {
+            setError("कृपया भुगतान के लिए बैंक विवरण या UPI ID प्रदान करें।");
+            return;
+        }
 
-    try {
-      await db.collection('applications').add({
-        ...formData,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-      });
-      setApplied(true);
-    } catch (err) {
-      console.error("Application submission error:", err);
-      setError("आवेदन जमा करने में विफल। कृपया पुन: प्रयास करें।");
-    } finally {
-      setLoading(false);
+        setLoading(true);
+        setError('');
+
+        try {
+          await db.collection('applications').add({
+            ...formData,
+            status: 'pending',
+            createdAt: serverTimestamp(),
+          });
+          setApplied(true);
+        } catch (err) {
+          console.error("Application submission error:", err);
+          setError("आवेदन जमा करने में विफल। कृपया पुन: प्रयास करें।");
+        } finally {
+          setLoading(false);
+        }
     }
   };
 
@@ -377,23 +372,13 @@ const ApplyAsListener: React.FC = () => {
             </button>
         )}
         
-        {step === 1 ? (
-            <button
-                type="button"
-                onClick={handleNext}
-                className="w-full bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-700 transition-colors shadow-lg col-span-2"
-            >
-                Next
-            </button>
-        ) : (
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-700 transition-colors shadow-lg disabled:bg-slate-400 disabled:cursor-not-allowed"
-            >
-                {loading ? 'जमा हो रहा है...' : 'आवेदन भेजें'}
-            </button>
-        )}
+        <button
+            type="submit"
+            disabled={loading}
+            className={`w-full bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-700 transition-colors shadow-lg disabled:bg-slate-400 disabled:cursor-not-allowed ${step === 1 ? 'col-span-2' : ''}`}
+        >
+            {step === 1 ? 'Next' : (loading ? 'जमा हो रहा है...' : 'आवेदन भेजें')}
+        </button>
       </div>
     </form>
   );
