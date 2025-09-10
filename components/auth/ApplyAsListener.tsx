@@ -128,6 +128,13 @@ const ApplyAsListener: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Fix: Route form submission based on the current step.
+    // This prevents submitting the form prematurely by pressing Enter on step 1.
+    if (step === 1) {
+      handleNext();
+      return;
+    }
     
     // Step 2 Validation
     if (formData.languages.length === 0) {
