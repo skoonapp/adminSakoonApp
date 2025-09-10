@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { db, serverTimestamp } from '../../utils/firebase';
 
@@ -54,7 +55,6 @@ const ApplyAsListener: React.FC = () => {
   const [error, setError] = useState('');
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const languageDropdownRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
 
 
   useEffect(() => {
@@ -68,22 +68,6 @@ const ApplyAsListener: React.FC = () => {
         document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    const handleClickOutsideForm = (event: MouseEvent) => {
-        const applyButton = document.getElementById('apply-now-button');
-        if (applyButton && applyButton.contains(event.target as Node)) {
-            return;
-        }
-        if (showForm && formRef.current && !formRef.current.contains(event.target as Node)) {
-            setShowForm(false);
-        }
-    };
-    document.addEventListener('mousedown', handleClickOutsideForm);
-    return () => {
-        document.removeEventListener('mousedown', handleClickOutsideForm);
-    };
-  }, [showForm]);
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -154,7 +138,7 @@ const ApplyAsListener: React.FC = () => {
           setApplied(true);
         } catch (err) {
           console.error("Application submission error:", err);
-          setError("आवेदन जमा करने में विफल। कृपया पुन: प्रयास करें।");
+          setError("आवेदन जमा करने में विफल। कृपया अपनी इंटरनेट जाँच करें और पुनः प्रयास करें।");
         } finally {
           setLoading(false);
         }
@@ -188,12 +172,13 @@ const ApplyAsListener: React.FC = () => {
 
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6 bg-slate-900/50 p-4 -m-4 rounded-lg">
-      <div className="text-center">
-          <p className="font-bold text-lg text-slate-300">Step {step} of 2</p>
-          <div className="w-full bg-slate-700 rounded-full h-2.5 mt-1">
-              <div className="bg-cyan-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${step === 1 ? '50%' : '100%'}` }}></div>
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-6 bg-slate-900/50 p-4 -m-4 rounded-lg">
+       <div className="flex justify-between items-center">
+            <p className="font-bold text-lg text-slate-300">Step {step} of 2</p>
+            <button type="button" onClick={() => setShowForm(false)} className="text-2xl text-slate-400 hover:text-white">&times;</button>
+       </div>
+      <div className="w-full bg-slate-700 rounded-full h-2.5">
+          <div className="bg-cyan-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${step === 1 ? '50%' : '100%'}` }}></div>
       </div>
 
       {/* Warning Note */}

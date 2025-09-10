@@ -49,6 +49,20 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendText, onSendAudio, recentMe
         }
     }, [text]);
 
+    // Cleanup effect for timers and media streams to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (recordingTimerRef.current) {
+                clearInterval(recordingTimerRef.current);
+            }
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+                mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+                mediaRecorderRef.current.stop();
+            }
+        };
+    }, []);
+
+
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value);
         if (validationError) {

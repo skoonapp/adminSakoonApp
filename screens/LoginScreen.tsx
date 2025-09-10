@@ -50,8 +50,7 @@ const LoginScreen: React.FC = () => {
   const [error, setError] = useState('');
   
   const [resendTimer, setResendTimer] = useState(60);
-  const [resendAttempts, setResendAttempts] = useState(0);
-  const [showFinalError, setShowFinalError] = useState(false);
+  const [canResend, setCanResend] = useState(false);
 
   // This useEffect is to clean up the reCAPTCHA verifier when the component unmounts.
   useEffect(() => {
@@ -63,9 +62,12 @@ const LoginScreen: React.FC = () => {
   useEffect(() => {
     let interval: number;
     if (step === 'otp' && resendTimer > 0) {
+      setCanResend(false);
       interval = window.setInterval(() => {
         setResendTimer((prev) => prev - 1);
       }, 1000);
+    } else if (step === 'otp' && resendTimer <= 0) {
+      setCanResend(true);
     }
     return () => clearInterval(interval);
   }, [step, resendTimer]);
@@ -73,8 +75,7 @@ const LoginScreen: React.FC = () => {
   useEffect(() => {
       if (step === 'phone') {
           setResendTimer(60);
-          setResendAttempts(0);
-          setShowFinalError(false);
+          setCanResend(false);
           setError('');
       }
   }, [step]);
@@ -82,7 +83,13 @@ const LoginScreen: React.FC = () => {
   const setupRecaptcha = () => {
       // Clear any previous instance before creating a new one
       window.recaptchaVerifier?.clear();
-      return new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      // Ensure the container exists before creating the verifier
+      const recaptchaContainer = document.getElementById('recaptcha-container');
+      if (!recaptchaContainer) {
+        // This case should ideally not happen if the div is always in the JSX
+        throw new Error("reCAPTCHA container not found.");
+      }
+      return new firebase.auth.RecaptchaVerifier(recaptchaContainer, {
           'size': 'invisible',
           'callback': () => { /* reCAPTCHA solved */ }
       });
@@ -103,9 +110,10 @@ const LoginScreen: React.FC = () => {
       const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
       window.confirmationResult = confirmationResult;
       setStep('otp');
+      setResendTimer(60); // Reset timer on new send
     } catch (err: any) {
-      console.error(err);
-      setError('Failed to send OTP. Please check your network and try again.');
+      console.error("Error sending OTP:", err);
+      setError('Failed to send OTP. Please check the phone number and try again.');
     } finally {
       setLoading(false);
     }
@@ -115,44 +123,45 @@ const LoginScreen: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (!window.confirmationResult) {
+        setError('Your session has expired. Please go back and try sending the OTP again.');
+        setLoading(false);
+        return;
+    }
+
     if (otp.length !== 6) {
       setError('Please enter the 6-digit OTP.');
       setLoading(false);
       return;
     }
     try {
-      await window.confirmationResult?.confirm(otp);
+      await window.confirmationResult.confirm(otp);
       // On successful login, the App.tsx router will handle navigation.
     } catch (err) {
-      console.error(err);
-      setError('Invalid OTP. Please try again.');
+      console.error("Error verifying OTP:", err);
+      setError('Invalid OTP. Please check the code and try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleResendOtp = async () => {
-    if (resendTimer > 0 || resendAttempts >= 2) return;
+    if (!canResend) return;
+    
     setLoading(true);
     setError('');
-    setShowFinalError(false);
 
     try {
       const verifier = setupRecaptcha();
       window.recaptchaVerifier = verifier;
       const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
       window.confirmationResult = confirmationResult;
-      const newAttempts = resendAttempts + 1;
-      setResendAttempts(newAttempts);
-      
-      if (newAttempts === 1) {
-        setResendTimer(120);
-      } else {
-        setShowFinalError(true);
-      }
+      setResendTimer(60); // Reset timer
+      setCanResend(false);
     } catch (err: any) {
-      console.error(err);
-      setError('Failed to resend OTP. Please try again.');
+      console.error("Error resending OTP:", err);
+      setError('Failed to resend OTP. Please try again after some time.');
     } finally {
       setLoading(false);
     }
@@ -252,16 +261,11 @@ const LoginScreen: React.FC = () => {
               <SecurityBadge />
               <hr className="border-t border-white/10" />
               <div className="text-center pt-6">
-                {showFinalError ? (
-                    <div className="flex items-center justify-center gap-2 text-sm text-yellow-300">
-                        <WarningIcon className="w-5 h-5 flex-shrink-0"/>
-                        <span>Please check your mobile number and try again after 15 minutes.</span>
-                    </div>
-                ) : resendTimer > 0 ? (
+                 {canResend ? (
+                     <button onClick={handleResendOtp} disabled={loading} className="text-sm text-cyan-200 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
+                 ) : (
                     <p className="text-sm text-slate-400">Resend OTP in {resendTimer}s</p>
-                ) : (
-                    <button onClick={handleResendOtp} disabled={loading || resendAttempts >= 2} className="text-sm text-cyan-200 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
-                )}
+                 )}
               </div>
               <button onClick={() => setStep('phone')} className="w-full text-center mt-6 text-sm text-slate-400 hover:text-cyan-200">
                 Change Number
