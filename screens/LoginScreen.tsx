@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+
+
+// FIX: Corrected the import statement for React hooks.
+import React, { useState, useEffect, useRef } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { auth } from '../utils/firebase';
@@ -52,92 +55,116 @@ const LoginScreen: React.FC = () => {
   
   const [resendTimer, setResendTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const recaptchaVerifierRef = useRef<firebase.auth.RecaptchaVerifier | null>(null);
 
-  // This useEffect is to clean up the reCAPTCHA verifier when the component unmounts.
   useEffect(() => {
     return () => {
-        window.recaptchaVerifier?.clear();
+      recaptchaVerifierRef.current?.clear();
     };
   }, []);
 
   useEffect(() => {
     let interval: number;
-    if (step === 'otp' && resendTimer > 0) {
-      setCanResend(false);
+    if (step === 'otp' && resendTimer > 0 && !canResend) {
       interval = window.setInterval(() => {
         setResendTimer((prev) => prev - 1);
       }, 1000);
-    } else if (step === 'otp' && resendTimer <= 0) {
+    } else if (resendTimer <= 0) {
       setCanResend(true);
+      if (interval) clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [step, resendTimer]);
+  }, [step, resendTimer, canResend]);
 
   useEffect(() => {
-      if (step === 'phone') {
-          setResendTimer(30);
-          setCanResend(false);
-          setError('');
-      }
+    if (step === 'phone') {
+      setResendTimer(30);
+      setCanResend(false);
+      setError('');
+    }
   }, [step]);
+  
+  // Dynamic loading messages for better UX during OTP delay
+  useEffect(() => {
+    // FIX: Corrected timer type from NodeJS.Timeout to number for browser environment.
+    let messageTimer: number;
+    if (loading && (loadingMessage.startsWith('Sending') || loadingMessage.startsWith('Resending'))) {
+      const messages = [
+        "Initializing secure connection...",
+        "Performing security check...",
+        `Requesting OTP for +91 ${phoneNumber}...`,
+        "Provider is sending the SMS...",
+        "Almost there..."
+      ];
+      let messageIndex = 0;
+      messageTimer = window.setInterval(() => {
+        messageIndex = (messageIndex + 1) % messages.length;
+        setLoadingMessage(messages[messageIndex]);
+      }, 3000);
+    }
+    // FIX: Use clearInterval for timers created with setInterval.
+    return () => clearInterval(messageTimer);
+  }, [loading, loadingMessage, phoneNumber]);
+
 
   const setupRecaptcha = () => {
-      // Clear any previous instance before creating a new one
-      window.recaptchaVerifier?.clear();
-      // Ensure the container exists before creating the verifier
-      const recaptchaContainer = document.getElementById('recaptcha-container');
-      if (!recaptchaContainer) {
-        // This case should ideally not happen if the div is always in the JSX
-        throw new Error("reCAPTCHA container not found.");
-      }
-      return new firebase.auth.RecaptchaVerifier(recaptchaContainer, {
-          'size': 'invisible',
-          'callback': () => { /* reCAPTCHA solved */ }
-      });
+    recaptchaVerifierRef.current?.clear();
+    const recaptchaContainer = document.getElementById('recaptcha-container');
+    if (!recaptchaContainer) {
+      throw new Error("reCAPTCHA container not found.");
+    }
+    const verifier = new firebase.auth.RecaptchaVerifier(recaptchaContainer, {
+      'size': 'invisible',
+      'callback': () => { /* reCAPTCHA solved */ }
+    });
+    recaptchaVerifierRef.current = verifier;
+    return verifier;
   };
 
-  const handlePhoneSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setLoadingMessage('Sending OTP...');
+  const sendOtp = async () => {
     setError('');
     if (phoneNumber.length !== 10) {
       setError('Please enter a valid 10-digit phone number.');
       setLoading(false);
       return;
     }
-    
-    const secureCheckTimer = setTimeout(() => {
-        setLoadingMessage('Performing security check...');
-    }, 7000);
 
     try {
       const verifier = setupRecaptcha();
-      window.recaptchaVerifier = verifier;
       const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
       window.confirmationResult = confirmationResult;
       setStep('otp');
-      setResendTimer(30); // Reset timer on new send
+      setResendTimer(30);
+      setCanResend(false);
     } catch (err: any) {
       console.error("Error sending OTP:", err);
-      setError('Failed to send OTP. Please check the number or try again later.');
+      setError('Failed to send OTP. Please check the number or try again later. If the problem persists, contact support.');
+      // Make sure recaptcha is cleared on failure to allow retry
+      recaptchaVerifierRef.current?.clear();
     } finally {
-      clearTimeout(secureCheckTimer);
       setLoading(false);
       setLoadingMessage('');
     }
+  };
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setLoadingMessage('Sending OTP...');
+    await sendOtp();
   };
   
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setLoadingMessage('Verifying...');
+    setLoadingMessage('Verifying OTP...');
     setError('');
 
     if (!window.confirmationResult) {
-        setError('Your session has expired. Please go back and try sending the OTP again.');
-        setLoading(false);
-        return;
+      setError('Your OTP session has expired. Please go back and request a new OTP.');
+      setLoading(false);
+      setLoadingMessage('');
+      return;
     }
 
     if (otp.length !== 6) {
@@ -148,13 +175,17 @@ const LoginScreen: React.FC = () => {
 
     try {
       await window.confirmationResult.confirm(otp);
-      // On success, keep loading and show a success message.
-      // The App.tsx router will handle navigation.
-      setLoadingMessage('Success! Logging in...');
-    } catch (err) {
+      setLoadingMessage('Success! Logging you in...');
+      // On success, App.tsx router will handle navigation.
+      // We don't setLoading(false) to prevent flicker.
+    } catch (err: any) {
       console.error("Error verifying OTP:", err);
-      setError('Invalid OTP. Please check the code and try again.');
-      setLoading(false); // Only set loading to false on error.
+      let errorMessage = 'Invalid OTP. Please check the code and try again.';
+      if (err.code === 'auth/session-expired') {
+          errorMessage = 'The verification code has expired. Please request a new one.';
+      }
+      setError(errorMessage);
+      setLoading(false);
       setLoadingMessage('');
     }
   };
@@ -164,34 +195,13 @@ const LoginScreen: React.FC = () => {
     
     setLoading(true);
     setLoadingMessage('Resending OTP...');
-    setError('');
-
-    const secureCheckTimer = setTimeout(() => {
-        setLoadingMessage('Performing security check...');
-    }, 7000);
-
-    try {
-      const verifier = setupRecaptcha();
-      window.recaptchaVerifier = verifier;
-      const confirmationResult = await auth.signInWithPhoneNumber(`+91${phoneNumber}`, verifier);
-      window.confirmationResult = confirmationResult;
-      setResendTimer(30); // Reset timer
-      setCanResend(false);
-    } catch (err: any) {
-      console.error("Error resending OTP:", err);
-      setError('Failed to resend OTP. Please try again after some time.');
-    } finally {
-      clearTimeout(secureCheckTimer);
-      setLoading(false);
-      setLoadingMessage('');
-    }
+    await sendOtp();
   };
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-start pt-20 p-4 relative overflow-hidden">
       <div id="recaptcha-container"></div>
 
-       {/* Background Image and Overlay */}
       <div className="absolute inset-0 z-0">
           <div 
               className="absolute inset-0 bg-cover bg-center opacity-30" 
@@ -219,7 +229,8 @@ const LoginScreen: React.FC = () => {
                          maxLength={10}
                        />
                    </div>
-                   <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
+                   <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed flex items-center justify-center">
+                       {loading && <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
                        {loading ? loadingMessage : 'OTP पाएं'}
                    </button>
                </form>
@@ -243,13 +254,7 @@ const LoginScreen: React.FC = () => {
                 </p>
 
                <SecurityBadge />
-                <div className="text-center pt-6 border-t border-white/10 text-slate-300">
-                    <p className="text-sm flex items-center justify-center gap-2">
-                        <span>🔐</span>
-                        <span>Secure Login with OTP Authentication</span>
-                    </p>
-                    <p className="text-xs mt-2 text-slate-400">App Version: 1.0.0 (Beta)</p>
-                </div>
+               <p className="text-xs text-slate-400 text-center mt-6">App Version: 1.0.1 (Stable)</p>
            </div>
         ) : (
           <>
@@ -273,8 +278,9 @@ const LoginScreen: React.FC = () => {
                           maxLength={6}
                       />
                   </div>
-                  <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed">
-                      {loading ? loadingMessage : 'Verify'}
+                  <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:bg-cyan-800 disabled:cursor-not-allowed flex items-center justify-center">
+                       {loading && <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
+                       {loading ? loadingMessage : 'Verify & Login'}
                   </button>
               </form>
               {error && <p className="text-red-300 bg-red-900/50 p-3 rounded-lg text-center mt-4 text-sm">{error}</p>}
