@@ -38,8 +38,8 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log("[sw.js] Received background message ", payload);
-  const { type, userName, callId, userAvatar, silent } = payload.data || {};
-  const isSilent = silent === 'true'; // Check for silent flag from payload
+  const { type, userName, callId, userAvatar, silent, chatId } = payload.data || {};
+  const isSilent = silent === 'true';
 
   if (type === 'incoming_call') {
       const notificationTitle = `Incoming Call`;
@@ -53,17 +53,17 @@ messaging.onBackgroundMessage((payload) => {
               { action: 'reject', title: 'Reject' }
           ],
           requireInteraction: true,
-          silent: isSilent, // Use the silent flag
+          silent: isSilent,
       };
       self.registration.showNotification(notificationTitle, notificationOptions);
-  } else {
-      // Handle other notifications like new messages
-      const notificationTitle = payload.notification?.title || "New Notification";
+  } else if (type === 'new_message') {
+      const notificationTitle = payload.notification?.title || `New message from ${userName || 'a user'}`;
       const notificationOptions = {
           body: payload.notification?.body || "",
-          icon: payload.notification?.image || "/icon-192.png",
+          icon: payload.notification?.image || userAvatar || "/icon-192.png",
           data: payload.data,
-          silent: isSilent, // Use the silent flag here too
+          tag: chatId || 'new-message', // Use chatId to stack/replace notifications
+          silent: isSilent,
       };
       self.registration.showNotification(notificationTitle, notificationOptions);
   }
@@ -72,6 +72,7 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const callId = event.notification.data?.callId;
+  const chatId = event.notification.data?.chatId;
 
   if (event.action === 'accept' && callId) {
       const targetUrl = new URL(`/#/call/${callId}`, self.location.origin).href;
@@ -97,7 +98,13 @@ self.addEventListener('notificationclick', (event) => {
       }
   } else {
     // Default click action if not an action button
-    const defaultPath = callId ? `/#/call/${callId}` : '/#/';
+    let defaultPath = '/#/';
+    if (callId) {
+      defaultPath = `/#/call/${callId}`;
+    } else if (chatId) {
+      defaultPath = `/#/chat`;
+    }
+    
     const targetUrl = new URL(event.notification.data?.url || defaultPath, self.location.origin).href;
     event.waitUntil(
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
