@@ -42,19 +42,28 @@ const App: React.FC = () => {
           if (doc.exists) {
             const data = doc.data() as ListenerProfile;
 
-            // Admin check takes highest priority
+            // Admin check is the absolute priority. If user is an admin,
+            // grant access regardless of their listener status (e.g., active, suspended).
             if (data.isAdmin === true) {
               setAuthStatus('admin');
-            } else if (data.status === 'onboarding_required') {
-              setAuthStatus('needs_onboarding');
-            } else if (data.status === 'pending') {
-              setAuthStatus('pending_approval');
-            } else if (data.status === 'active') {
-              setAuthStatus('active');
-            } else {
-              // Handle other statuses like 'suspended' or 'rejected' by showing an unauthorized screen
-              console.warn(`User ${firebaseUser.uid} has an unhandled or rejected status: ${data.status}`);
-              setAuthStatus('unauthorized');
+              return; // Exit early after setting admin status.
+            }
+
+            // If the user is not an admin, proceed with the standard listener status checks.
+            switch (data.status) {
+              case 'onboarding_required':
+                setAuthStatus('needs_onboarding');
+                break;
+              case 'pending':
+                setAuthStatus('pending_approval');
+                break;
+              case 'active':
+                setAuthStatus('active');
+                break;
+              default:
+                // Any other status (e.g., 'suspended', 'rejected', or invalid) leads to unauthorized access for non-admins.
+                console.warn(`User ${firebaseUser.uid} has an unhandled or rejected status: ${data.status}`);
+                setAuthStatus('unauthorized');
             }
           } else {
             // If an auth user exists but has no listener doc, they are unauthorized for this app.
