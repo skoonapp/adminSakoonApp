@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-// FIX: Use named imports for react-router-dom v6.
+// Fix: Corrected import for react-router-dom components.
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';

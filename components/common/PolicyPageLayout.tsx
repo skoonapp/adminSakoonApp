@@ -1,5 +1,5 @@
 import React from 'react';
-// FIX: Use named imports for react-router-dom v6 components.
+// Fix: Corrected import for react-router-dom Link component.
 import { Link } from 'react-router-dom';
 
 const PolicyPageLayout: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (

@@ -1,5 +1,5 @@
 import React from 'react';
-// FIX: Use named imports for react-router-dom v6 components.
+// Fix: Corrected import for react-router-dom NavLink component.
 import { NavLink } from 'react-router-dom';
 
 const navItems = [

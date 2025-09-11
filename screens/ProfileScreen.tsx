@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../utils/firebase';
-// FIX: Use named imports for react-router-dom v6 hooks.
+// Fix: Corrected import for react-router-dom useNavigate hook.
 import { useNavigate } from 'react-router-dom';
 import ListenerGuidelines from '../components/profile/ListenerGuidelines';
 import { useListener } from '../context/ListenerContext';

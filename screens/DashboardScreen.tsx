@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// FIX: Use named imports for react-router-dom v6 components.
+// Fix: Corrected import for react-router-dom Link component.
 import { Link } from 'react-router-dom';
 import { useListener } from './../context/ListenerContext';
 import { db } from './../utils/firebase';

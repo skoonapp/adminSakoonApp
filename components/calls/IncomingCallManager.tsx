@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-// FIX: Use named imports for react-router-dom v6 hooks.
+// Fix: Corrected import for react-router-dom hooks.
 import { useNavigate, useLocation } from 'react-router-dom';
 import { messaging, db } from '../../utils/firebase';
 import { useListener } from '../../context/ListenerContext';

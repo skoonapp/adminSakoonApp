@@ -1,4 +1,5 @@
 import React from 'react';
+// Fix: Corrected import for react-router-dom Link component.
 import { Link } from 'react-router-dom';
 import type { OnboardingData } from '../../screens/OnboardingScreen';
 

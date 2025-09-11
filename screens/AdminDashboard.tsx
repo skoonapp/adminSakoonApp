@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, functions } from '../utils/firebase';
 import firebase from 'firebase/compat/app';
 import type { ListenerProfile, Application } from '../types';
-// FIX: Use named imports for react-router-dom v6 components.
+// Fix: Corrected import for react-router-dom Link component.
 import { Link } from 'react-router-dom';
 
 // Icons

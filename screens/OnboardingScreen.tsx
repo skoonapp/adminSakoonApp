@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// Fix: Corrected import for react-router-dom useNavigate hook.
 import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { db } from '../utils/firebase';

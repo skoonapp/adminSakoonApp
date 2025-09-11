@@ -1,36 +1,82 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// FIX: Use named imports for react-router-dom v6 components.
+// Fix: Corrected import for react-router-dom Link component.
 import { Link } from 'react-router-dom';
 import { db } from '../utils/firebase';
 import type { ListenerProfile, ListenerAccountStatus } from '../types';
 import ListenerRow from '../components/admin/ListenerRow';
+import type firebase from 'firebase/compat/app';
 
 type StatusFilter = 'all' | ListenerAccountStatus;
 
+const PAGE_SIZE = 25;
+
 const ListenerManagementScreen: React.FC = () => {
-    const [allListeners, setAllListeners] = useState<ListenerProfile[]>([]);
+    const [listeners, setListeners] = useState<ListenerProfile[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [lastDoc, setLastDoc] = useState<firebase.firestore.QueryDocumentSnapshot | null>(null);
+    const [hasMore, setHasMore] = useState(true);
+    
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        setLoading(true);
-        const unsubscribe = db.collection('listeners')
-            .orderBy('createdAt', 'desc')
-            .onSnapshot(snapshot => {
+        // Using get() for pagination control instead of onSnapshot
+        const fetchInitialListeners = async () => {
+            setLoading(true);
+            try {
+                const query = db.collection('listeners')
+                    .orderBy('createdAt', 'desc')
+                    .limit(PAGE_SIZE);
+                
+                const snapshot = await query.get();
+                
                 const listenersData = snapshot.docs.map(doc => doc.data() as ListenerProfile);
-                setAllListeners(listenersData);
-                setLoading(false);
-            }, error => {
+                setListeners(listenersData);
+                
+                const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+                setLastDoc(lastVisible);
+                
+                setHasMore(snapshot.docs.length === PAGE_SIZE);
+            } catch (error) {
                 console.error("Error fetching listeners:", error);
+            } finally {
                 setLoading(false);
-            });
-
-        return () => unsubscribe();
+            }
+        };
+        fetchInitialListeners();
     }, []);
 
+    const handleLoadMore = async () => {
+        if (!lastDoc || loadingMore || !hasMore) return;
+        
+        setLoadingMore(true);
+        try {
+            const query = db.collection('listeners')
+                .orderBy('createdAt', 'desc')
+                .startAfter(lastDoc)
+                .limit(PAGE_SIZE);
+
+            const snapshot = await query.get();
+            
+            const newListenersData = snapshot.docs.map(doc => doc.data() as ListenerProfile);
+            setListeners(prev => [...prev, ...newListenersData]);
+            
+            const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+            setLastDoc(lastVisible);
+            
+            setHasMore(snapshot.docs.length === PAGE_SIZE);
+        } catch (error) {
+            console.error("Error fetching more listeners:", error);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+
     const filteredListeners = useMemo(() => {
-        return allListeners.filter(listener => {
+        // Filtering is now done on the currently loaded listeners
+        return listeners.filter(listener => {
             const matchesStatus = statusFilter === 'all' || listener.status === statusFilter;
             const matchesSearch = searchTerm === '' ||
                 listener.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,7 +84,7 @@ const ListenerManagementScreen: React.FC = () => {
             
             return matchesStatus && matchesSearch;
         });
-    }, [allListeners, statusFilter, searchTerm]);
+    }, [listeners, statusFilter, searchTerm]);
 
     const filterOptions: { value: StatusFilter, label: string }[] = [
         { value: 'all', label: 'All Listeners' },
@@ -70,7 +116,7 @@ const ListenerManagementScreen: React.FC = () => {
                     className="sm:w-1/4 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
                     {filterOptions.map(option => (
-                        <option key={option.value} value={option.value}>{option.label} ({option.value === 'all' ? allListeners.length : allListeners.filter(l => l.status === option.value).length})</option>
+                        <option key={option.value} value={option.value}>{option.label}</option>
                     ))}
                 </select>
                 <input
@@ -120,6 +166,20 @@ const ListenerManagementScreen: React.FC = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Load More Button */}
+            {hasMore && (
+                 <div className="text-center pt-4">
+                    <button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded-full disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center mx-auto"
+                    >
+                        {loadingMore && <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
+                        {loadingMore ? 'Loading...' : 'Load More'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
