@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-// Fix: Corrected import for react-router-dom hooks.
-import { useParams, useNavigate } from 'react-router-dom';
+// FIX: Downgraded react-router-dom hooks to v5 syntax (`useNavigate` -> `useHistory`).
+import { useParams, useHistory } from 'react-router-dom';
 import { useListener } from '../context/ListenerContext';
 import { db } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
@@ -13,7 +13,7 @@ const ConnectingIcon = () => <svg className="animate-spin h-10 w-10 text-white" 
 
 const ActiveCallScreen: React.FC = () => {
     const { callId } = useParams<{ callId: string }>();
-    const navigate = useNavigate();
+    const history = useHistory();
     const { profile } = useListener();
     const zegoContainerRef = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<'loading' | 'connecting' | 'connected' | 'error'>('loading');
@@ -65,12 +65,12 @@ const ActiveCallScreen: React.FC = () => {
                     },
                     showPreJoinView: false,
                     onLeaveRoom: () => {
-                        navigate('/dashboard');
+                        history.push('/dashboard');
                     },
                     onUserLeave: () => {
                         // The call might be over, hang up and redirect.
                         zp?.destroy();
-                        navigate('/dashboard', { replace: true });
+                        history.replace('/dashboard');
                     },
                     turnOnCameraWhenJoining: false,
                     turnOnMicrophoneWhenJoining: true,
@@ -95,11 +95,11 @@ const ActiveCallScreen: React.FC = () => {
             }
         };
 
-    }, [callId, profile, navigate]);
+    }, [callId, profile, history]);
 
     const handleHangUp = () => {
         // Here you would also update the call status in Firestore to 'completed' or 'rejected_by_listener'
-        navigate('/dashboard', { replace: true });
+        history.replace('/dashboard');
     };
 
     return (
@@ -137,7 +137,7 @@ const ActiveCallScreen: React.FC = () => {
                                 <p className="text-lg text-red-400">Connection Failed</p>
                                 <p className="text-slate-300 mt-2">{error}</p>
                                 <button
-                                    onClick={() => navigate('/dashboard')}
+                                    onClick={() => history.push('/dashboard')}
                                     className="mt-6 bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded-full"
                                 >
                                     Go to Dashboard

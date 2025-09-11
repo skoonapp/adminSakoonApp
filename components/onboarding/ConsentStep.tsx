@@ -1,5 +1,5 @@
 import React from 'react';
-// Fix: Corrected import for react-router-dom Link component.
+// FIX: The import for `Link` is correct for react-router-dom v5. The error was a cascading issue from other files using v6 syntax.
 import { Link } from 'react-router-dom';
 import type { OnboardingData } from '../../screens/OnboardingScreen';
 

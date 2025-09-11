@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// Fix: Corrected import for react-router-dom useNavigate hook.
-import { useNavigate } from 'react-router-dom';
+// FIX: Downgraded react-router-dom hooks to v5 syntax (`useNavigate` -> `useHistory`).
+import { useHistory } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { db } from '../utils/firebase';
 import type { ListenerProfile } from '../types';
@@ -21,7 +21,7 @@ export interface OnboardingData {
 }
 
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
-  const navigate = useNavigate();
+  const history = useHistory();
   const [step, setStep] = useState(1);
   const [listenerData, setListenerData] = useState<ListenerProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
 
       await db.collection('listeners').doc(user.uid).update(listenerUpdate);
       
-      navigate('/pending-approval', { replace: true });
+      history.replace('/pending-approval');
 
     } catch (err) {
       console.error("Failed to submit onboarding data:", err);

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-// Fix: Corrected import for react-router-dom hooks.
-import { useNavigate, useLocation } from 'react-router-dom';
+// FIX: Downgraded react-router-dom hooks to v5 syntax (`useNavigate` -> `useHistory`).
+import { useHistory, useLocation } from 'react-router-dom';
 import { messaging, db } from '../../utils/firebase';
 import { useListener } from '../../context/ListenerContext';
 import firebase from 'firebase/compat/app';
@@ -96,7 +96,7 @@ const playMessageTone = () => {
 
 const IncomingCallManager: React.FC = () => {
   const { profile } = useListener();
-  const navigate = useNavigate();
+  const history = useHistory();
   const location = useLocation();
 
   useEffect(() => {
@@ -151,7 +151,7 @@ const IncomingCallManager: React.FC = () => {
         stopRingtone(); // Stop ringtone after user interacts with prompt
 
         if (isConfirmed && callId) {
-          navigate(`/call/${callId}`);
+          history.push(`/call/${callId}`);
         } else {
           // TODO: Implement call rejection logic
           console.log('Call rejected by listener from foreground prompt.');
@@ -169,7 +169,7 @@ const IncomingCallManager: React.FC = () => {
       unsubscribe();
       stopRingtone(); // Ensure ringtone stops if component unmounts while ringing
     };
-  }, [profile, navigate, location]);
+  }, [profile, history, location]);
 
   return null; // This component does not render anything itself.
 };

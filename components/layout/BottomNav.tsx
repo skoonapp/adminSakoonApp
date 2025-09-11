@@ -1,5 +1,5 @@
 import React from 'react';
-// Fix: Corrected import for react-router-dom NavLink component.
+// FIX: The import for `NavLink` is correct for react-router-dom v5. The error was a cascading issue from other files using v6 syntax.
 import { NavLink } from 'react-router-dom';
 
 const navItems = [

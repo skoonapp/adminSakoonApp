@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// Fix: Corrected import for react-router-dom components and hooks.
-import { useLocation, useNavigate, Outlet } from 'react-router-dom';
+// FIX: Downgraded react-router-dom hooks to v5 syntax (`useNavigate` -> `useHistory`, `Outlet` removed).
+import { useLocation, useHistory } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';
 import Header from '../common/Header';
@@ -34,9 +34,9 @@ const NAV_ORDER = navItems.map(item => item.path);
 const SWIPE_THRESHOLD = 75;
 const DIRECTION_LOCK_THRESHOLD = 10;
 
-const MainLayout: React.FC = () => {
+const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const history = useHistory();
   
   const [touchState, setTouchState] = useState<{
     startX: number;
@@ -96,9 +96,9 @@ const MainLayout: React.FC = () => {
         const currentIndex = NAV_ORDER.indexOf(location.pathname);
 
         if (touchState.translateX > SWIPE_THRESHOLD && currentIndex > 0) {
-          navigate(NAV_ORDER[currentIndex - 1]);
+          history.push(NAV_ORDER[currentIndex - 1]);
         } else if (touchState.translateX < -SWIPE_THRESHOLD && currentIndex < NAV_ORDER.length - 1) {
-          navigate(NAV_ORDER[currentIndex + 1]);
+          history.push(NAV_ORDER[currentIndex + 1]);
         }
     }
     
@@ -171,7 +171,7 @@ const MainLayout: React.FC = () => {
         )}
 
         <div style={swipeableStyle} className="bg-slate-50 dark:bg-slate-950">
-            <Outlet />
+            {children}
         </div>
       </main>
       <BottomNav />
