@@ -1,8 +1,12 @@
-// This is the main entry point for all backend functions.
-// It imports and re-exports all functions from their respective files.
+/**
+ * Main entry point for all Firebase Functions.
+ * This file should re-export all functions from other files.
+ */
 
-export * from "./calls";
-export * from "./zego";
+// Note: admin.initializeApp() is called in other files like zego.ts and listenerApply.ts
+// with a guard to prevent re-initialization. This is sufficient.
+
 export * from "./listenerApply";
-// Fix: Comment out exports for modules that are not yet implemented to prevent build errors.
-// export * from "./notifications";
+export * from "./zego";
+// export * from "./calls"; // This file is empty for now.
+// export * from "./notifications"; // This file contains commented-out example code.

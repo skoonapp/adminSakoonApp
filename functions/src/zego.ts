@@ -3,9 +3,9 @@ import { onRequest } from "firebase-functions/v2/https";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { RtcTokenBuilder, RtcRole } from "zegocloud-server-sdk";
-// FIX: Use require-style imports for CommonJS modules to ensure type compatibility without esModuleInterop.
-import express = require("express");
-import cors = require("cors");
+// FIX: Changed require-style imports to ES module imports to resolve TS errors.
+import express from "express";
+import cors from "cors";
 
 
 // Initialize Firebase Admin SDK if not already initialized

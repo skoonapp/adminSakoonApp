@@ -1,95 +1,89 @@
-import type firebase from 'firebase/compat/app';
+import firebase from 'firebase/compat/app';
 
-// Fix: Define all application-wide TypeScript types in this file to resolve module errors.
-
-// Status for the listener's application/account, managed by admins.
-export type ListenerAccountStatus = 'pending' | 'active' | 'suspended' | 'rejected' | 'onboarding_required';
-
-// Status for the listener's availability in the app, controlled by the listener.
+// Describes the listener's availability for taking new calls/chats.
 export type ListenerAppStatus = 'Available' | 'Busy' | 'Offline' | 'Break';
 
+// Describes the listener's account status in the system (e.g., pending approval, active).
+export type ListenerAccountStatus = 'onboarding_required' | 'pending' | 'active' | 'suspended' | 'rejected';
+
+// The main profile for a listener.
 export interface ListenerProfile {
   uid: string;
-  displayName: string;
-  phone?: string;
-  avatarUrl?: string; // Made optional for onboarding
-  city?: string; // Made optional, will be set during onboarding
-  age?: number; // Made optional, will be set during onboarding
-  status: ListenerAccountStatus;
-  appStatus: ListenerAppStatus;
+  displayName: string; // Public name shown to users
+  realName: string; // For admin and payment purposes
+  phone: string;
+  status: ListenerAccountStatus; // Account status
+  appStatus: ListenerAppStatus; // Live availability status
+  createdAt: firebase.firestore.Timestamp;
   onboardingComplete: boolean;
-  createdAt: firebase.firestore.FieldValue | firebase.firestore.Timestamp;
-  isAdmin?: boolean;
-  fcmTokens?: string[];
+  isAdmin: boolean;
+  profession: string;
+  languages: string[];
+  avatarUrl: string;
+  city: string;
+  age: number;
+  bankAccount?: string | null;
+  ifsc?: string | null;
+  bankName?: string | null;
+  upiId?: string | null;
   notificationSettings?: {
-    calls: boolean;
-    messages: boolean;
+    calls?: boolean;
+    messages?: boolean;
   };
-  // Fields from application form
-  realName?: string;
-  profession?: string;
-  languages?: string[];
-  bankAccount?: string;
-  ifsc?: string;
-  bankName?: string;
-  upiId?: string;
+  fcmTokens?: string[];
 }
 
-export interface UnverifiedListener {
-    realName: string;
-    bankAccount: string;
-    upiId: string;
-}
-
-export type CallStatus = 'completed' | 'missed' | 'rejected';
-
+// Represents a single call record in the history.
 export interface CallRecord {
   callId: string;
+  listenerId: string;
   userId: string;
   userName: string;
   userAvatar?: string;
-  listenerId: string;
   startTime: firebase.firestore.Timestamp;
   endTime?: firebase.firestore.Timestamp;
   durationSeconds?: number;
-  status: CallStatus;
+  status: 'pending' | 'ringing' | 'active' | 'completed' | 'missed' | 'rejected' | 'cancelled';
   earnings?: number;
+  type?: 'call'; // for activity feed
 }
 
+// Represents a chat session between a listener and a user.
 export interface ListenerChatSession {
-  id: string; // doc id
-  userId: string;
-  userName: string;
-  userAvatar?: string;
-  listenerId: string;
-  lastMessageText: string;
-  lastMessageTimestamp: firebase.firestore.Timestamp;
-  unreadByUser: boolean;
-  unreadByListener: boolean;
+    id: string; // document ID
+    listenerId: string;
+    userId: string;
+    userName: string;
+    userAvatar?: string;
+    lastMessageText: string;
+    lastMessageTimestamp: firebase.firestore.Timestamp;
+    unreadByListener: boolean;
 }
 
-export type MessageType = 'text' | 'audio';
-export type MessageStatus = 'sent' | 'delivered' | 'read';
-
+// Represents a single message within a chat.
+export type ChatMessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 export interface ChatMessage {
-    id: string; // doc id
-    senderId: string; // either user or listener uid
+    id: string;
+    senderId: string; // either listener's UID or user's UID
     text: string;
-    timestamp: firebase.firestore.FieldValue | firebase.firestore.Timestamp;
-    type: MessageType;
-    status: MessageStatus;
-    audioUrl?: string;
-    duration?: number; // for audio messages, in seconds
-}
-
-export interface EarningRecord {
-    id: string; // doc id
-    amount: number;
-    callId: string;
     timestamp: firebase.firestore.Timestamp;
-    userName: string; // user from the call
+    status: ChatMessageStatus;
+    type: 'text' | 'audio' | 'info';
+    audioUrl?: string;
+    duration?: number; // for audio messages in seconds
 }
 
+// Represents a single earning transaction for a listener.
+export interface EarningRecord {
+    id: string;
+    amount: number;
+    timestamp: firebase.firestore.Timestamp;
+    type: 'call' | 'chat_session'; // Source of the earning
+    sourceId: string; // callId or chatId
+    userName: string;
+}
+
+// Represents a new listener application.
 export interface Application {
     id: string;
     fullName: string;
@@ -103,4 +97,6 @@ export interface Application {
     upiId?: string;
     status: 'pending' | 'approved' | 'rejected';
     createdAt: firebase.firestore.Timestamp;
+    reason?: string;
+    listenerUid?: string;
 }
