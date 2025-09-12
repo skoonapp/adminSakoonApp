@@ -31,6 +31,8 @@ export interface ListenerProfile {
     messages?: boolean;
   };
   fcmTokens?: string[];
+  totalEarnings?: number;
+  totalCalls?: number;
 }
 
 // Represents a single call record in the history.

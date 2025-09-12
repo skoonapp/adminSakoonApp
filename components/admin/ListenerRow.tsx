@@ -15,6 +15,7 @@ const StatusBadge: React.FC<{ status: ListenerAccountStatus }> = ({ status }) =>
             colorClasses = "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300";
             break;
         case 'pending':
+        case 'onboarding_required':
             colorClasses = "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300";
             break;
         case 'suspended':
@@ -26,7 +27,7 @@ const StatusBadge: React.FC<{ status: ListenerAccountStatus }> = ({ status }) =>
         default:
              colorClasses = "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200";
     }
-    return <span className={`${baseClasses} ${colorClasses}`}>{status}</span>;
+    return <span className={`${baseClasses} ${colorClasses}`}>{status.replace('_', ' ')}</span>;
 };
 
 
@@ -53,7 +54,7 @@ const ListenerRow: React.FC<ListenerRowProps> = ({ listener }) => {
         <tr className={`bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${isUpdating ? 'opacity-50' : ''}`}>
             <th scope="row" className="px-6 py-4 font-medium text-slate-900 dark:text-white whitespace-nowrap">
                 <div className="flex items-center gap-3">
-                    <img src={listener.avatarUrl} alt={listener.displayName} className="w-10 h-10 rounded-full object-cover"/>
+                    <img src={listener.avatarUrl || `https://ui-avatars.com/api/?name=${listener.displayName}&background=random`} alt={listener.displayName} className="w-10 h-10 rounded-full object-cover"/>
                     <div>
                         {listener.displayName}
                         <div className="font-normal text-slate-500 text-xs">{listener.uid}</div>
@@ -64,7 +65,12 @@ const ListenerRow: React.FC<ListenerRowProps> = ({ listener }) => {
                 <StatusBadge status={listener.status} />
             </td>
             <td className="px-6 py-4">{listener.phone || 'N/A'}</td>
-            <td className="px-6 py-4">{listener.city}, {listener.age}</td>
+            <td className="px-6 py-4 font-mono text-slate-600 dark:text-slate-300">
+              ₹{listener.totalEarnings?.toFixed(2) ?? '0.00'}
+            </td>
+            <td className="px-6 py-4 font-mono text-center text-slate-600 dark:text-slate-300">
+              {listener.totalCalls ?? 0}
+            </td>
             <td className="px-6 py-4 text-right">
                  <select
                     value={listener.status}
@@ -74,6 +80,7 @@ const ListenerRow: React.FC<ListenerRowProps> = ({ listener }) => {
                 >
                     <option value="active">Active</option>
                     <option value="pending">Pending</option>
+                    <option value="onboarding_required">Onboarding</option>
                     <option value="suspended">Suspended</option>
                     <option value="rejected">Rejected</option>
                 </select>

@@ -137,7 +137,8 @@ const ListenerManagementScreen: React.FC = () => {
                                 <th scope="col" className="px-6 py-3">Listener</th>
                                 <th scope="col" className="px-6 py-3">Status</th>
                                 <th scope="col" className="px-6 py-3">Phone</th>
-                                <th scope="col" className="px-6 py-3">Details</th>
+                                <th scope="col" className="px-6 py-3">Total Earnings</th>
+                                <th scope="col" className="px-6 py-3">Total Calls</th>
                                 <th scope="col" className="px-6 py-3 text-right">Change Status</th>
                             </tr>
                         </thead>
@@ -149,6 +150,7 @@ const ListenerManagementScreen: React.FC = () => {
                                         <td className="px-6 py-4"><div className="h-6 w-20 bg-slate-200 dark:bg-slate-700 rounded-full animate-pulse"></div></td>
                                         <td className="px-6 py-4"><div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div></td>
                                         <td className="px-6 py-4"><div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div></td>
+                                        <td className="px-6 py-4"><div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div></td>
                                         <td className="px-6 py-4 text-right"><div className="h-10 w-32 ml-auto bg-slate-200 dark:bg-slate-700 rounded-md animate-pulse"></div></td>
                                     </tr>
                                 ))
@@ -156,7 +158,7 @@ const ListenerManagementScreen: React.FC = () => {
                                 filteredListeners.map(listener => <ListenerRow key={listener.uid} listener={listener} />)
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="text-center py-10">
+                                    <td colSpan={6} className="text-center py-10">
                                         <p className="font-semibold text-lg text-slate-600 dark:text-slate-300">No Listeners Found</p>
                                         <p className="text-slate-400">No listeners match the current filters.</p>
                                     </td>
