@@ -3,10 +3,26 @@
  * This file should re-export all functions from other files.
  */
 
-// Note: admin.initializeApp() is called in other files like zego.ts and listenerApply.ts
-// with a guard to prevent re-initialization. This is sufficient.
+// ADMIN-SIDE FUNCTIONS
+export * from "./admin/auth";
+export * from "./admin/dashboard";
+export * from "./admin/manageListeners";
+export * from "./admin/manageUsers";
 
-export * from "./listenerApply";
-export * from "./zego";
-// export * from "./calls"; // This file is empty for now.
-// export * from "./notifications"; // This file contains commented-out example code.
+// COMMON/UTILITY FUNCTIONS
+export * from "./common/api";
+export * from "./common/cashfree";
+export * from "./common/gemini";
+export * from "./common/zegocloud";
+
+// LISTENER-SIDE FUNCTIONS
+export * from "./listener/addEarning";
+export * from "./listener/auth";
+export * from "./listener/availability";
+export * from "./listener/dashboard";
+export * from "./listener/earnings";
+export * from "./listener/listenerApply";
+export * from "./listener/notifications";
+
+// USER-SIDE FUNCTIONS
+export * from "./user/user";
