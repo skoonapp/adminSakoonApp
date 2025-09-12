@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { db, serverTimestamp } from '../../utils/firebase';
+import { db, serverTimestamp, functions } from '../../utils/firebase';
 
 // Icon for privacy note
 const LockIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -130,15 +130,12 @@ const ApplyAsListener: React.FC = () => {
         setError('');
 
         try {
-          await db.collection('applications').add({
-            ...formData,
-            status: 'pending',
-            createdAt: serverTimestamp(),
-          });
+          const submitListenerApplication = functions.httpsCallable('submitListenerApplication');
+          await submitListenerApplication(formData);
           setApplied(true);
-        } catch (err) {
+        } catch (err: any) {
           console.error("Application submission error:", err);
-          setError("आवेदन जमा करने में विफल। कृपया अपनी इंटरनेट जाँच करें और पुनः प्रयास करें।");
+          setError(err.message || "आवेदन जमा करने में विफल। कृपया अपनी इंटरनेट जाँच करें और पुनः प्रयास करें।");
         } finally {
           setLoading(false);
         }

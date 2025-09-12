@@ -1,8 +1,21 @@
+// FIX: Migrated from Functions v1 to v2 and corrected imports to resolve type errors.
+import { onRequest } from "firebase-functions/v2/https";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { RtcTokenBuilder, RtcRole } from "zegocloud-server-sdk";
-import * as express from "express";
-import * as cors from "cors";
+// FIX: Use standard ES module imports for express and cors, and alias types to avoid name collisions.
+import express, {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+  NextFunction as ExpressNextFunction,
+} from "express";
+import cors from "cors";
+
+
+// Initialize Firebase Admin SDK if not already initialized
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
 
 // IMPORTANT: Set these in your Firebase environment configuration by running:
 // firebase functions:config:set zego.appid="YOUR_ZEGO_APP_ID"
@@ -29,7 +42,8 @@ function sdbmHash(str: string): number {
 }
 
 // Middleware to verify Firebase Auth token
-const authenticate = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+// FIX: Explicitly use aliased types from express to ensure correct type resolution.
+const authenticate = async (req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => {
     if (!req.headers.authorization || !req.headers.authorization.startsWith("Bearer ")) {
         return res.status(403).send("Unauthorized: No token provided.");
     }
@@ -43,7 +57,8 @@ const authenticate = async (req: express.Request, res: express.Response, next: e
     }
 };
 
-app.post("/generateZegoToken", authenticate, (req, res) => {
+// FIX: Explicitly use aliased types from express to ensure correct type resolution.
+app.post("/generateZegoToken", authenticate, (req: ExpressRequest, res: ExpressResponse) => {
     const { roomId } = req.body;
     if (!roomId || typeof roomId !== "string") {
         return res.status(400).json({ error: "Missing or invalid 'roomId'." });
@@ -79,4 +94,4 @@ app.post("/generateZegoToken", authenticate, (req, res) => {
 });
 
 // Exposes the Express app as a single Cloud Function named 'api'
-export const api = functions.region("asia-south1").https.onRequest(app);
+export const api = onRequest({ region: "asia-south1" }, app);

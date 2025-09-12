@@ -1,5 +1,6 @@
 
 
+
 // FIX: Corrected the import statement for React hooks.
 import React, { useState, useEffect, useRef } from 'react';
 import firebase from 'firebase/compat/app';
@@ -11,12 +12,6 @@ import ApplyAsListener from '../components/auth/ApplyAsListener';
 const LockIcon: React.FC<{className?: string}> = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-    </svg>
-);
-
-const WarningIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
-      <path fillRule="evenodd" d="M8.257 3.099a.75.75 0 011.486 0l5.575 10.655a.75.75 0 01-.643 1.11H3.32a.75.75 0 01-.643-1.11L8.257 3.1zM9 12a1 1 0 112 0 1 1 0 01-2 0zm1-4a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0V8z" clipRule="evenodd" />
     </svg>
 );
 

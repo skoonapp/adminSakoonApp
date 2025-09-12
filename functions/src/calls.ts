@@ -1,6 +1,14 @@
+// FIX: Migrated from Functions v1 to v2 to resolve type errors.
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { db } from "./utils/admin";
+
+// Initialize Firebase Admin SDK if not already initialized
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
+const db = admin.firestore();
+
 
 // Define necessary types locally to avoid external dependencies
 type CallStatus = "completed" | "missed" | "rejected";
@@ -72,16 +80,24 @@ function calculateEarnings(session: {
  * Triggered when a call document is updated.
  * Calculates and records earnings when a call's status changes to 'completed'.
  */
-export const onCallComplete = functions
-  .region("asia-south1")
-  .firestore.document("calls/{callId}")
-  .onUpdate(async (change, context) => {
+export const onCallComplete = onDocumentUpdated(
+  {
+    document: "calls/{callId}",
+    region: "asia-south1",
+  },
+  async (event) => {
+    const change = event.data;
+    if (!change) {
+      functions.logger.warn("onCallComplete triggered without data change.");
+      return null;
+    }
+
     const beforeData = change.before.data() as CallRecord;
     const afterData = change.after.data() as CallRecord;
 
     // Proceed only if the call status has just changed to 'completed'
     if (beforeData.status !== "completed" && afterData.status === "completed") {
-      const { callId } = context.params;
+      const { callId } = event.params;
       const { listenerId, durationSeconds, userName } = afterData;
 
       if (!listenerId || !durationSeconds || durationSeconds <= 0) {
@@ -132,12 +148,19 @@ export const onCallComplete = functions
 /**
  * Triggered when a new message is created. Calculates earnings if the message is from a user.
  */
-export const onNewMessage = functions
-  .region("asia-south1")
-  .firestore.document("chats/{chatId}/messages/{messageId}")
-  .onCreate(async (snap, context) => {
+export const onNewMessage = onDocumentCreated(
+  {
+    document: "chats/{chatId}/messages/{messageId}",
+    region: "asia-south1",
+  },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) {
+      functions.logger.error("onNewMessage triggered without data snapshot.");
+      return null;
+    }
     const messageData = snap.data();
-    const { chatId, messageId } = context.params;
+    const { chatId, messageId } = event.params;
 
     const chatSessionDoc = await db.collection("chats").doc(chatId).get();
     if (!chatSessionDoc.exists) {
