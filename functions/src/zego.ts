@@ -3,13 +3,9 @@ import { onRequest } from "firebase-functions/v2/https";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { RtcTokenBuilder, RtcRole } from "zegocloud-server-sdk";
-// FIX: Use standard ES module imports for express and cors, and alias types to avoid name collisions.
-import express, {
-  Request as ExpressRequest,
-  Response as ExpressResponse,
-  NextFunction as ExpressNextFunction,
-} from "express";
-import cors from "cors";
+// FIX: Use require-style imports for CommonJS modules to ensure type compatibility without esModuleInterop.
+import express = require("express");
+import cors = require("cors");
 
 
 // Initialize Firebase Admin SDK if not already initialized
@@ -42,8 +38,8 @@ function sdbmHash(str: string): number {
 }
 
 // Middleware to verify Firebase Auth token
-// FIX: Explicitly use aliased types from express to ensure correct type resolution.
-const authenticate = async (req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => {
+// FIX: Use types from the imported express module directly.
+const authenticate = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (!req.headers.authorization || !req.headers.authorization.startsWith("Bearer ")) {
         return res.status(403).send("Unauthorized: No token provided.");
     }
@@ -57,8 +53,8 @@ const authenticate = async (req: ExpressRequest, res: ExpressResponse, next: Exp
     }
 };
 
-// FIX: Explicitly use aliased types from express to ensure correct type resolution.
-app.post("/generateZegoToken", authenticate, (req: ExpressRequest, res: ExpressResponse) => {
+// FIX: Use types from the imported express module directly.
+app.post("/generateZegoToken", authenticate, (req: express.Request, res: express.Response) => {
     const { roomId } = req.body;
     if (!roomId || typeof roomId !== "string") {
         return res.status(400).json({ error: "Missing or invalid 'roomId'." });

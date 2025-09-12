@@ -82,7 +82,7 @@ export const setAdminRole = onCall(
 
 
 /**
- * Approves a listener application, creates an auth user and a listener profile.
+ * Approves a listener application, creates an auth user and a listener profile atomically.
  */
 export const approveApplication = onCall(
   { region: "asia-south1" },
@@ -103,16 +103,18 @@ export const approveApplication = onCall(
     const appData = appDoc.data()!;
 
     if (appData.status !== "pending") {
-        throw new HttpsError("failed-precondition", "Application already processed.");
+      throw new HttpsError("failed-precondition", "Application already processed.");
     }
 
     let userRecord;
     try {
+      // Step 1: Create the authentication user. This cannot be in a batch.
       userRecord = await auth.createUser({
         phoneNumber: `+91${appData.phone}`,
         displayName: appData.displayName,
       });
 
+      // Step 2: Prepare Firestore writes in a batch for atomicity.
       const listenerProfile = {
         uid: userRecord.uid,
         displayName: appData.displayName,
@@ -130,23 +132,41 @@ export const approveApplication = onCall(
         bankName: appData.bankName || null,
         upiId: appData.upiId || null,
       };
-      await db.collection("listeners").doc(userRecord.uid).set(listenerProfile);
 
-      await appRef.update({ status: "approved", listenerUid: userRecord.uid });
+      const batch = db.batch();
+
+      // Action A: Create the listener document.
+      const listenerRef = db.collection("listeners").doc(userRecord.uid);
+      batch.set(listenerRef, listenerProfile);
+
+      // Action B: Update the application document.
+      batch.update(appRef, { status: "approved", listenerUid: userRecord.uid });
+
+      // Step 3: Commit the batch. Both actions will succeed or fail together.
+      await batch.commit();
 
       return { success: true, uid: userRecord.uid };
     } catch (error: any) {
+      // --- ROBUST ERROR HANDLING ---
+      // If the auth user was created but the batch failed, we MUST delete it
+      // to prevent an orphaned auth account that leads to "Access Denied".
       if (userRecord) {
+        functions.logger.warn(`Cleaning up orphaned auth user ${userRecord.uid} due to a failed profile creation.`);
         await auth.deleteUser(userRecord.uid);
       }
+
+      // Handle specific, known errors to give better feedback to the admin.
       if (error.code === "auth/phone-number-already-exists") {
-        await appRef.update({ status: "rejected", reason: "Phone already exists" });
-        throw new HttpsError("already-exists", "This phone number is already registered.");
+        await appRef.update({ status: "rejected", reason: "Phone already exists in Auth" });
+        throw new HttpsError("already-exists", "This phone number is already registered as a user.");
       }
-      functions.logger.error("Error approving application:", error);
-      throw new HttpsError("internal", "Error creating listener profile.", error.message);
+
+      // For all other errors, log them and throw a generic error.
+      functions.logger.error(`Critical error approving application ${applicationId}:`, error);
+      throw new HttpsError("internal", "An error occurred while creating the listener. The operation was rolled back.", error.message);
     }
-  });
+  }
+);
 
 
 /**
