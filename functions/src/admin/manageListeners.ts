@@ -1,4 +1,5 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
 import { db, auth } from "../common/db";
 import * as admin from "firebase-admin";
@@ -148,3 +149,37 @@ export const rejectApplication = onCall({ region: "asia-south1" }, async (reques
         throw new HttpsError("internal", "An unexpected error occurred while rejecting the application.");
     }
 });
+
+
+/**
+ * Firestore Trigger: Automatically activates a listener's account after they complete onboarding.
+ */
+export const onListenerProfileUpdate = onDocumentUpdated(
+  "listeners/{listenerId}",
+  async (event) => {
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
+
+    if (!beforeData || !afterData) {
+      logger.info("No data found in listener update event.");
+      return;
+    }
+
+    // Check for the specific condition: moving from onboarding to completed
+    const wasOnboarding = beforeData.status === "onboarding_required" && beforeData.onboardingComplete === false;
+    const isNowComplete = afterData.status === "onboarding_required" && afterData.onboardingComplete === true;
+
+    if (wasOnboarding && isNowComplete) {
+      logger.info(`Listener ${event.params.listenerId} completed onboarding. Activating profile.`);
+      try {
+        await event.data?.after.ref.update({
+          status: "active",
+        });
+        logger.info(`Successfully activated listener ${event.params.listenerId}.`);
+        // TODO: Send a "Welcome! Your profile is active" notification here.
+      } catch (error) {
+        logger.error(`Failed to activate listener ${event.params.listenerId}:`, error);
+      }
+    }
+  }
+);

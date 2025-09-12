@@ -1,73 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { db, functions } from '../utils/firebase';
-import firebase from 'firebase/compat/app';
 import type { ListenerProfile, Application } from '../types';
-// FIX: The import for `Link` is correct for react-router-dom v5. The error was a cascading issue from other files using v6 syntax.
 import { Link } from 'react-router-dom';
 
-// Icons
-const UserCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+// --- Icon Components ---
+const RupeeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-5 4h4m5 4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+const ProfitIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>;
+const TransactionIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
 const UserClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const NewApplicationIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+const UserCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 
-
-const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; loading: boolean; linkTo?: string; }> = ({ title, value, icon, loading, linkTo }) => {
-    const content = (
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center gap-4 h-full hover:shadow-md transition-shadow">
-            <div className="flex-shrink-0">{icon}</div>
-            <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{title}</p>
-                {loading ?
-                    <div className="h-7 w-20 mt-1 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div> :
-                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{value}</p>
-                }
-            </div>
+const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; loading: boolean; }> = ({ title, value, icon, loading }) => (
+    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center gap-4 h-full">
+        <div className="flex-shrink-0">{icon}</div>
+        <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{title}</p>
+            {loading ?
+                <div className="h-7 w-24 mt-1 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div> :
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{value}</p>
+            }
         </div>
-    );
+    </div>
+);
 
-    if (linkTo) {
-        return <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl">{content}</Link>;
-    }
-    return content;
-};
 
 const AdminDashboardScreen: React.FC = () => {
-  const [pendingListeners, setPendingListeners] = useState<ListenerProfile[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [stats, setStats] = useState({ activeListeners: 0 });
+  const [onboardingListeners, setOnboardingListeners] = useState<ListenerProfile[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
 
-    const unsubPendingListeners = db.collection('listeners').where('status', '==', 'pending')
-      .onSnapshot(snapshot => {
-        setPendingListeners(snapshot.docs.map(doc => doc.data() as ListenerProfile));
-      });
+    const fetchAllData = async () => {
+        try {
+            const getStats = functions.httpsCallable('getAdminDashboardStats');
+            const result = await getStats();
+            setStats(result.data);
+        } catch (error) {
+            console.error("Error fetching dashboard stats:", error);
+        }
+    };
+    fetchAllData();
 
     const unsubApplications = db.collection('applications').where('status', '==', 'pending')
       .onSnapshot(snapshot => {
         setApplications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Application)));
+        setLoading(false); // Stop loading after first fetch
       });
-
-    const unsubActive = db.collection('listeners').where('status', '==', 'active')
+      
+    const unsubOnboarding = db.collection('listeners').where('status', '==', 'onboarding_required')
       .onSnapshot(snapshot => {
-         setStats(prev => ({...prev, activeListeners: snapshot.size}));
-         setLoading(false);
+        setOnboardingListeners(snapshot.docs.map(doc => doc.data() as ListenerProfile));
       });
 
     return () => {
-      unsubPendingListeners();
       unsubApplications();
-      unsubActive();
+      unsubOnboarding();
     };
   }, []);
 
   const handleApplicationAction = async (applicationId: string, action: 'approve' | 'reject') => {
     if (!applicationId) return;
     const confirmationText = action === 'approve'
-      ? 'Are you sure you want to approve this application and create a listener account?'
+      ? 'Are you sure you want to approve this application? This will create a listener account and ask them to complete their profile.'
       : 'Are you sure you want to reject this application?';
     if (!window.confirm(confirmationText)) return;
 
@@ -82,36 +81,47 @@ const AdminDashboardScreen: React.FC = () => {
     }
   };
 
-  const handleFinalApproval = async (uid: string, newStatus: 'active' | 'rejected') => {
-      if (!uid) return;
-      if (!window.confirm(`Are you sure you want to ${newStatus === 'active' ? 'approve' : 'reject'} this listener? This is the final step.`)) return;
-
-      try {
-          await db.collection('listeners').doc(uid).update({ status: newStatus });
-          alert(`Listener has been ${newStatus}.`);
-      } catch (error) {
-          console.error(`Error updating listener status:`, error);
-          alert('Failed to update listener status.');
-      }
-  };
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 bg-slate-50 dark:bg-slate-900 min-h-full">
+    <div className="p-4 sm:p-6 space-y-8 bg-slate-100 dark:bg-slate-900 min-h-full">
         <header>
             <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Admin Dashboard</h1>
-            <p className="text-slate-500 dark:text-slate-400">Welcome, Admin. Here's your overview.</p>
+            <p className="text-slate-500 dark:text-slate-400">Welcome, Admin. Here's your complete business overview.</p>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="New Applications" value={applications.length} icon={<NewApplicationIcon />} loading={loading} />
-            <StatCard title="Pending Final Approval" value={pendingListeners.length} icon={<UserClockIcon />} loading={loading} />
-            <StatCard title="Active Listeners" value={stats.activeListeners} icon={<UserCheckIcon />} loading={loading} />
-            <StatCard title="Manage All Listeners" value="View & Edit" icon={<UsersIcon />} loading={loading} linkTo="/admin/listeners" />
+        {/* Main Stats Grid */}
+        <div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Today's Performance</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard title="Today's Revenue" value={`₹${stats?.dailyRevenue ?? '...'}`} icon={<RupeeIcon />} loading={!stats} />
+                <StatCard title="Today's Profit" value={`₹${stats?.dailyProfit ?? '...'}`} icon={<ProfitIcon />} loading={!stats} />
+                <StatCard title="Today's Calls" value={stats?.dailyCalls ?? '...'} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>} loading={!stats} />
+                <StatCard title="Today's Chats" value={stats?.dailyChats ?? '...'} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>} loading={!stats} />
+            </div>
+        </div>
+
+        {/* Listener Funnel */}
+        <div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Listener Management Funnel</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard title="New Applications" value={applications.length} icon={<NewApplicationIcon />} loading={loading} />
+                <StatCard title="Pending Profile Completion" value={onboardingListeners.length} icon={<UserClockIcon />} loading={loading} />
+                <StatCard title="Active Listeners" value={stats?.activeListeners ?? '...'} icon={<UserCheckIcon />} loading={!stats} />
+                 <Link to="/admin/listeners" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl block bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4 h-full">
+                        <div className="flex-shrink-0"><UsersIcon /></div>
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Manage All Listeners</p>
+                            <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">View & Edit</p>
+                        </div>
+                    </div>
+                </Link>
+            </div>
         </div>
         
         {/* New Applications Table */}
         <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Step 1: New Applications</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">ACTION REQUIRED: New Applications</h3>
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
@@ -140,7 +150,7 @@ const AdminDashboardScreen: React.FC = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-8">No new applications.</td>
+                                    <td colSpan={4} className="text-center py-8">No new applications to review.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -149,9 +159,9 @@ const AdminDashboardScreen: React.FC = () => {
             </div>
         </div>
 
-        {/* Pending Final Approvals Table */}
+        {/* Pending Profile Completion Table */}
         <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Step 2: Pending Final Approvals</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">INFORMATIONAL: Pending Profile Completion</h3>
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
@@ -159,28 +169,27 @@ const AdminDashboardScreen: React.FC = () => {
                             <tr>
                                 <th scope="col" className="px-6 py-3">Name</th>
                                 <th scope="col" className="px-6 py-3">Phone</th>
-                                <th scope="col" className="px-6 py-3">Age / City</th>
+                                <th scope="col" className="px-6 py-3">Approved On</th>
                                 <th scope="col" className="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr><td colSpan={4} className="text-center p-4">Loading...</td></tr>
-                            ) : pendingListeners.length > 0 ? (
-                                pendingListeners.map(listener => (
+                            ) : onboardingListeners.length > 0 ? (
+                                onboardingListeners.map(listener => (
                                     <tr key={listener.uid} className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                                         <th scope="row" className="px-6 py-4 font-medium text-slate-900 dark:text-white whitespace-nowrap">{listener.displayName}</th>
                                         <td className="px-6 py-4">{listener.phone}</td>
-                                        <td className="px-6 py-4">{listener.age} / {listener.city}</td>
+                                        <td className="px-6 py-4">{listener.createdAt?.toDate().toLocaleDateString() ?? 'N/A'}</td>
                                         <td className="px-6 py-4 text-right space-x-2">
-                                            <button onClick={() => handleFinalApproval(listener.uid, 'active')} className="font-medium text-green-600 dark:text-green-500 hover:underline">Final Approve</button>
-                                            <button onClick={() => handleFinalApproval(listener.uid, 'rejected')} className="font-medium text-red-600 dark:text-red-500 hover:underline">Reject</button>
+                                            <button disabled className="font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed">Send Reminder</button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-8">No listeners awaiting final approval.</td>
+                                    <td colSpan={4} className="text-center py-8">No listeners are currently completing their profiles.</td>
                                 </tr>
                             )}
                         </tbody>

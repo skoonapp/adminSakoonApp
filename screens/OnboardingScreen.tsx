@@ -61,16 +61,20 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
     setLoading(true);
     setError(null);
     try {
+      // The backend trigger will automatically change the status from 'onboarding_required' to 'active'
+      // once 'onboardingComplete' is set to true.
       const listenerUpdate = {
         avatarUrl: formData.selectedAvatar,
         city: formData.city,
         age: parseInt(formData.age, 10),
-        status: 'pending', // Set to pending for final admin approval
         onboardingComplete: true,
       };
 
       await db.collection('listeners').doc(user.uid).update(listenerUpdate);
       
+      // Since the status change is now automatic on the backend, we can optimistically redirect.
+      // The App.tsx router will pick up the 'active' status on the next load.
+      // For a brief moment, they might see the pending screen if redirection is faster than the backend trigger.
       history.replace('/pending-approval');
 
     } catch (err) {
