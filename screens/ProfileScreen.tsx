@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../utils/firebase';
-// FIX: Downgraded react-router-dom hooks to v5 syntax (`useNavigate` -> `useHistory`).
-import { useHistory } from 'react-router-dom';
+// FIX: Upgraded from useHistory (v5) to useNavigate (v6).
+import { useNavigate } from 'react-router-dom';
 import ListenerGuidelines from '../components/profile/ListenerGuidelines';
 import { useListener } from '../context/ListenerContext';
 import { TermsContent } from './TermsScreen';
@@ -59,7 +59,8 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
 
 
 const ProfileScreen: React.FC = () => {
-    const history = useHistory();
+    // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
+    const navigate = useNavigate();
     const { profile, loading } = useListener();
     const isInitialLoad = useRef(true);
 
@@ -81,7 +82,8 @@ const ProfileScreen: React.FC = () => {
     const handleLogout = async () => {
         try {
             await auth.signOut();
-            history.push('/login');
+            // FIX: Upgraded from history.push (v5) to navigate (v6).
+            navigate('/login');
         } catch (error) {
             console.error('Error signing out: ', error);
         }

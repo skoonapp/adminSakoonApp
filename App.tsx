@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-// FIX: Downgraded react-router-dom from v6 to v5 syntax.
-import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+// FIX: Upgraded react-router-dom from v5 to v6 syntax.
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
 
@@ -93,75 +93,80 @@ const App: React.FC = () => {
     return <SplashScreen />;
   }
 
+  const renderRoutes = () => {
+    switch (authStatus) {
+      case 'unauthenticated':
+        return (
+          <Routes>
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        );
+      case 'needs_onboarding':
+        return user ? (
+          <Routes>
+            <Route path="/onboarding" element={<OnboardingScreen user={user} />} />
+            <Route path="*" element={<Navigate to="/onboarding" replace />} />
+          </Routes>
+        ) : <SplashScreen />;
+      case 'pending_approval':
+        return (
+          <Routes>
+            <Route path="/pending-approval" element={<PendingApprovalScreen />} />
+            <Route path="*" element={<Navigate to="/pending-approval" replace />} />
+          </Routes>
+        );
+      case 'admin':
+        return (
+          <Routes>
+            <Route path="/admin/listeners" element={<ListenerManagementScreen />} />
+            <Route path="/admin" element={<AdminDashboardScreen />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </Routes>
+        );
+      case 'unauthorized':
+        return (
+          <Routes>
+            <Route path="/unauthorized" element={<UnauthorizedScreen />} />
+            <Route path="*" element={<Navigate to="/unauthorized" replace />} />
+          </Routes>
+        );
+      case 'active':
+        return user ? (
+          <Routes>
+            <Route path="/call/:callId" element={
+              <ListenerProvider user={user}>
+                <ActiveCallScreen />
+              </ListenerProvider>
+            } />
+            <Route path="/*" element={
+              <ListenerProvider user={user}>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<DashboardScreen />} />
+                    <Route path="/calls" element={<CallsScreen />} />
+                    <Route path="/chat" element={<ChatScreen />} />
+                    <Route path="/earnings" element={<EarningsScreen />} />
+                    <Route path="/profile" element={<ProfileScreen />} />
+                    <Route path="/terms" element={<TermsScreen />} />
+                    <Route path="/privacy" element={<PrivacyPolicyScreen />} />
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                  </Routes>
+                </MainLayout>
+              </ListenerProvider>
+            } />
+          </Routes>
+        ) : <SplashScreen />;
+      default:
+        return <SplashScreen />;
+    }
+  };
+
   return (
     <HashRouter>
       <Suspense fallback={<SplashScreen />}>
-        <Switch>
-          {authStatus === 'unauthenticated' && (
-            <>
-              <Route path="/login" component={LoginScreen} />
-              <Redirect to="/login" />
-            </>
-          )}
-
-          {authStatus === 'needs_onboarding' && user && (
-            <>
-              <Route path="/onboarding">
-                <OnboardingScreen user={user} />
-              </Route>
-              <Redirect to="/onboarding" />
-            </>
-          )}
-
-          {authStatus === 'pending_approval' && (
-             <>
-              <Route path="/pending-approval" component={PendingApprovalScreen} />
-              <Redirect to="/pending-approval" />
-            </>
-          )}
-
-          {authStatus === 'admin' && (
-            <>
-              <Route path="/admin/listeners" component={ListenerManagementScreen} />
-              <Route path="/admin" component={AdminDashboardScreen} />
-              <Redirect to="/admin" />
-            </>
-          )}
-          
-          {authStatus === 'unauthorized' && (
-             <>
-              <Route path="/unauthorized" component={UnauthorizedScreen} />
-              <Redirect to="/unauthorized" />
-            </>
-          )}
-
-          {authStatus === 'active' && user && (
-            <>
-              <Route path="/call/:callId">
-                <ListenerProvider user={user}>
-                  <ActiveCallScreen />
-                </ListenerProvider>
-              </Route>
-              <Route path="/">
-                <ListenerProvider user={user}>
-                  <MainLayout>
-                    <Switch>
-                      <Route exact path="/" render={() => <Redirect to="/dashboard" />} />
-                      <Route path="/dashboard" component={DashboardScreen} />
-                      <Route path="/calls" component={CallsScreen} />
-                      <Route path="/chat" component={ChatScreen} />
-                      <Route path="/earnings" component={EarningsScreen} />
-                      <Route path="/profile" component={ProfileScreen} />
-                      <Route path="/terms" component={TermsScreen} />
-                      <Route path="/privacy" component={PrivacyPolicyScreen} />
-                      <Redirect to="/dashboard" />
-                    </Switch>
-                  </MainLayout>
-                </ListenerProvider>
-              </Route>
-            </>
-          )}
-        </Switch>
+        {renderRoutes()}
       </Suspense>
     </HashRouter>
   );
