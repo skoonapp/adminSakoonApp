@@ -44,7 +44,7 @@ const StatusBadge: React.FC<{ status: CallRecord['status'] }> = ({ status }) => 
             break;
         case 'rejected':
             colorClasses = "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300";
-            label = 'Reverse call';
+            label = 'Reverse';
             break;
     }
     return <span className={`${baseClasses} ${colorClasses}`}>{label}</span>;

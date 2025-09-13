@@ -91,25 +91,6 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 };
 
 
-const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center justify-between gap-4 opacity-60 cursor-not-allowed">
-        <div>
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                Active Status
-                <span className="cursor-help" title="Status cannot be changed.">
-                    <svg className="w-4 h-4 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
-                </span>
-            </h3>
-            <p className="text-sm text-red-500 dark:text-red-400">{message}</p>
-        </div>
-        <div className="flex items-center border border-slate-300 dark:border-slate-600 rounded-full p-1 space-x-1">
-            <div className="w-20 py-1.5 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</div>
-            <div className="w-20 py-1.5 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</div>
-            <div className="w-20 py-1.5 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">Online</div>
-        </div>
-    </div>
-);
-
 const StatusToggle: React.FC = () => {
     const { profile, loading: profileLoading } = useListener();
     const [optimisticStatus, setOptimisticStatus] = useState<ListenerAppStatus | null>(null);
@@ -138,11 +119,21 @@ const StatusToggle: React.FC = () => {
     };
     
     if (profileLoading) {
-        return <div className="h-[88px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+        return <div className="h-[74px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
     }
 
     if (!profile || !optimisticStatus) {
-        return <DisabledStatusToggle message="Profile or status could not be loaded." />;
+         return <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm space-y-2 opacity-60">
+            <div className="flex items-center justify-between gap-4">
+                <h3 className="font-semibold text-base text-slate-800 dark:text-slate-200">Active Status</h3>
+                 <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-full p-0.5 space-x-0.5">
+                    <div className="px-3 py-1 w-[70px] text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Offline</div>
+                    <div className="px-3 py-1 w-[70px] text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Busy</div>
+                    <div className="px-3 py-1 w-[70px] text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Online</div>
+                </div>
+            </div>
+            <p className="text-xs text-red-500 dark:text-red-400 text-right pr-1">Profile or status could not be loaded.</p>
+        </div>;
     }
     
     const getSubtitle = () => {
@@ -163,42 +154,31 @@ const StatusToggle: React.FC = () => {
         { label: 'Online', value: 'Available' },
     ];
     
-    const activeIndex = statuses.findIndex(s => s.value === currentUiStatus);
-
     return (
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center justify-between gap-4">
-            <div>
-                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm space-y-2">
+            <div className="flex items-center justify-between gap-4">
+                <h3 className="font-semibold text-base text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                     Active Status
-                    <span className="cursor-help" title="Set your status to control incoming calls.">
-                        <svg className="w-4 h-4 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
-                    </span>
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
-            </div>
 
-            <div className="relative flex items-center border border-slate-300 dark:border-slate-600 rounded-full p-1">
-                <div
-                    className="absolute top-1 left-1 bottom-1 h-auto transition-all duration-300 ease-in-out rounded-full shadow"
-                    style={{
-                        width: 'calc(33.333% - 2.66px)',
-                        transform: `translateX(${activeIndex * 100}%)`,
-                        backgroundColor: currentUiStatus === 'Available' ? '#22c55e' : (currentUiStatus === 'Busy' ? '#f97316' : '#64748b')
-                    }}
-                />
-                {statuses.map(status => (
-                    <button
-                        key={status.value}
-                        onClick={() => handleStatusChange(status.value)}
-                        className="relative z-10 w-20 py-1.5 text-sm font-semibold rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-                        aria-pressed={currentUiStatus === status.value}
-                    >
-                        <span className={`transition-colors duration-300 ${currentUiStatus === status.value ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+                <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-full p-0.5 space-x-0.5">
+                    {statuses.map(status => (
+                        <button
+                            key={status.value}
+                            onClick={() => handleStatusChange(status.value)}
+                            className={`px-3 py-1 w-[70px] text-center text-xs font-semibold rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
+                                currentUiStatus === status.value
+                                    ? (status.value === 'Available' ? 'bg-green-500 text-white shadow' : (status.value === 'Busy' ? 'bg-orange-500 text-white shadow' : 'bg-slate-500 text-white shadow'))
+                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                            }`}
+                            aria-pressed={currentUiStatus === status.value}
+                        >
                             {status.label}
-                        </span>
-                    </button>
-                ))}
+                        </button>
+                    ))}
+                </div>
             </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-right pr-1">{getSubtitle()}</p>
         </div>
     );
 };
@@ -318,11 +298,11 @@ const DashboardScreen: React.FC = () => {
     }, [allActivities]);
 
     return (
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-4">
             <InstallPWAButton />
             <StatusToggle />
             
-            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+            <hr className="my-4 border-slate-200 dark:border-slate-700" />
             
             {/* Today's Summary */}
             <div>
@@ -335,7 +315,7 @@ const DashboardScreen: React.FC = () => {
                 </div>
             </div>
 
-            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+            <hr className="my-4 border-slate-200 dark:border-slate-700" />
 
             {/* This Week's Performance */}
              <div>
@@ -348,7 +328,7 @@ const DashboardScreen: React.FC = () => {
                 </div>
             </div>
 
-            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+            <hr className="my-4 border-slate-200 dark:border-slate-700" />
 
             {/* Recent Activity */}
             <div>
