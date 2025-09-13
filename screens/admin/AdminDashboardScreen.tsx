@@ -1,9 +1,12 @@
 
 
+
+
 import React, { useState, useEffect } from 'react';
 import { db, functions, auth } from '../../utils/firebase';
 import type { ListenerProfile, Application } from '../../types';
-import { Link, useNavigate } from 'react-router-dom';
+// FIX: Reverted useNavigate to useHistory for react-router-dom v5 compatibility.
+import { Link, useHistory } from 'react-router-dom';
 
 // --- Icon Components ---
 const RupeeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-5 4h4m5 4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
@@ -59,12 +62,12 @@ const AdminDashboardScreen: React.FC = () => {
   const [onboardingListeners, setOnboardingListeners] = useState<ListenerProfile[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const handleLogout = async () => {
     try {
         await auth.signOut();
-        navigate('/login'); 
+        history.push('/login'); 
     } catch (error) {
         console.error('Error signing out: ', error);
         alert('Could not log out. Please try again.');

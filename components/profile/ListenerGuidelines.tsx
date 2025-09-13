@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 // --- Icons ---
-const ChevronDownIcon: React.FC<{ isOpen: boolean }> = ({ isOpen }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-);
 const SectionIcon: React.FC<{ children: React.ReactNode, colorClass: string }> = ({ children, colorClass }) => (
     <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${colorClass}`}>
         {children}
@@ -28,72 +23,56 @@ const GuidelineSection: React.FC<{ title: string; children: React.ReactNode; ico
     </div>
 );
 
-const ListenerGuidelines: React.FC = () => {
-    const [isOpen, setIsOpen] = useState(false);
-
+export const GuidelinesContent: React.FC = () => {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex justify-between items-center text-left p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-lg"
-                aria-expanded={isOpen}
-            >
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">Listener Guidelines & FAQ</h2>
-                <ChevronDownIcon isOpen={isOpen} />
-            </button>
-            <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isOpen ? 'max-h-[2000px]' : 'max-h-0'}`}>
-                <div className="border-t border-slate-200 dark:border-slate-700 divide-y divide-slate-200 dark:divide-slate-700">
-                    <GuidelineSection title="User Interaction Rules" icon={<UserIcon />} colorClass="bg-blue-500">
-                        <ul className="list-disc list-outside pl-5 space-y-1">
-                            <li>कॉल या चैट को बीच में disconnect मत करें।</li>
-                            <li>User के साथ misbehave नहीं करें।</li>
-                            <li className="text-red-600 dark:text-red-400 font-semibold">Abusing, sexual content या offensive language पूरी तरह मना है।</li>
-                            <li className="text-red-600 dark:text-red-400 font-semibold">Personal details share करने से आपकी ID suspend या disable हो सकती है।</li>
-                            <li className="bg-yellow-100 dark:bg-yellow-900/50 p-2 rounded-md font-medium text-yellow-800 dark:text-yellow-300">Admin आपकी activity monitor कर रहे हैं।</li>
-                        </ul>
-                    </GuidelineSection>
+        <div className="divide-y divide-slate-200 dark:divide-slate-700 -m-4 md:-m-6">
+            <GuidelineSection title="User Interaction Rules" icon={<UserIcon />} colorClass="bg-blue-500">
+                <ul className="list-disc list-outside pl-5 space-y-1">
+                    <li>कॉल या चैट को बीच में disconnect मत करें।</li>
+                    <li>User के साथ misbehave नहीं करें।</li>
+                    <li className="text-red-600 dark:text-red-400 font-semibold">Abusing, sexual content या offensive language पूरी तरह मना है।</li>
+                    <li className="text-red-600 dark:text-red-400 font-semibold">Personal details share करने से आपकी ID suspend या disable हो सकती है।</li>
+                    <li className="bg-yellow-100 dark:bg-yellow-900/50 p-2 rounded-md font-medium text-yellow-800 dark:text-yellow-300">Admin आपकी activity monitor कर रहे हैं।</li>
+                </ul>
+            </GuidelineSection>
 
-                    <GuidelineSection title="Performance & Engagement" icon={<ChartIcon />} colorClass="bg-green-500">
-                         <ul className="list-disc list-outside pl-5 space-y-1">
-                            <li>आपकी earning performance-based होगी।</li>
-                            <li>Engagement जितना ज़्यादा, earning उतनी ज़्यादा।</li>
-                            <li>Engagement कम → income decrease।</li>
-                            <li className="font-semibold text-green-700 dark:text-green-300">High-quality engagement → extra incentives मिल सकते हैं।</li>
-                        </ul>
-                    </GuidelineSection>
+            <GuidelineSection title="Performance & Engagement" icon={<ChartIcon />} colorClass="bg-green-500">
+                 <ul className="list-disc list-outside pl-5 space-y-1">
+                    <li>आपकी earning performance-based होगी।</li>
+                    <li>Engagement जितना ज़्यादा, earning उतनी ज़्यादा।</li>
+                    <li>Engagement कम → income decrease।</li>
+                    <li className="font-semibold text-green-700 dark:text-green-300">High-quality engagement → extra incentives मिल सकते हैं।</li>
+                </ul>
+            </GuidelineSection>
 
-                    <GuidelineSection title="Safety & Privacy" icon={<ShieldIcon />} colorClass="bg-indigo-500">
-                         <ul className="list-disc list-outside pl-5 space-y-1">
-                            <li>User और listener की privacy हमेशा safe रहेगी।</li>
-                            <li>Personal contact, address या sensitive info share न करें।</li>
-                            <li>Suspicious activity → report immediately।</li>
-                        </ul>
-                    </GuidelineSection>
+            <GuidelineSection title="Safety & Privacy" icon={<ShieldIcon />} colorClass="bg-indigo-500">
+                 <ul className="list-disc list-outside pl-5 space-y-1">
+                    <li>User और listener की privacy हमेशा safe रहेगी।</li>
+                    <li>Personal contact, address या sensitive info share न करें।</li>
+                    <li>Suspicious activity → report immediately।</li>
+                </ul>
+            </GuidelineSection>
 
-                    <GuidelineSection title="Professional Conduct" icon={<BriefcaseIcon />} colorClass="bg-purple-500">
-                        <ul className="list-disc list-outside pl-5 space-y-1">
-                            <li>हमेशा friendly, polite और respectful रहें।</li>
-                            <li>User satisfaction पर ध्यान दें → long calls/chats → higher earnings।</li>
-                            <li>Admin feedback follow करें।</li>
-                        </ul>
-                    </GuidelineSection>
-                    
-                    <GuidelineSection title="Consequences of Violation" icon={<WarningIcon />} colorClass="bg-red-500">
-                        <ul className="list-disc list-outside pl-5 space-y-1 font-semibold text-red-600 dark:text-red-400">
-                            <li>Rules violate → earning suspend या reduce हो सकती है।</li>
-                            <li>Serious violation → ID permanently disable हो सकता है।</li>
-                        </ul>
-                    </GuidelineSection>
+            <GuidelineSection title="Professional Conduct" icon={<BriefcaseIcon />} colorClass="bg-purple-500">
+                <ul className="list-disc list-outside pl-5 space-y-1">
+                    <li>हमेशा friendly, polite और respectful रहें।</li>
+                    <li>User satisfaction पर ध्यान दें → long calls/chats → higher earnings।</li>
+                    <li>Admin feedback follow करें।</li>
+                </ul>
+            </GuidelineSection>
+            
+            <GuidelineSection title="Consequences of Violation" icon={<WarningIcon />} colorClass="bg-red-500">
+                <ul className="list-disc list-outside pl-5 space-y-1 font-semibold text-red-600 dark:text-red-400">
+                    <li>Rules violate → earning suspend या reduce हो सकती है।</li>
+                    <li>Serious violation → ID permanently disable हो सकता है।</li>
+                </ul>
+            </GuidelineSection>
 
-                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50">
-                        <blockquote className="text-center italic font-semibold text-slate-700 dark:text-slate-300">
-                            “Respect users, maintain engagement, follow rules, grow your income safely.”
-                        </blockquote>
-                    </div>
-                </div>
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50">
+                <blockquote className="text-center italic font-semibold text-slate-700 dark:text-slate-300">
+                    “Respect users, maintain engagement, follow rules, grow your income safely.”
+                </blockquote>
             </div>
         </div>
     );
 };
-
-export default ListenerGuidelines;

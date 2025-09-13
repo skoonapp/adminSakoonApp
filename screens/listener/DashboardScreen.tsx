@@ -2,6 +2,8 @@
 
 
 
+
+
 import React, { useState, useEffect, useMemo } from 'react';
 // FIX: The import for `Link` is correct for react-router-dom v5. The error was likely a cascading issue from other files using v6 syntax.
 import { Link } from 'react-router-dom';
@@ -73,8 +75,8 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
     return (
         <div className="flex items-center justify-between py-3">
             <div className="flex items-center gap-3 overflow-hidden">
-                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-cyan-100 dark:bg-cyan-900/50`}>
-                    {isCall ? <PhoneIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-300"/> : <ChatIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-300"/>}
+                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCall ? 'bg-cyan-100 dark:bg-cyan-900/50' : 'bg-purple-100 dark:bg-purple-900/50'}`}>
+                    {isCall ? <PhoneIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-300"/> : <ChatIcon className="h-5 w-5 text-purple-600 dark:text-purple-300"/>}
                 </div>
                 <div className="overflow-hidden">
                     <p className="font-semibold text-slate-700 dark:text-slate-300 truncate">
@@ -96,17 +98,17 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 
 const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
-    <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 opacity-60">
-        <div className="flex-grow text-center sm:text-left">
+    <div className="bg-white dark:bg-slate-800 p-2 sm:p-1.5 rounded-xl shadow-sm flex items-center justify-between gap-4 opacity-60">
+        <div className="flex-grow text-left px-2">
             <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">Active Status</h3>
             <p className="text-xs text-red-500 dark:text-red-400 mt-1">{message}</p>
         </div>
-        <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0 cursor-not-allowed">
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
-            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
-            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
+        <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0 cursor-not-allowed">
+            <div className="inline-flex items-stretch rounded-full space-x-1">
+                <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
+                <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
+                <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
+            </div>
         </div>
     </div>
 );
@@ -146,7 +148,7 @@ const StatusToggle: React.FC = () => {
     };
     
     if (profileLoading) {
-        return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+        return <div className="h-16 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
     }
 
     if (!profile) {
@@ -178,36 +180,40 @@ const StatusToggle: React.FC = () => {
         { label: 'Online', value: 'Available' },
     ];
 
+    const getButtonClasses = (statusValue: ListenerAppStatus) => {
+        const base = "px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500";
+        if (currentUiStatus === statusValue) {
+            switch(statusValue) {
+                case 'Available': return `${base} bg-green-500 text-white shadow`;
+                case 'Busy': return `${base} bg-slate-500 text-white shadow`;
+                case 'Offline': return `${base} bg-slate-500 text-white shadow`;
+                default: return `${base} bg-white dark:bg-slate-900 shadow-sm text-slate-800 dark:text-slate-100`;
+            }
+        }
+        return `${base} text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-slate-600/50`;
+    };
+
     return (
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex-grow text-center sm:text-left">
-                <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 flex items-center justify-center sm:justify-start">
+        <div className="bg-white dark:bg-slate-800 p-2 sm:p-1.5 rounded-xl shadow-sm flex items-center justify-between gap-2">
+            <div className="flex-grow text-left px-2">
+                <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">
                     Active Status
-                    <span className="ml-1.5 text-slate-400 cursor-help" title="Set your status to control incoming calls.">
-                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
-                    </span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
             </div>
             
-            <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0">
-                {statuses.map((status, index) => (
-                    <React.Fragment key={status.value}>
+             <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0">
+                <div className="inline-flex items-stretch rounded-full space-x-1">
+                    {statuses.map((status) => (
                         <button
+                            key={status.value}
                             onClick={() => handleStatusChange(status.value)}
-                            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
-                                currentUiStatus === status.value
-                                    ? (status.value === 'Available' ? 'bg-green-500 text-white shadow-md' : 'text-slate-800 dark:text-slate-100')
-                                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
-                            }`}
+                            className={getButtonClasses(status.value)}
                         >
                             {status.label}
                         </button>
-                        {index < statuses.length - 1 && (
-                            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-                        )}
-                    </React.Fragment>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );

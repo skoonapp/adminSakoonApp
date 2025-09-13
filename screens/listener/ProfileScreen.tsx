@@ -1,11 +1,17 @@
 
 
 
+
+
+
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../../utils/firebase';
 // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-import { useNavigate } from 'react-router-dom';
-import ListenerGuidelines from '../../components/profile/ListenerGuidelines';
+// FIX: Reverted useNavigate to useHistory for react-router-dom v5 compatibility.
+import { useHistory } from 'react-router-dom';
+import { GuidelinesContent } from '../../components/profile/ListenerGuidelines';
 import { useListener } from '../../context/ListenerContext';
 import { TermsContent } from './TermsScreen';
 import { PrivacyPolicyContent } from './PrivacyPolicyScreen';
@@ -18,12 +24,11 @@ const ChevronDownIcon: React.FC<{ isOpen: boolean; className?: string }> = ({ is
     </svg>
 );
 
-const Accordion: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const Accordion: React.FC<{ title: string; children: React.ReactNode; isOpen: boolean; onToggle: () => void; }> = ({ title, children, isOpen, onToggle }) => {
     return (
         <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={onToggle}
                 className="w-full flex justify-between items-center text-left p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg"
                 aria-expanded={isOpen}
             >
@@ -63,9 +68,10 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
 
 const ProfileScreen: React.FC = () => {
     // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-    const navigate = useNavigate();
+    const history = useHistory();
     const { profile, loading } = useListener();
     const isInitialLoad = useRef(true);
+    const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
     const [localSettings, setLocalSettings] = useState({
         calls: true,
@@ -82,11 +88,15 @@ const ProfileScreen: React.FC = () => {
         }
     }, [profile]);
 
+    const handleAccordionToggle = (accordionKey: string) => {
+        setOpenAccordion(prev => (prev === accordionKey ? null : accordionKey));
+    };
+
     const handleLogout = async () => {
         try {
             await auth.signOut();
             // FIX: Upgraded from history.push (v5) to navigate (v6).
-            navigate('/login');
+            history.push('/login');
         } catch (error) {
             console.error('Error signing out: ', error);
         }
@@ -107,8 +117,10 @@ const ProfileScreen: React.FC = () => {
         }
     };
 
-    const sections = [
-        <div key="profile" className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm">
+
+  return (
+    <div className="p-4 space-y-3">
+        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm">
           <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-cyan-100 dark:bg-cyan-900/50 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 shrink-0">
@@ -122,8 +134,9 @@ const ProfileScreen: React.FC = () => {
                 Logout
               </button>
           </div>
-        </div>,
-        <div key="notifications" className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        </div>
+        
+        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
              <h3 className="p-4 text-lg font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700">Notification Settings</h3>
             <div className="divide-y divide-slate-200 dark:divide-slate-700">
                 <div className="flex justify-between items-center p-4">
@@ -141,8 +154,9 @@ const ProfileScreen: React.FC = () => {
                     <ToggleSwitch checked={localSettings.messages} onChange={(v) => handleSettingsChange('messages', v)} disabled={loading} />
                 </div>
             </div>
-        </div>,
-        <div key="support" className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        </div>
+        
+        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
             <a href="https://chat.whatsapp.com/FDgBcmlnuBUFeuSSdy4Yhy?mode=ems_copy_c" target="_blank" rel="noopener noreferrer" className="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl">
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white"><WhatsAppIcon className="w-6 h-6" /></div>
@@ -153,15 +167,32 @@ const ProfileScreen: React.FC = () => {
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
             </a>
-        </div>,
-        <ListenerGuidelines key="guidelines" />,
-        <Accordion key="terms" title="Terms & Conditions"><TermsContent /></Accordion>,
-        <Accordion key="privacy" title="Privacy Policy"><PrivacyPolicyContent /></Accordion>,
-    ];
+        </div>
+        
+        <Accordion 
+            title="Listener Guidelines & FAQ"
+            isOpen={openAccordion === 'guidelines'}
+            onToggle={() => handleAccordionToggle('guidelines')}
+        >
+            <GuidelinesContent />
+        </Accordion>
+        
+        <Accordion 
+            title="Terms & Conditions"
+            isOpen={openAccordion === 'terms'}
+            onToggle={() => handleAccordionToggle('terms')}
+        >
+            <TermsContent />
+        </Accordion>
 
-  return (
-    <div className="p-4 space-y-4">
-        {sections.map((section) => section)}
+        <Accordion 
+            title="Privacy Policy"
+            isOpen={openAccordion === 'privacy'}
+            onToggle={() => handleAccordionToggle('privacy')}
+        >
+            <PrivacyPolicyContent />
+        </Accordion>
+
     </div>
   );
 };

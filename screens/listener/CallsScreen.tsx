@@ -23,6 +23,18 @@ const FilterButton: React.FC<{
     </select>
 );
 
+const StatusTab: React.FC<{label: string; value: StatusFilter; active: boolean; onClick: (value: StatusFilter) => void}> = ({ label, value, active, onClick }) => {
+    const baseClasses = "px-4 py-2 text-sm font-medium focus:outline-none whitespace-nowrap";
+    const activeClasses = "border-b-2 border-cyan-500 text-cyan-600 dark:text-cyan-400";
+    const inactiveClasses = "border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-600";
+    
+    return (
+        <button onClick={() => onClick(value)} className={`${baseClasses} ${active ? activeClasses : inactiveClasses}`}>
+            {label}
+        </button>
+    );
+};
+
 
 const CallsScreen: React.FC = () => {
     const { profile } = useListener();
@@ -81,24 +93,18 @@ const CallsScreen: React.FC = () => {
         return calls;
     }, [allCalls, statusFilter, dateFilter]);
 
+    const statusOptions: {value: StatusFilter, label: string}[] = [
+        { value: 'all', label: 'All Calls' },
+        { value: 'completed', label: 'Completed' },
+        { value: 'missed', label: 'Missed' },
+        { value: 'rejected', label: 'Rejected' },
+    ];
+
     return (
         <div className="p-4 space-y-4">
-            <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Call History</h1>
+            <header className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-slate-500 dark:text-slate-400">Review your recent calls.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <FilterButton 
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-                        options={[
-                            { value: 'all', label: 'All Statuses' },
-                            { value: 'completed', label: 'Completed' },
-                            { value: 'missed', label: 'Missed' },
-                            { value: 'rejected', label: 'Rejected' },
-                        ]}
-                    />
                     <FilterButton 
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value as DateFilter)}
@@ -109,6 +115,11 @@ const CallsScreen: React.FC = () => {
                             { value: '30d', label: 'Last 30 Days' },
                         ]}
                     />
+                </div>
+                 <div className="flex items-center border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
+                    {statusOptions.map(opt => (
+                        <StatusTab key={opt.value} label={opt.label} value={opt.value} active={statusFilter === opt.value} onClick={setStatusFilter} />
+                    ))}
                 </div>
             </header>
             

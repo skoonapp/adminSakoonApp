@@ -1,9 +1,10 @@
 
 
 
+
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax to match project dependencies.
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+// FIX: Downgraded react-router-dom from v6 to v5 syntax to match project dependencies.
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
 
@@ -104,67 +105,55 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <Suspense fallback={<SplashScreen />}>
-        <Routes>
-            {authStatus === 'unauthenticated' && (
-                <>
-                    <Route path="/login" element={<LoginScreen />} />
-                    <Route path="*" element={<Navigate to="/login" replace />} />
-                </>
-            )}
-            {authStatus === 'needs_onboarding' && user && (
-                <>
-                    <Route path="/onboarding" element={<OnboardingScreen user={user} />} />
-                    <Route path="*" element={<Navigate to="/onboarding" replace />} />
-                </>
-            )}
-            {authStatus === 'pending_approval' && (
-                <>
-                    <Route path="/pending-approval" element={<PendingApprovalScreen />} />
-                    <Route path="*" element={<Navigate to="/pending-approval" replace />} />
-                </>
-            )}
-            {authStatus === 'admin' && (
-                <>
-                    <Route path="/admin/listeners" element={<ListenerManagementScreen />} />
-                    <Route path="/admin" element={<AdminDashboardScreen />} />
-                    <Route path="*" element={<Navigate to="/admin" replace />} />
-                </>
-            )}
-            {authStatus === 'unauthorized' && (
-                <>
-                    <Route path="/unauthorized" element={<UnauthorizedScreen />} />
-                    <Route path="*" element={<Navigate to="/unauthorized" replace />} />
-                </>
-            )}
+        <Switch>
+            {authStatus === 'unauthenticated' && [
+                <Route key="login" path="/login"><LoginScreen /></Route>,
+                <Redirect key="redirect" to="/login" />
+            ]}
+            {authStatus === 'needs_onboarding' && user && [
+                <Route key="onboarding" path="/onboarding" render={() => <OnboardingScreen user={user} />} />,
+                <Redirect key="redirect" to="/onboarding" />
+            ]}
+            {authStatus === 'pending_approval' && [
+                <Route key="pending" path="/pending-approval"><PendingApprovalScreen /></Route>,
+                <Redirect key="redirect" to="/pending-approval" />
+            ]}
+            {authStatus === 'admin' && [
+                <Route key="listeners" path="/admin/listeners"><ListenerManagementScreen /></Route>,
+                <Route key="admin" path="/admin" component={AdminDashboardScreen} />,
+                <Redirect key="redirect" to="/admin" />
+            ]}
+            {authStatus === 'unauthorized' && [
+                <Route key="unauthorized" path="/unauthorized"><UnauthorizedScreen /></Route>,
+                <Redirect key="redirect" to="/unauthorized" />
+            ]}
             {authStatus === 'active' && user && (
-                <>
-                    <Route path="/call/:callId" element={
-                        <ListenerProvider user={user}>
+                <ListenerProvider user={user}>
+                    <Switch>
+                        <Route path="/call/:callId">
                             <ActiveCallScreen />
-                        </ListenerProvider>
-                    } />
-                    <Route path="/*" element={
-                        <ListenerProvider user={user}>
+                        </Route>
+                        <Route path="/">
                             <MainLayout>
-                                <Routes>
-                                    <Route path="dashboard" element={<DashboardScreen />} />
-                                    <Route path="calls" element={<CallsScreen />} />
-                                    <Route path="chat" element={<ChatScreen />} />
-                                    <Route path="earnings" element={<EarningsScreen />} />
-                                    <Route path="profile" element={<ProfileScreen />} />
-                                    <Route path="terms" element={<TermsScreen />} />
-                                    <Route path="privacy" element={<PrivacyPolicyScreen />} />
-                                    <Route index element={<Navigate to="/dashboard" replace />} />
-                                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                                </Routes>
+                                <Switch>
+                                    <Route path="/dashboard"><DashboardScreen /></Route>
+                                    <Route path="/calls"><CallsScreen /></Route>
+                                    <Route path="/chat"><ChatScreen /></Route>
+                                    <Route path="/earnings"><EarningsScreen /></Route>
+                                    <Route path="/profile"><ProfileScreen /></Route>
+                                    <Route path="/terms"><TermsScreen /></Route>
+                                    <Route path="/privacy"><PrivacyPolicyScreen /></Route>
+                                    <Redirect from="/" to="/dashboard" exact />
+                                    <Redirect to="/dashboard" />
+                                </Switch>
                             </MainLayout>
-                        </ListenerProvider>
-                    } />
-                </>
+                        </Route>
+                    </Switch>
+                </ListenerProvider>
             )}
              {/* Fallback for unhandled statuses or when conditions are not met */}
-             <Route path="*" element={<SplashScreen />} />
-        </Routes>
+             <Route path="*"><SplashScreen /></Route>
+        </Switch>
       </Suspense>
     </HashRouter>
   );

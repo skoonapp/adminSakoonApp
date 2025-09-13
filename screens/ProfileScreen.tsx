@@ -1,10 +1,14 @@
 
 
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../utils/firebase';
 // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-import { useNavigate } from 'react-router-dom';
-import ListenerGuidelines from '../components/profile/ListenerGuidelines';
+// FIX: Reverted useNavigate to useHistory for react-router-dom v5 compatibility.
+import { useHistory } from 'react-router-dom';
+// FIX: Corrected import to be a named import for GuidelinesContent and fixed usage.
+import { GuidelinesContent } from '../components/profile/ListenerGuidelines';
 import { useListener } from '../context/ListenerContext';
 import { TermsContent } from './TermsScreen';
 import { PrivacyPolicyContent } from './PrivacyPolicyScreen';
@@ -62,7 +66,7 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
 
 const ProfileScreen: React.FC = () => {
     // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-    const navigate = useNavigate();
+    const history = useHistory();
     const { profile, loading } = useListener();
     const isInitialLoad = useRef(true);
 
@@ -85,7 +89,7 @@ const ProfileScreen: React.FC = () => {
         try {
             await auth.signOut();
             // FIX: Upgraded from history.push (v5) to navigate (v6).
-            navigate('/login');
+            history.push('/login');
         } catch (error) {
             console.error('Error signing out: ', error);
         }
@@ -153,7 +157,7 @@ const ProfileScreen: React.FC = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
             </a>
         </div>,
-        <ListenerGuidelines key="guidelines" />,
+        <Accordion key="guidelines" title="Listener Guidelines"><GuidelinesContent /></Accordion>,
         <Accordion key="terms" title="Terms & Conditions"><TermsContent /></Accordion>,
         <Accordion key="privacy" title="Privacy Policy"><PrivacyPolicyContent /></Accordion>,
     ];
