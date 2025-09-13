@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { db } from '../../utils/firebase';
 import { useListener } from '../../context/ListenerContext';
 import type { CallRecord } from '../../types';
@@ -11,7 +11,7 @@ const FilterButton: React.FC<{
   options: { value: string, label: string }[];
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-}> = ({ options, value, onChange }) => (
+}> = memo(({ options, value, onChange }) => (
     <select 
         value={value} 
         onChange={onChange}
@@ -21,9 +21,9 @@ const FilterButton: React.FC<{
             <option key={option.value} value={option.value}>{option.label}</option>
         ))}
     </select>
-);
+));
 
-const StatusTab: React.FC<{label: string; value: StatusFilter; active: boolean; onClick: (value: StatusFilter) => void}> = ({ label, value, active, onClick }) => {
+const StatusTab: React.FC<{label: string; value: StatusFilter; active: boolean; onClick: (value: StatusFilter) => void}> = memo(({ label, value, active, onClick }) => {
     const baseClasses = "px-4 py-2 text-sm font-medium focus:outline-none whitespace-nowrap";
     const activeClasses = "border-b-2 border-cyan-500 text-cyan-600 dark:text-cyan-400";
     const inactiveClasses = "border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-600";
@@ -33,7 +33,7 @@ const StatusTab: React.FC<{label: string; value: StatusFilter; active: boolean; 
             {label}
         </button>
     );
-};
+});
 
 
 const CallsScreen: React.FC = () => {
@@ -93,6 +93,14 @@ const CallsScreen: React.FC = () => {
         return calls;
     }, [allCalls, statusFilter, dateFilter]);
 
+    const handleStatusFilterChange = useCallback((value: StatusFilter) => {
+        setStatusFilter(value);
+    }, []);
+
+    const handleDateFilterChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        setDateFilter(e.target.value as DateFilter);
+    }, []);
+
     const statusOptions: {value: StatusFilter, label: string}[] = [
         { value: 'all', label: 'All Calls' },
         { value: 'completed', label: 'Completed' },
@@ -107,7 +115,7 @@ const CallsScreen: React.FC = () => {
                     <p className="text-slate-500 dark:text-slate-400">Review your recent calls.</p>
                     <FilterButton 
                         value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+                        onChange={handleDateFilterChange}
                         options={[
                             { value: 'all', label: 'All Time' },
                             { value: 'today', label: 'Today' },
@@ -118,7 +126,7 @@ const CallsScreen: React.FC = () => {
                 </div>
                  <div className="flex items-center border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
                     {statusOptions.map(opt => (
-                        <StatusTab key={opt.value} label={opt.label} value={opt.value} active={statusFilter === opt.value} onClick={setStatusFilter} />
+                        <StatusTab key={opt.value} label={opt.label} value={opt.value} active={statusFilter === opt.value} onClick={handleStatusFilterChange} />
                     ))}
                 </div>
             </header>

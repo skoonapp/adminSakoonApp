@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { FORBIDDEN_CONTENT_PATTERN } from '../../utils/chatSecurity';
 import type { ChatMessage } from '../../types';
 
@@ -204,4 +204,4 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendText, onSendAudio, recentMe
     );
 };
 
-export default ChatInput;
+export default memo(ChatInput);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { auth, db } from '../../utils/firebase';
 // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ const ChevronDownIcon: React.FC<{ isOpen: boolean; className?: string }> = ({ is
     </svg>
 );
 
-const Accordion: React.FC<{ title: string; children: React.ReactNode; isOpen: boolean; onToggle: () => void; }> = ({ title, children, isOpen, onToggle }) => {
+const Accordion: React.FC<{ title: string; children: React.ReactNode; isOpen: boolean; onToggle: () => void; }> = memo(({ title, children, isOpen, onToggle }) => {
     return (
         <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
             <button
@@ -33,10 +33,10 @@ const Accordion: React.FC<{ title: string; children: React.ReactNode; isOpen: bo
             </div>
         </div>
     );
-};
+});
 
 
-const ToggleSwitch: React.FC<{ checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean; }> = ({ checked, onChange, disabled }) => (
+const ToggleSwitch: React.FC<{ checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean; }> = memo(({ checked, onChange, disabled }) => (
     <button
         type="button"
         disabled={disabled}
@@ -48,7 +48,7 @@ const ToggleSwitch: React.FC<{ checked: boolean; onChange: (checked: boolean) =>
             className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ease-in-out ${checked ? 'translate-x-6' : 'translate-x-1'}`}
         />
     </button>
-);
+));
 
 const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
@@ -82,7 +82,6 @@ const EarningStructureContent: React.FC = () => (
 
 
 const ProfileScreen: React.FC = () => {
-    // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
     const navigate = useNavigate();
     const { profile, loading } = useListener();
     const isInitialLoad = useRef(true);
@@ -103,21 +102,20 @@ const ProfileScreen: React.FC = () => {
         }
     }, [profile]);
 
-    const handleAccordionToggle = (accordionKey: string) => {
+    const handleAccordionToggle = useCallback((accordionKey: string) => {
         setOpenAccordion(prev => (prev === accordionKey ? null : accordionKey));
-    };
+    }, []);
 
-    const handleLogout = async () => {
+    const handleLogout = useCallback(async () => {
         try {
             await auth.signOut();
-            // FIX: Upgraded from history.push (v5) to navigate (v6).
             navigate('/login');
         } catch (error) {
             console.error('Error signing out: ', error);
         }
-    };
+    }, [navigate]);
     
-    const handleSettingsChange = async (key: 'calls' | 'messages', value: boolean) => {
+    const handleSettingsChange = useCallback(async (key: 'calls' | 'messages', value: boolean) => {
         if (!profile?.uid) return;
         setLocalSettings(prev => ({ ...prev, [key]: value }));
         try {
@@ -130,7 +128,7 @@ const ProfileScreen: React.FC = () => {
             setLocalSettings(prev => ({ ...prev, [key]: !value }));
             alert(`Could not save setting for ${key}. Please try again.`);
         }
-    };
+    }, [profile]);
 
 
   return (

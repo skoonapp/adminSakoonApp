@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useListener } from '../../context/ListenerContext';
 import { db, storage } from '../../utils/firebase';
 import type { ListenerChatSession, ChatMessage } from '../../types';
@@ -80,7 +80,7 @@ const ChatScreen: React.FC = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const handleSendText = async (text: string) => {
+    const handleSendText = useCallback(async (text: string) => {
         if (!profile || !activeSession) return;
         const message: Omit<ChatMessage, 'id'> = {
             senderId: profile.uid,
@@ -90,9 +90,9 @@ const ChatScreen: React.FC = () => {
             type: 'text',
         };
         await db.collection('chats').doc(activeSession.id).collection('messages').add(message);
-    };
+    }, [profile, activeSession]);
     
-    const handleSendAudio = async (audioBlob: Blob, duration: number) => {
+    const handleSendAudio = useCallback(async (audioBlob: Blob, duration: number) => {
         if (!profile || !activeSession) return;
         const filePath = `chats/${activeSession.id}/${new Date().getTime()}.webm`;
         const fileRef = storage.ref(filePath);
@@ -109,7 +109,7 @@ const ChatScreen: React.FC = () => {
             duration: Math.round(duration),
         };
         await db.collection('chats').doc(activeSession.id).collection('messages').add(message);
-    };
+    }, [profile, activeSession]);
 
     return (
         <div className="flex h-full">

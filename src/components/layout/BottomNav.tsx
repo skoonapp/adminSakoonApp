@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 // FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced hooks for v6 compatibility.
 import { Link, useMatch, useResolvedPath } from 'react-router-dom';
 
@@ -10,7 +10,7 @@ const navItems = [
   { path: '/profile', label: 'Profile', icon: (active: boolean) => <IconProfile active={active} /> },
 ];
 
-const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) => React.ReactNode; }> = ({ path, label, icon }) => {
+const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) => React.ReactNode; }> = memo(({ path, label, icon }) => {
     // FIX: Replaced v5 useRouteMatch with v6's useResolvedPath and useMatch
     const resolved = useResolvedPath(path);
     const match = useMatch({ path: resolved.pathname, end: true });
@@ -34,7 +34,7 @@ const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) =
             <span className={`transition-all duration-200 ${labelStyle} ${textColor} group-hover:text-slate-800 dark:group-hover:text-slate-200`}>{label}</span>
         </Link>
     );
-};
+});
 
 
 const BottomNav: React.FC = () => {

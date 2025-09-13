@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useListener } from '../../context/ListenerContext';
 import { db } from '../../utils/firebase';
@@ -37,7 +37,7 @@ const formatDuration = (seconds: number = 0): string => {
 };
 
 type StatCardColor = 'blue' | 'indigo' | 'purple' | 'green';
-const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.ReactNode; color: StatCardColor; linkTo?: string; }> = ({ title, value, icon, color, linkTo }) => {
+const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.ReactNode; color: StatCardColor; linkTo?: string; }> = memo(({ title, value, icon, color, linkTo }) => {
     const colorClasses = {
         blue: 'from-cyan-50 to-sky-100 dark:from-cyan-900/30 dark:to-sky-900/30 border-sky-200 dark:border-sky-800',
         indigo: 'from-indigo-50 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30 border-violet-200 dark:border-violet-800',
@@ -58,10 +58,9 @@ const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.Re
     );
     
     return linkTo ? <Link to={linkTo} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl">{content}</Link> : content;
-};
+});
 
-// Fix: Refactor ActivityRow to safely access properties based on activity type.
-const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
+const ActivityRow: React.FC<{ activity: Activity }> = memo(({ activity }) => {
     const isCall = activity.type === 'call';
 
     return (
@@ -86,10 +85,10 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
             )}
         </div>
     );
-};
+});
 
 
-const StatusToggle: React.FC = () => {
+const StatusToggle: React.FC = memo(() => {
     const { profile, loading: profileLoading } = useListener();
     const [optimisticStatus, setOptimisticStatus] = useState<ListenerAppStatus | null>(null);
 
@@ -101,7 +100,7 @@ const StatusToggle: React.FC = () => {
         }
     }, [profile, profileLoading]);
     
-    const handleStatusChange = async (newStatus: ListenerAppStatus) => {
+    const handleStatusChange = useCallback(async (newStatus: ListenerAppStatus) => {
         if (!profile || newStatus === optimisticStatus) return;
 
         const previousStatus = optimisticStatus || profile.appStatus;
@@ -114,7 +113,7 @@ const StatusToggle: React.FC = () => {
             setOptimisticStatus(previousStatus);
             alert("Failed to update status. Please check your connection and try again.");
         }
-    };
+    }, [profile, optimisticStatus]);
     
     if (profileLoading) {
         return <div className="h-[74px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
@@ -189,7 +188,7 @@ const StatusToggle: React.FC = () => {
             <p className="text-xs text-slate-500 dark:text-slate-400 text-left mt-1.5">{getSubtitle()}</p>
         </div>
     );
-};
+});
 
 
 // --- Main Dashboard Screen Component ---

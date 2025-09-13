@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useListener } from '../../context/ListenerContext';
 import { db } from '../../utils/firebase';
 
@@ -78,4 +78,4 @@ const Header: React.FC = () => {
     );
 };
 
-export default Header;
+export default memo(Header);

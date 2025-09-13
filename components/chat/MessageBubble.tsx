@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { ChatMessage } from '../../types';
 import AudioPlayer from './AudioPlayer';
 import { filterInappropriateContent } from '../../utils/chatSecurity';
@@ -64,4 +64,4 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage }) 
     );
 };
 
-export default MessageBubble;
+export default memo(MessageBubble);
