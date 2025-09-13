@@ -69,7 +69,7 @@ const ListenerRow: React.FC<ListenerRowProps> = ({ listener }) => {
               ₹{listener.totalEarnings?.toFixed(2) ?? '0.00'}
             </td>
             <td className="px-6 py-4 font-mono text-center text-slate-600 dark:text-slate-300">
-              {listener.totalCalls ?? 0}
+              {listener.callsCompleted ?? listener.totalCalls ?? 0}
             </td>
             <td className="px-6 py-4 text-right">
                  <select

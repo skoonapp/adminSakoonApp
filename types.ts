@@ -31,8 +31,24 @@ export interface ListenerProfile {
     messages?: boolean;
   };
   fcmTokens?: string[];
+  
+  // Aggregated Stats
   totalEarnings?: number;
-  totalCalls?: number;
+  totalCalls?: number; // Legacy, replaced by callsCompleted
+  callsCompleted?: number;
+  chatsCompleted?: number;
+  totalMinutes?: number;
+  totalMessages?: number;
+
+  // Performance Metrics
+  rating?: number;
+  responseTime?: string;
+  averagePerMinuteEarning?: number;
+  averagePerMessageEarning?: number;
+  dailyEarnings?: { [key: string]: number };
+  isOnline?: boolean;
+  lastActive?: firebase.firestore.Timestamp;
+  approvedBy?: string;
 }
 
 // Represents a single call record in the history.
