@@ -57,6 +57,30 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
+const EarningStructureContent: React.FC = () => (
+    <>
+        <p>आपकी कमाई दो तरीकों से होती है: वॉयस कॉल और चैट मैसेज।</p>
+        
+        <h4>A) वॉयस कॉल के लिए (ब्रैकेट सिस्टम):</h4>
+        <p>आपको प्रति मिनट का रेट कॉल की कुल लंबाई (duration) के हिसाब से मिलता है। कॉल जितनी लंबी होगी, प्रति मिनट का रेट उतना ही ज़्यादा होगा।</p>
+        <ul>
+            <li><strong>5 मिनट तक की कॉल पर:</strong> ₹2.0 प्रति मिनट</li>
+            <li><strong>6 से 15 मिनट की कॉल पर:</strong> ₹2.5 प्रति मिनट</li>
+            <li><strong>16 से 30 मिनट की कॉल पर:</strong> ₹3.0 प्रति मिनट</li>
+            <li><strong>31 से 45 मिनट की कॉल पर:</strong> ₹3.5 प्रति मिनट</li>
+            <li><strong>45 मिनट से ज़्यादा की कॉल पर:</strong> ₹3.6 प्रति मिनट</li>
+        </ul>
+        <p className="mt-2 text-xs italic bg-slate-100 dark:bg-slate-700/50 p-2 rounded-md"><strong>उदाहरण:</strong> अगर आप 20 मिनट की कॉल पूरी करते हैं, तो आपकी कमाई होगी: 20 मिनट x ₹3.0/मिनट = ₹60</p>
+
+        <h4 className="mt-4">B) चैट मैसेज के लिए (फिक्स्ड रेट):</h4>
+        <p>आपको हर भेजे गए मैसेज के लिए एक फिक्स्ड रेट मिलता है।</p>
+        <ul>
+            <li><strong>हर मैसेज पर कमाई:</strong> ₹0.50 प्रति मैसेज</li>
+        </ul>
+         <p className="mt-2 text-xs italic bg-slate-100 dark:bg-slate-700/50 p-2 rounded-md"><strong>उदाहरण:</strong> अगर आप 25 मैसेज का जवाब देते हैं, तो आपकी कमाई होगी: 25 मैसेज x ₹0.50/मैसेज = ₹12.50</p>
+    </>
+);
+
 
 const ProfileScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -160,6 +184,14 @@ const ProfileScreen: React.FC = () => {
             </a>
         </div>
         
+        <Accordion 
+            title="आपकी कमाई कैसे होती है?"
+            isOpen={openAccordion === 'earning'}
+            onToggle={() => handleAccordionToggle('earning')}
+        >
+            <EarningStructureContent />
+        </Accordion>
+
         <Accordion 
             title="Listener Guidelines & FAQ"
             isOpen={openAccordion === 'guidelines'}
