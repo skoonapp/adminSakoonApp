@@ -1,7 +1,8 @@
 
+
 import React from 'react';
-// FIX: Downgraded react-router-dom from v6 to v5 syntax. Replaced NavLink with Link and useRouteMatch.
-import { Link, useRouteMatch } from 'react-router-dom';
+// FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced Link and useRouteMatch with NavLink.
+import { NavLink } from 'react-router-dom';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: (active: boolean) => <IconDashboard active={active} /> },
@@ -12,25 +13,24 @@ const navItems = [
 ];
 
 const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) => React.ReactNode; }> = ({ path, label, icon }) => {
-    const match = useRouteMatch({
-        path: path,
-        exact: true
-    });
-    const isActive = !!match;
-
     const baseClasses = "relative flex flex-col items-center justify-center w-full h-full transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
     const inactiveClasses = "text-cyan-200 hover:text-white";
     const activeClasses = "text-white";
 
     return (
-        <Link
+        <NavLink
             to={path}
-            className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
+            end
+            className={({ isActive }) => `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
         >
-            {isActive && <div className="absolute top-0 h-1 w-8 bg-white rounded-b-full"></div>}
-            {icon(isActive)}
-            <span className={`text-xs mt-0.5 font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
-        </Link>
+            {({ isActive }) => (
+                <>
+                    {isActive && <div className="absolute top-0 h-1 w-8 bg-white rounded-b-full"></div>}
+                    {icon(isActive)}
+                    <span className={`text-xs mt-0.5 font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
+                </>
+            )}
+        </NavLink>
     );
 };
 

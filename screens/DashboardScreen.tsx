@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 // FIX: The import for `Link` is correct for react-router-dom v5. The error was likely a cascading issue from other files using v6 syntax.
 import { Link } from 'react-router-dom';
@@ -92,18 +93,17 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 
 const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
-    <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm flex items-center justify-between opacity-60">
-        <div>
-            <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center">
-                Active Status
-            </h3>
+    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 opacity-60">
+        <div className="flex-grow text-center sm:text-left">
+            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">Active Status</h3>
             <p className="text-sm text-red-500 dark:text-red-400 mt-1">{message}</p>
         </div>
-        
-        <div className="relative bg-slate-200 dark:bg-slate-700 rounded-full p-1 flex items-center w-60 h-10 border dark:border-slate-600 cursor-not-allowed">
-            <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Offline</div>
-            <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Busy</div>
-            <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Online</div>
+        <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0 cursor-not-allowed">
+            <span className="px-6 py-2 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
+            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
+            <span className="px-6 py-2 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
+            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
+            <span className="px-6 py-2 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
         </div>
     </div>
 );
@@ -154,29 +154,6 @@ const StatusToggle: React.FC = () => {
         return <DisabledStatusToggle message="Status could not be loaded from profile." />;
     }
 
-    // Fix: Use ListenerAppStatus type.
-    const statuses: { label: string; value: ListenerAppStatus; indicatorColor: string; }[] = [
-        { label: 'Offline', value: 'Offline', indicatorColor: 'bg-red-500' },
-        { label: 'Busy', value: 'Busy', indicatorColor: 'bg-yellow-500' },
-        { label: 'Online', value: 'Available', indicatorColor: 'bg-green-500' },
-    ];
-    
-    // Treat 'Break' status as 'Busy' for UI purposes
-    const currentUiStatus = optimisticStatus === 'Break' ? 'Busy' : optimisticStatus;
-    const activeIndex = statuses.findIndex(s => s.value === currentUiStatus);
-
-    const getSliderPosition = () => {
-        if (activeIndex === 0) return 'translate-x-0';
-        if (activeIndex === 1) return 'translate-x-full';
-        if (activeIndex === 2) return 'translate-x-[200%]';
-        return 'opacity-0'; // Hide if no match
-    };
-
-    const getSliderColor = () => {
-        if (activeIndex === -1) return 'bg-transparent';
-        return statuses[activeIndex].indicatorColor;
-    };
-
     const getSubtitle = () => {
         switch (optimisticStatus) {
             case 'Available':
@@ -189,30 +166,44 @@ const StatusToggle: React.FC = () => {
                 return 'Go online to start taking calls';
         }
     };
+    
+    const currentUiStatus = optimisticStatus === 'Break' ? 'Busy' : optimisticStatus;
+    
+    const statuses: { label: string; value: ListenerAppStatus }[] = [
+        { label: 'Offline', value: 'Offline' },
+        { label: 'Busy', value: 'Busy' },
+        { label: 'Online', value: 'Available' },
+    ];
 
     return (
-        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm flex items-center justify-between">
-            <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex-grow text-center sm:text-left">
+                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 flex items-center justify-center sm:justify-start">
                     Active Status
                     <span className="ml-1.5 text-slate-400 cursor-help" title="Set your status to control incoming calls.">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
+                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
                     </span>
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{getSubtitle()}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
             </div>
             
-            <div className="relative bg-slate-100 dark:bg-slate-700 rounded-full p-1 flex items-center w-60 h-10 border dark:border-slate-600">
-                <div className={`absolute top-1 left-1 h-8 w-[calc(100%/3-4px)] rounded-full transition-all duration-300 ease-in-out transform ${getSliderPosition()} ${getSliderColor()}`}></div>
+            <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0">
                 {statuses.map((status, index) => (
-                    <button
-                        key={status.value}
-                        onClick={() => handleStatusChange(status.value)}
-                        className={`relative z-10 w-1/3 text-center text-sm font-bold py-1 rounded-full transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500
-                            ${activeIndex === index ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`}
-                    >
-                        {status.label}
-                    </button>
+                    <React.Fragment key={status.value}>
+                        <button
+                            onClick={() => handleStatusChange(status.value)}
+                            className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
+                                currentUiStatus === status.value
+                                    ? (status.value === 'Available' ? 'bg-green-500 text-white shadow-md' : 'text-slate-800 dark:text-slate-100')
+                                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                            }`}
+                        >
+                            {status.label}
+                        </button>
+                        {index < statuses.length - 1 && (
+                            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
+                        )}
+                    </React.Fragment>
                 ))}
             </div>
         </div>
