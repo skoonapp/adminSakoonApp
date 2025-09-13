@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { db, functions } from '../../utils/firebase';
+
+import React, 'useState', useEffect } from 'react';
+import { db, functions, auth } from '../../utils/firebase';
 import type { ListenerProfile, Application } from '../../types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // --- Icon Components ---
 const RupeeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-5 4h4m5 4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
@@ -43,8 +44,8 @@ const PayoutNotice: React.FC = () => {
     return (
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl shadow-lg flex items-center justify-between gap-4">
             <div className="flex-grow">
-                <h3 className="font-bold text-lg">{isTodayPayoutDay ? "✅ आज पेआउट का दिन है!" : "🗓️ अगला पेआउट शेड्यूल"}</h3>
-                <p className="text-sm">{isTodayPayoutDay ? "सुनिश्चित करें कि सभी गणनाएँ सत्यापित हैं।" : `पेआउट हर सोमवार को प्रोसेस किए जाते हैं। अगला पेआउट: ${nextPayoutDate.toLocaleDateString('hi-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`}</p>
+                <h3 className="font-bold text-lg">{isTodayPayoutDay ? "✅ Today is Payout Day!" : "🗓️ Next Payout Schedule"}</h3>
+                <p className="text-sm">{isTodayPayoutDay ? "Please ensure all calculations are verified." : `Payouts are processed every Monday. Next payout: ${nextPayoutDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`}</p>
             </div>
             <CalendarIcon />
         </div>
@@ -57,6 +58,17 @@ const AdminDashboardScreen: React.FC = () => {
   const [onboardingListeners, setOnboardingListeners] = useState<ListenerProfile[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+        await auth.signOut();
+        navigate('/login'); 
+    } catch (error) {
+        console.error('Error signing out: ', error);
+        alert('Could not log out. Please try again.');
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -110,48 +122,56 @@ const AdminDashboardScreen: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 space-y-8 bg-slate-100 dark:bg-slate-900 min-h-full">
-        <header>
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">एडमिन डैशबोर्ड</h1>
-            <p className="text-slate-500 dark:text-slate-400">आपका स्वागत है, एडमिन। यहाँ आपके व्यवसाय का पूरा अवलोकन है।</p>
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+                <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Admin Dashboard</h1>
+                <p className="text-slate-500 dark:text-slate-400">Welcome, Admin. Here's a complete overview of your business.</p>
+            </div>
+            <button
+                onClick={handleLogout}
+                className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold py-2 px-4 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex-shrink-0"
+            >
+                Logout
+            </button>
         </header>
         
         <PayoutNotice />
 
         {/* Overall Stats Grid */}
         <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">कुल बिज़नेस परफॉरमेंस</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Overall Business Performance</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="कुल कमाई" value={`₹${stats?.totalRevenue ?? '...'}`} icon={<RupeeIcon />} loading={!stats} />
-                <StatCard title="कुल मुनाफ़ा" value={`₹${stats?.totalProfit ?? '...'}`} icon={<ProfitIcon />} loading={!stats} />
-                <StatCard title="लिसनर्स को भुगतान" value={`₹${stats?.totalPaidToListeners ?? '...'}`} icon={<CashIcon />} loading={!stats} />
-                <StatCard title="कुल ट्रांजैक्शन" value={stats?.totalTransactions ?? '...'} icon={<TransactionIcon />} loading={!stats} />
+                <StatCard title="Total Revenue" value={`₹${stats?.totalRevenue ?? '...'}`} icon={<RupeeIcon />} loading={!stats} />
+                <StatCard title="Total Profit" value={`₹${stats?.totalProfit ?? '...'}`} icon={<ProfitIcon />} loading={!stats} />
+                <StatCard title="Paid to Listeners" value={`₹${stats?.totalPaidToListeners ?? '...'}`} icon={<CashIcon />} loading={!stats} />
+                <StatCard title="Total Transactions" value={stats?.totalTransactions ?? '...'} icon={<TransactionIcon />} loading={!stats} />
             </div>
         </div>
 
         {/* Today's Stats Grid */}
         <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">आज का परफॉरमेंस</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Today's Performance</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="आज की कमाई" value={`₹${stats?.dailyRevenue ?? '...'}`} icon={<RupeeIcon />} loading={!stats} />
-                <StatCard title="आज का मुनाफ़ा" value={`₹${stats?.dailyProfit ?? '...'}`} icon={<ProfitIcon />} loading={!stats} />
-                <StatCard title="आज की कॉल्स" value={stats?.dailyCalls ?? '...'} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>} loading={!stats} />
-                <StatCard title="आज की चैट्स" value={stats?.dailyChats ?? '...'} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>} loading={!stats} />
+                <StatCard title="Today's Revenue" value={`₹${stats?.dailyRevenue ?? '...'}`} icon={<RupeeIcon />} loading={!stats} />
+                <StatCard title="Today's Profit" value={`₹${stats?.dailyProfit ?? '...'}`} icon={<ProfitIcon />} loading={!stats} />
+                <StatCard title="Today's Calls" value={stats?.dailyCalls ?? '...'} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>} loading={!stats} />
+                <StatCard title="Today's Chats" value={stats?.dailyChats ?? '...'} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>} loading={!stats} />
             </div>
         </div>
 
         {/* Listener Funnel */}
         <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">लिसनर मैनेजमेंट फनल</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Listener Management Funnel</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="नए आवेदन" value={applications.length} icon={<NewApplicationIcon />} loading={loading} />
-                <StatCard title="प्रोफाइल पूर्णता बाकी" value={onboardingListeners.length} icon={<UserClockIcon />} loading={loading} />
-                <StatCard title="सक्रिय श्रोता" value={stats?.activeListeners ?? '...'} icon={<UserCheckIcon />} loading={!stats} />
+                <StatCard title="New Applications" value={applications.length} icon={<NewApplicationIcon />} loading={loading} />
+                <StatCard title="Pending Profile Completion" value={onboardingListeners.length} icon={<UserClockIcon />} loading={loading} />
+                <StatCard title="Active Listeners" value={stats?.activeListeners ?? '...'} icon={<UserCheckIcon />} loading={!stats} />
                  <Link to="/admin/listeners" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl block bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-4 h-full">
                         <div className="flex-shrink-0"><UsersIcon /></div>
                         <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">सभी श्रोताओं को प्रबंधित करें</p>
-                            <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">देखें और संपादित करें</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Manage All Listeners</p>
+                            <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">View & Edit</p>
                         </div>
                     </div>
                 </Link>
@@ -160,21 +180,21 @@ const AdminDashboardScreen: React.FC = () => {
         
         {/* New Applications Table */}
         <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">ACTION REQUIRED: नए आवेदन</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">ACTION REQUIRED: New Applications</h3>
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
                         <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                             <tr>
-                                <th scope="col" className="px-6 py-3">आवेदक का नाम</th>
-                                <th scope="col" className="px-6 py-3">फोन</th>
-                                <th scope="col" className="px-6 py-3">पेशा</th>
-                                <th scope="col" className="px-6 py-3 text-right">कार्रवाई</th>
+                                <th scope="col" className="px-6 py-3">Applicant Name</th>
+                                <th scope="col" className="px-6 py-3">Phone</th>
+                                <th scope="col" className="px-6 py-3">Profession</th>
+                                <th scope="col" className="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan={4} className="text-center p-4">लोड हो रहा है...</td></tr>
+                                <tr><td colSpan={4} className="text-center p-4">Loading...</td></tr>
                             ) : applications.length > 0 ? (
                                 applications.map(app => (
                                     <tr key={app.id} className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
@@ -189,7 +209,7 @@ const AdminDashboardScreen: React.FC = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-8">समीक्षा के लिए कोई नया आवेदन नहीं है।</td>
+                                    <td colSpan={4} className="text-center py-8">No new applications to review.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -200,21 +220,21 @@ const AdminDashboardScreen: React.FC = () => {
 
         {/* Pending Profile Completion Table */}
         <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">INFORMATIONAL: प्रोफाइल पूर्णता बाकी</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">INFORMATIONAL: Pending Profile Completion</h3>
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
                          <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                             <tr>
-                                <th scope="col" className="px-6 py-3">नाम</th>
-                                <th scope="col" className="px-6 py-3">फोन</th>
+                                <th scope="col" className="px-6 py-3">Name</th>
+                                <th scope="col" className="px-6 py-3">Phone</th>
                                 <th scope="col" className="px-6 py-3">Approved On</th>
-                                <th scope="col" className="px-6 py-3 text-right">कार्रवाई</th>
+                                <th scope="col" className="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan={4} className="text-center p-4">लोड हो रहा है...</td></tr>
+                                <tr><td colSpan={4} className="text-center p-4">Loading...</td></tr>
                             ) : onboardingListeners.length > 0 ? (
                                 onboardingListeners.map(listener => (
                                     <tr key={listener.uid} className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
@@ -222,13 +242,13 @@ const AdminDashboardScreen: React.FC = () => {
                                         <td className="px-6 py-4">{listener.phone}</td>
                                         <td className="px-6 py-4">{listener.createdAt?.toDate().toLocaleDateString() ?? 'N/A'}</td>
                                         <td className="px-6 py-4 text-right space-x-2">
-                                            <button disabled className="font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed">रिमाइंडर भेजें</button>
+                                            <button disabled className="font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed">Send Reminder</button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-8">कोई भी लिसनर वर्तमान में अपनी प्रोफाइल पूरी नहीं कर रहा है।</td>
+                                    <td colSpan={4} className="text-center py-8">No listeners are currently completing their profile.</td>
                                 </tr>
                             )}
                         </tbody>
