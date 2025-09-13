@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-// FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-import { useNavigate } from 'react-router-dom';
+// FIX: Downgraded from useNavigate (v6) to useHistory (v5).
+import { useHistory } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { db } from '../utils/firebase';
 import type { ListenerProfile } from '../types';
@@ -21,8 +22,8 @@ export interface OnboardingData {
 }
 
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
-  // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-  const navigate = useNavigate();
+  // FIX: Downgraded from useNavigate (v6) to useHistory (v5).
+  const history = useHistory();
   const [step, setStep] = useState(1);
   const [listenerData, setListenerData] = useState<ListenerProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,8 +77,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ user }) => {
       // Since the status change is now automatic on the backend, we can optimistically redirect.
       // The App.tsx router will pick up the 'active' status on the next load.
       // For a brief moment, they might see the pending screen if redirection is faster than the backend trigger.
-      // FIX: Upgraded from history.replace (v5) to navigate (v6).
-      navigate('/pending-approval', { replace: true });
+      // FIX: Downgraded from navigate (v6) to history.replace (v5).
+      history.replace('/pending-approval');
 
     } catch (err) {
       console.error("Failed to submit onboarding data:", err);

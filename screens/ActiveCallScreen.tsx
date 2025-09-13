@@ -1,5 +1,7 @@
+
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+// FIX: Downgraded react-router-dom from v6 to v5 syntax.
+import { useParams, useHistory } from 'react-router-dom';
 import { db } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
 import { useListener } from '../context/ListenerContext';
@@ -8,8 +10,8 @@ import type { CallRecord } from '../types';
 const ActiveCallScreen: React.FC = () => {
     const { callId } = useParams<{ callId: string }>();
     const { profile } = useListener();
-    // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-    const navigate = useNavigate();
+    // FIX: Downgraded from useNavigate (v6) to useHistory (v5).
+    const history = useHistory();
     const [callData, setCallData] = useState<CallRecord | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isJoining, setIsJoining] = useState(true);
@@ -24,8 +26,8 @@ const ActiveCallScreen: React.FC = () => {
         const unsubscribe = callRef.onSnapshot(async (doc) => {
             if (!doc.exists) {
                 setError("Call not found or has ended.");
-                // FIX: Upgraded from history.replace (v5) to navigate (v6).
-                setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
+                // FIX: Downgraded from navigate (v6) to history.replace (v5).
+                setTimeout(() => history.replace('/dashboard'), 3000);
                 return;
             }
 
@@ -60,8 +62,8 @@ const ActiveCallScreen: React.FC = () => {
                                       .catch(err => console.error("Failed to update call status on leave:", err));
                                 }
                             });
-                            // FIX: Upgraded from history.replace (v5) to navigate (v6).
-                            navigate('/dashboard', { replace: true });
+                            // FIX: Downgraded from navigate (v6) to history.replace (v5).
+                            history.replace('/dashboard');
                         },
                     });
                 } catch (err: any) {
@@ -72,8 +74,8 @@ const ActiveCallScreen: React.FC = () => {
             // If the call status changes to something that terminates it
             if (['completed', 'rejected', 'missed', 'cancelled'].includes(data.status)) {
                 setError(`Call has been ${data.status}. Redirecting...`);
-                 // FIX: Upgraded from history.replace (v5) to navigate (v6).
-                 setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
+                 // FIX: Downgraded from navigate (v6) to history.replace (v5).
+                 setTimeout(() => history.replace('/dashboard'), 3000);
             }
 
         }, (err) => {
@@ -82,7 +84,7 @@ const ActiveCallScreen: React.FC = () => {
         });
 
         return () => unsubscribe();
-    }, [profile, callId, navigate, isJoining]);
+    }, [profile, callId, history, isJoining]);
 
     if (error) {
         return (

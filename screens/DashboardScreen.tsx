@@ -100,7 +100,7 @@ const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
             <p className="text-sm text-red-500 dark:text-red-400 mt-1">{message}</p>
         </div>
         
-        <div className="relative bg-slate-200 dark:bg-slate-700 rounded-full p-1 flex items-center w-[210px] h-[42px] border dark:border-slate-600 cursor-not-allowed">
+        <div className="relative bg-slate-200 dark:bg-slate-700 rounded-full p-1 flex items-center w-60 h-10 border dark:border-slate-600 cursor-not-allowed">
             <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Offline</div>
             <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Busy</div>
             <div className="w-1/3 text-center text-sm font-bold py-1 text-slate-400 dark:text-slate-500">Online</div>
@@ -199,11 +199,11 @@ const StatusToggle: React.FC = () => {
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
                     </span>
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{getSubtitle()}</p>
             </div>
             
-            <div className="relative bg-slate-100 dark:bg-slate-700 rounded-full p-1 flex items-center w-[210px] h-[42px] border dark:border-slate-600">
-                <div className={`absolute top-1 left-1 h-9 w-[calc(100%/3-4px)] rounded-full transition-all duration-300 ease-in-out transform ${getSliderPosition()} ${getSliderColor()}`}></div>
+            <div className="relative bg-slate-100 dark:bg-slate-700 rounded-full p-1 flex items-center w-60 h-10 border dark:border-slate-600">
+                <div className={`absolute top-1 left-1 h-8 w-[calc(100%/3-4px)] rounded-full transition-all duration-300 ease-in-out transform ${getSliderPosition()} ${getSliderColor()}`}></div>
                 {statuses.map((status, index) => (
                     <button
                         key={status.value}

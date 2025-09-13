@@ -1,6 +1,7 @@
+
 import React from 'react';
-// FIX: The import for `NavLink` is correct for react-router-dom v5. The error was a cascading issue from other files using v6 syntax.
-import { NavLink } from 'react-router-dom';
+// FIX: Downgraded react-router-dom from v6 to v5 syntax. Replaced NavLink with Link and useRouteMatch.
+import { Link, useRouteMatch } from 'react-router-dom';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: (active: boolean) => <IconDashboard active={active} /> },
@@ -10,29 +11,36 @@ const navItems = [
   { path: '/profile', label: 'Profile', icon: (active: boolean) => <IconProfile active={active} /> },
 ];
 
+const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) => React.ReactNode; }> = ({ path, label, icon }) => {
+    const match = useRouteMatch({
+        path: path,
+        exact: true
+    });
+    const isActive = !!match;
+
+    const baseClasses = "relative flex flex-col items-center justify-center w-full h-full transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
+    const inactiveClasses = "text-cyan-200 hover:text-white";
+    const activeClasses = "text-white";
+
+    return (
+        <Link
+            to={path}
+            className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
+        >
+            {isActive && <div className="absolute top-0 h-1 w-8 bg-white rounded-b-full"></div>}
+            {icon(isActive)}
+            <span className={`text-xs mt-0.5 font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
+        </Link>
+    );
+};
+
 
 const BottomNav: React.FC = () => {
-  const baseClasses = "relative flex flex-col items-center justify-center w-full h-full transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
-  const inactiveClasses = "text-cyan-200 hover:text-white";
-  const activeClasses = "text-white";
-  
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-r from-cyan-600 to-teal-500 dark:from-slate-900 dark:to-slate-800 shadow-[0_-2px_15px_-5px_rgba(0,0,0,0.2)] border-t border-black/10 dark:border-white/10 z-50">
       <div className="flex justify-around h-full">
-        {navItems.map(({ path, label, icon }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) => `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && <div className="absolute top-0 h-1 w-8 bg-white rounded-b-full"></div>}
-                  {icon(isActive)}
-                  <span className={`text-xs mt-0.5 font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
-                </>
-              )}
-            </NavLink>
+        {navItems.map((item) => (
+            <NavItem key={item.path} {...item} />
         ))}
       </div>
     </nav>
