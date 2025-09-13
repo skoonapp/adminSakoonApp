@@ -1,31 +1,32 @@
 
 
+
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 // FIX: Upgraded react-router-dom from v5 to v6 syntax to match project dependencies.
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
 
-import LoginScreen from './screens/LoginScreen';
+import LoginScreen from './screens/auth/LoginScreen';
 import MainLayout from './components/layout/MainLayout';
 import SplashScreen from './components/common/SplashScreen';
 import { ListenerProvider } from './context/ListenerContext';
 import type { ListenerProfile } from './types';
 
 // Lazy load all screens
-const DashboardScreen = lazy(() => import('./screens/DashboardScreen'));
-const CallsScreen = lazy(() => import('./screens/CallsScreen'));
-const ChatScreen = lazy(() => import('./screens/ChatScreen'));
-const EarningsScreen = lazy(() => import('./screens/EarningsScreen'));
-const ProfileScreen = lazy(() => import('./screens/ProfileScreen'));
-const ActiveCallScreen = lazy(() => import('./screens/ActiveCallScreen'));
-const TermsScreen = lazy(() => import('./screens/TermsScreen'));
-const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'));
-const OnboardingScreen = lazy(() => import('./screens/OnboardingScreen'));
-const PendingApprovalScreen = lazy(() => import('./screens/PendingApprovalScreen'));
-const AdminDashboardScreen = lazy(() => import('./screens/AdminDashboard'));
-const ListenerManagementScreen = lazy(() => import('./screens/ListenerManagementScreen'));
-const UnauthorizedScreen = lazy(() => import('./screens/UnauthorizedScreen'));
+const DashboardScreen = lazy(() => import('./screens/listener/DashboardScreen'));
+const CallsScreen = lazy(() => import('./screens/listener/CallsScreen'));
+const ChatScreen = lazy(() => import('./screens/listener/ChatScreen'));
+const EarningsScreen = lazy(() => import('./screens/listener/EarningsScreen'));
+const ProfileScreen = lazy(() => import('./screens/listener/ProfileScreen'));
+const ActiveCallScreen = lazy(() => import('./screens/listener/ActiveCallScreen'));
+const TermsScreen = lazy(() => import('./screens/listener/TermsScreen'));
+const PrivacyPolicyScreen = lazy(() => import('./screens/listener/PrivacyPolicyScreen'));
+const OnboardingScreen = lazy(() => import('./screens/auth/OnboardingScreen'));
+const PendingApprovalScreen = lazy(() => import('./screens/auth/PendingApprovalScreen'));
+const AdminDashboardScreen = lazy(() => import('./screens/admin/AdminDashboardScreen'));
+const ListenerManagementScreen = lazy(() => import('./screens/admin/ListenerManagementScreen'));
+const UnauthorizedScreen = lazy(() => import('./screens/auth/UnauthorizedScreen'));
 
 type AuthStatus = 'loading' | 'unauthenticated' | 'needs_onboarding' | 'pending_approval' | 'active' | 'admin' | 'unauthorized';
 

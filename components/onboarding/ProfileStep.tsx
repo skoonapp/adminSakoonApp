@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { OnboardingData } from '../../screens/OnboardingScreen';
+import type { OnboardingData } from '../../screens/auth/OnboardingScreen';
 
 interface ProfileStepProps {
   nextStep: () => void;

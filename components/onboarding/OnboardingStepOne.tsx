@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import type { ListenerProfile } from '../../types';
-import type { OnboardingData } from '../../screens/OnboardingScreen';
+import type { OnboardingData } from '../../screens/auth/OnboardingScreen';
 
 interface OnboardingStepOneProps {
   nextStep: () => void;
