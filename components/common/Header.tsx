@@ -41,13 +41,20 @@ const Header: React.FC = () => {
     }, [profile?.uid]);
     
     return (
-        <header className="fixed top-0 left-0 right-0 h-14 bg-gradient-to-r from-cyan-600 to-teal-500 dark:from-slate-900 dark:to-slate-800 shadow-md text-white z-50 flex items-center justify-between px-4">
-            <h1 className="text-xl font-bold tracking-tight text-white">SakoonApp Admin</h1>
+        <header className="fixed top-0 left-0 right-0 h-14 bg-gradient-to-r from-white to-primary-50 dark:from-deep-slate dark:to-cyan-950/40 shadow-md z-50 flex items-center justify-between px-4">
+            <div className="text-2xl font-bold tracking-tight">
+                <span className="bg-gradient-to-r from-cyan-600 to-teal-500 bg-clip-text text-transparent dark:from-cyan-400 dark:to-teal-300">
+                    Sakoon
+                </span>
+                <span className="text-indigo-500 dark:text-indigo-300">
+                    App
+                </span>
+            </div>
             
             <div className="flex items-center gap-2 sm:gap-4">
                 <div className="relative">
                     <button
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-teal-100 hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors relative"
+                        className="w-10 h-10 flex items-center justify-center rounded-full text-slate-600 dark:text-cyan-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors relative"
                         aria-label="Notifications"
                     >
                         <BellIcon className="w-6 h-6" />
@@ -58,7 +65,7 @@ const Header: React.FC = () => {
                 </div>
                 <button
                     onClick={() => setIsDarkMode(!isDarkMode)}
-                    className="w-10 h-10 flex items-center justify-center rounded-full text-teal-100 hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center rounded-full text-slate-600 dark:text-cyan-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors"
                     aria-label="Toggle dark mode"
                 >
                     {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}

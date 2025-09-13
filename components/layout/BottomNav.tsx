@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 // FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced useRouteMatch with useMatch and useResolvedPath for v6 compatibility.
 import { Link, useMatch, useResolvedPath } from 'react-router-dom';
@@ -12,22 +13,26 @@ const navItems = [
 ];
 
 const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) => React.ReactNode; }> = ({ path, label, icon }) => {
-    const baseClasses = "relative flex flex-col items-center justify-center w-full h-full transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
-    const inactiveClasses = "text-cyan-200 hover:text-white";
-    const activeClasses = "text-white";
-
     const resolved = useResolvedPath(path);
     const match = useMatch({ path: resolved.pathname, end: true });
     const isActive = !!match;
 
+    const textColor = isActive 
+        ? 'text-slate-800 dark:text-emerald-200' 
+        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
+    
+    const labelStyle = isActive 
+        ? 'text-sm font-bold' 
+        : 'text-xs';
+
     return (
-        <Link
-            to={path}
-            className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
-        >
-            {isActive && <div className="absolute top-0 h-1 w-8 bg-white rounded-b-full"></div>}
-            {icon(isActive)}
-            <span className={`text-xs mt-0.5 font-medium ${isActive ? 'font-bold' : ''}`}>{label}</span>
+        <Link to={path} className="flex-1 flex justify-center items-center h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg">
+            <div className={`relative flex flex-col items-center justify-center transition-all duration-300 ${textColor} space-y-0.5`}>
+                {/* Pill shape */}
+                <div className={`absolute -z-10 h-8 w-16 transition-all duration-300 ease-in-out ${isActive ? 'scale-100' : 'scale-0'} bg-emerald-100 dark:bg-emerald-500/20 rounded-full`}></div>
+                {icon(isActive)}
+                <span className={`transition-all duration-200 ${labelStyle}`}>{label}</span>
+            </div>
         </Link>
     );
 };
@@ -35,7 +40,7 @@ const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) =
 
 const BottomNav: React.FC = () => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-r from-cyan-600 to-teal-500 dark:from-slate-900 dark:to-slate-800 shadow-[0_-2px_15px_-5px_rgba(0,0,0,0.2)] border-t border-black/10 dark:border-white/10 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-slate-50 dark:bg-deep-slate shadow-[0_-2px_15px_-5px_rgba(0,0,0,0.2)] border-t border-slate-200/80 dark:border-white/10 z-50">
       <div className="flex justify-around h-full">
         {navItems.map((item) => (
             <NavItem key={item.path} {...item} />
