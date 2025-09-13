@@ -223,7 +223,8 @@ const StatusToggle: React.FC = () => {
 // --- Main Dashboard Screen Component ---
 const DashboardScreen: React.FC = () => {
     const { profile, loading: profileLoading } = useListener();
-    const [allActivities, setAllActivities] = useState<Activity[]>([]);
+    const [calls, setCalls] = useState<CallActivity[]>([]);
+    const [chats, setChats] = useState<ChatActivity[]>([]);
     const [loadingActivities, setLoadingActivities] = useState(true);
     const [earningsData, setEarningsData] = useState<{ today: number, week: number }>({ today: 0, week: 0 });
     const [loadingEarnings, setLoadingEarnings] = useState(true);
@@ -271,6 +272,7 @@ const DashboardScreen: React.FC = () => {
         return () => unsubEarnings();
     }, [profile?.uid, profileLoading]);
 
+    // Optimization: Fetch calls and chats into separate states to prevent race conditions and unnecessary re-renders.
     useEffect(() => {
         if (!profile?.uid) {
             if (!profileLoading) setLoadingActivities(false);
@@ -283,29 +285,25 @@ const DashboardScreen: React.FC = () => {
         const sevenDaysAgoTimestamp = firebase.firestore.Timestamp.fromDate(sevenDaysAgo);
 
         const callsQuery = db.collection('calls').where('listenerId', '==', profile.uid).where('startTime', '>=', sevenDaysAgoTimestamp);
-        const chatsQuery = db.collection('chats').where('listenerId', '==', profile.uid).where('lastMessageTimestamp', '>=', sevenDaysAgoTimestamp);
-
-        let callsData: CallActivity[] = [];
-        let chatsData: ChatActivity[] = [];
-        
-        const combineAndUpdate = () => {
-             const combined = [...callsData, ...chatsData].sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
-             setAllActivities(combined);
-             setLoadingActivities(false);
-        };
-
         const unsubCalls = callsQuery.onSnapshot(snapshot => {
-            callsData = snapshot.docs.map(doc => ({ ...doc.data(), callId: doc.id, type: 'call', timestamp: doc.data().startTime } as CallActivity));
-            combineAndUpdate();
+            const callsData = snapshot.docs.map(doc => ({ ...doc.data(), callId: doc.id, type: 'call', timestamp: doc.data().startTime } as CallActivity));
+            setCalls(callsData);
+            setLoadingActivities(false);
         }, () => setLoadingActivities(false));
         
+        const chatsQuery = db.collection('chats').where('listenerId', '==', profile.uid).where('lastMessageTimestamp', '>=', sevenDaysAgoTimestamp);
         const unsubChats = chatsQuery.onSnapshot(snapshot => {
-            chatsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, type: 'chat', timestamp: doc.data().lastMessageTimestamp } as ChatActivity));
-            combineAndUpdate();
+            const chatsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, type: 'chat', timestamp: doc.data().lastMessageTimestamp } as ChatActivity));
+            setChats(chatsData);
+            setLoadingActivities(false);
         }, () => setLoadingActivities(false));
 
         return () => { unsubCalls(); unsubChats(); };
     }, [profile?.uid, profileLoading]);
+
+    const allActivities = useMemo(() => {
+        return [...calls, ...chats].sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
+    }, [calls, chats]);
 
     const { todayStats, weekStats, recentActivities } = useMemo(() => {
         const now = new Date();

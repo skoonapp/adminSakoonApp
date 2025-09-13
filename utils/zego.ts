@@ -15,7 +15,8 @@ declare global {
  */
 export const fetchZegoToken = async (roomId: string): Promise<string> => {
     // यह URL Zego टोकन जेनरेट करने के लिए आपके डिप्लॉय किए गए फायरबेस फंक्शन एंडपॉइंट को इंगित करता है।
-    const functionUrl = 'https://asia-south1-sakoonapp-9574c.cloudfunctions.net/api/generateZegoToken';
+    const cloudFunctionBaseUrl = 'https://asia-south1-sakoonapp-9574c.cloudfunctions.net/api';
+    const functionUrl = `${cloudFunctionBaseUrl}/generateZegoToken`;
 
     try {
         const user = auth.currentUser;

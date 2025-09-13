@@ -38,6 +38,7 @@ const CallsScreen: React.FC = () => {
         const unsubscribe = db.collection('calls')
             .where('listenerId', '==', profile.uid)
             .orderBy('startTime', 'desc')
+            .limit(200) // Optimization: Limit to last 200 calls to prevent fetching huge datasets.
             .onSnapshot(snapshot => {
                 const callsData = snapshot.docs.map(doc => ({
                     ...doc.data(),

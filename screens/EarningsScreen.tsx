@@ -65,14 +65,21 @@ const EarningsScreen: React.FC = () => {
     const [transactions, setTransactions] = useState<EarningRecord[]>([]);
 
     useEffect(() => {
-        if (!profile?.uid) return;
+        if (!profile?.uid) {
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
-        // Using a more robust earnings subcollection for scalability
+        // Optimization: Fetch only the last 30 days of records to calculate period-based earnings.
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
         const unsubscribe = db.collection('listeners').doc(profile.uid).collection('earnings')
+            .where('timestamp', '>=', thirtyDaysAgo)
             .orderBy('timestamp', 'desc')
             .onSnapshot(snapshot => {
-                const earningsRecords = snapshot.docs.map(doc => ({
+                const recentEarningsRecords = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data(),
                 }) as EarningRecord);
@@ -80,22 +87,25 @@ const EarningsScreen: React.FC = () => {
                 const now = new Date();
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
-                const thirtyDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
 
-                const calculatedEarnings: EarningsData = { total: 0, today: 0, last7Days: 0, last30Days: 0 };
+                const calculatedEarnings: Omit<EarningsData, 'total'> = { today: 0, last7Days: 0, last30Days: 0 };
 
-                earningsRecords.forEach(record => {
+                recentEarningsRecords.forEach(record => {
                     const callEarning = Number(record.amount) || 0;
                     const callDate = record.timestamp.toDate();
                     
-                    calculatedEarnings.total += callEarning;
-                    if (callDate >= today) calculatedEarnings.today += callEarning;
+                    // All records are within the last 30 days due to the query
+                    calculatedEarnings.last30Days += callEarning;
                     if (callDate >= sevenDaysAgo) calculatedEarnings.last7Days += callEarning;
-                    if (callDate >= thirtyDaysAgo) calculatedEarnings.last30Days += callEarning;
+                    if (callDate >= today) calculatedEarnings.today += callEarning;
                 });
 
-                setEarnings(calculatedEarnings);
-                setTransactions(earningsRecords.slice(0, 25)); // show latest 25 transactions
+                setEarnings({
+                    total: profile.totalEarnings || 0, // Optimization: Use pre-aggregated total from profile
+                    ...calculatedEarnings,
+                });
+
+                setTransactions(recentEarningsRecords.slice(0, 25)); // Show latest 25 transactions from the fetched data
                 setLoading(false);
             }, (error) => {
                 console.error("Error fetching earnings:", error);
@@ -103,7 +113,7 @@ const EarningsScreen: React.FC = () => {
             });
 
         return () => unsubscribe();
-    }, [profile?.uid]);
+    }, [profile?.uid, profile?.totalEarnings]);
 
     return (
         <div className="p-4 space-y-6 animate-fade-in">
@@ -116,9 +126,9 @@ const EarningsScreen: React.FC = () => {
             <div className="bg-gradient-to-br from-cyan-600 to-teal-500 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between">
                 <div>
                     <p className="text-lg font-medium text-white/80">Total Earnings</p>
-                    {loading ? 
+                    {loading && !profile?.totalEarnings ? 
                         <LoadingSkeleton className="h-10 w-32 mt-1 bg-white/30" /> :
-                        <p className="text-4xl font-extrabold tracking-tight">₹{earnings.total.toFixed(2)}</p>
+                        <p className="text-4xl font-extrabold tracking-tight">₹{(profile?.totalEarnings || earnings.total).toFixed(2)}</p>
                     }
                 </div>
                 <TotalEarningsIcon />

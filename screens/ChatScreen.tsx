@@ -41,13 +41,16 @@ const ChatScreen: React.FC = () => {
             setMessages([]);
             return;
         }
+        // Optimization: Fetch only the last 50 messages to improve performance on long chats.
         const unsubscribe = db.collection('chats').doc(activeSession.id).collection('messages')
-            .orderBy('timestamp', 'asc')
+            .orderBy('timestamp', 'desc') // Order by desc to get the last N messages
+            .limit(50)
             .onSnapshot(snapshot => {
                 const messagesData = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
-                } as ChatMessage));
+                } as ChatMessage))
+                .reverse(); // Reverse the array on the client to display in correct order
                 setMessages(messagesData);
             });
         return () => unsubscribe();
