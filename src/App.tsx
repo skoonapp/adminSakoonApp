@@ -110,6 +110,7 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <Suspense fallback={<SplashScreen />}>
+        {/* FIX: Replaced Switch with Routes and updated Route syntax for react-router-dom v6 */}
         <Routes>
             {authStatus === 'unauthenticated' && <>
                 <Route path="/login" element={<LoginScreen />} />

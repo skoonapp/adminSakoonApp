@@ -153,6 +153,7 @@ const IncomingCallManager: React.FC = () => {
         stopRingtone(); // Stop ringtone after user interacts with prompt
 
         if (isConfirmed && callId) {
+          // FIX: Upgraded from history.push (v5) to navigate (v6).
           navigate(`/call/${callId}`);
         } else {
           // TODO: Implement call rejection logic

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../../utils/firebase';
 // FIX: Upgraded from useHistory (v5) to useNavigate (v6).

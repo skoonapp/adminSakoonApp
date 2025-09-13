@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
 import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
+// FIX: Corrected relative import path
 import { db } from '../../utils/firebase';
 import type { ListenerProfile } from '../../types';
 

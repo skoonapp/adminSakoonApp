@@ -56,12 +56,14 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (isLeftSwipe) {
       // Swiped left, go to the next screen
       if (currentIndex < swipeablePaths.length - 1) {
+        // FIX: Upgraded from history.push (v5) to navigate (v6).
         navigate(swipeablePaths[currentIndex + 1]);
         swipeHandled.current = true;
       }
     } else if (isRightSwipe) {
       // Swiped right, go to the previous screen
       if (currentIndex > 0) {
+        // FIX: Upgraded from history.push (v5) to navigate (v6).
         navigate(swipeablePaths[currentIndex - 1]);
         swipeHandled.current = true;
       }

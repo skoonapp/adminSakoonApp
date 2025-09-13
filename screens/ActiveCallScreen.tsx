@@ -41,6 +41,16 @@ const ActiveCallScreen: React.FC = () => {
                     const token = await fetchZegoToken(callId);
                     const zp = window.ZegoUIKitPrebuilt.create(token);
                     
+                    // Enhance audio quality by enabling noise suppression and echo cancellation.
+                    const zegoExpressEngine = zp.getExpressEngine();
+                    if (zegoExpressEngine) {
+                        // Enable Acoustic Echo Cancellation to prevent the caller's voice from being played back.
+                        zegoExpressEngine.enableAEC(true);
+                        // Enable Automatic Noise Suppression to filter out background noise.
+                        // 'MEDIUM' provides a good balance between noise reduction and audio clarity.
+                        zegoExpressEngine.enableANS(true, 'MEDIUM');
+                    }
+
                     zp.joinRoom({
                         container: callContainerRef.current,
                         sharedLinks: [

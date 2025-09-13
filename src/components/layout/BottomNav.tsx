@@ -1,5 +1,5 @@
 import React from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax.
+// FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced hooks for v6 compatibility.
 import { Link, useMatch, useResolvedPath } from 'react-router-dom';
 
 const navItems = [
@@ -11,7 +11,7 @@ const navItems = [
 ];
 
 const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) => React.ReactNode; }> = ({ path, label, icon }) => {
-    // FIX: Replaced v5 hook with v6's useResolvedPath and useMatch
+    // FIX: Replaced v5 useRouteMatch with v6's useResolvedPath and useMatch
     const resolved = useResolvedPath(path);
     const match = useMatch({ path: resolved.pathname, end: true });
     const isActive = !!match;

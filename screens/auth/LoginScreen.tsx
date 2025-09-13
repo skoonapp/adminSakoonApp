@@ -1,11 +1,9 @@
 
-
-
-
 // FIX: Corrected the import statement for React hooks.
 import React, { useState, useEffect, useRef } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
+// FIX: Corrected relative import paths
 import { auth } from '../../utils/firebase';
 import ApplyAsListener from '../../components/auth/ApplyAsListener';
 
