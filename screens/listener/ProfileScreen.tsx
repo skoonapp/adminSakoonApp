@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../../utils/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -126,7 +125,6 @@ const ProfileScreen: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-             <h3 className="p-4 text-lg font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700">Notification Settings</h3>
             <div className="divide-y divide-slate-200 dark:divide-slate-700">
                 <div className="flex justify-between items-center p-4">
                     <div>

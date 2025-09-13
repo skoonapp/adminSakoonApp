@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import React, { useState, useEffect, useMemo } from 'react';
 // FIX: The import for `Link` is correct for react-router-dom v5. The error was likely a cascading issue from other files using v6 syntax.
 import { Link } from 'react-router-dom';
@@ -98,18 +92,22 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 
 const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
-    <div className="bg-white dark:bg-slate-800 p-2 sm:p-1.5 rounded-xl shadow-sm flex items-center justify-between gap-4 opacity-60">
-        <div className="flex-grow text-left px-2">
-            <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">Active Status</h3>
-            <p className="text-xs text-red-500 dark:text-red-400 mt-1">{message}</p>
-        </div>
-        <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0 cursor-not-allowed">
-            <div className="inline-flex items-stretch rounded-full space-x-1">
-                <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
-                <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
-                <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
+     <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm opacity-60">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 flex-shrink-0">
+                Active Status
+            </h3>
+            <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0 cursor-not-allowed">
+                <div className="inline-flex items-stretch rounded-full space-x-1">
+                    <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
+                    <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
+                    <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
+                </div>
             </div>
         </div>
+        <p className="text-xs text-red-500 dark:text-red-400 mt-2 text-center sm:text-left">
+            {message}
+        </p>
     </div>
 );
 
@@ -148,7 +146,7 @@ const StatusToggle: React.FC = () => {
     };
     
     if (profileLoading) {
-        return <div className="h-16 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+        return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
     }
 
     if (!profile) {
@@ -185,7 +183,7 @@ const StatusToggle: React.FC = () => {
         if (currentUiStatus === statusValue) {
             switch(statusValue) {
                 case 'Available': return `${base} bg-green-500 text-white shadow`;
-                case 'Busy': return `${base} bg-slate-500 text-white shadow`;
+                case 'Busy': return `${base} bg-orange-500 text-white shadow`;
                 case 'Offline': return `${base} bg-slate-500 text-white shadow`;
                 default: return `${base} bg-white dark:bg-slate-900 shadow-sm text-slate-800 dark:text-slate-100`;
             }
@@ -194,27 +192,28 @@ const StatusToggle: React.FC = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-2 sm:p-1.5 rounded-xl shadow-sm flex items-center justify-between gap-2">
-            <div className="flex-grow text-left px-2">
-                <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 flex-shrink-0">
                     Active Status
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
-            </div>
-            
-             <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0">
-                <div className="inline-flex items-stretch rounded-full space-x-1">
-                    {statuses.map((status) => (
-                        <button
-                            key={status.value}
-                            onClick={() => handleStatusChange(status.value)}
-                            className={getButtonClasses(status.value)}
-                        >
-                            {status.label}
-                        </button>
-                    ))}
+                <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0">
+                    <div className="inline-flex items-stretch rounded-full space-x-1">
+                        {statuses.map((status) => (
+                            <button
+                                key={status.value}
+                                onClick={() => handleStatusChange(status.value)}
+                                className={getButtonClasses(status.value)}
+                            >
+                                {status.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center sm:text-right">
+                {getSubtitle()}
+            </p>
         </div>
     );
 };

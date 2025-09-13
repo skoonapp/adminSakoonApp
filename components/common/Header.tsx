@@ -16,8 +16,8 @@ const MoonIcon: React.FC<{className?: string}> = ({className}) => (
 );
 
 const BellIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path fillRule="evenodd" d="M11.25 4.5A6.75 6.75 0 004.5 11.25v3.161c0 .363-.035.723-.105 1.079a.75.75 0 00.808.808c.356-.07.716-.105 1.079-.105h9.332c.363 0 .723.035 1.079.105a.75.75 0 00.808-.808c-.07-.356-.105-.716-.105-1.079v-3.161A6.75 6.75 0 0012.75 4.5h-1.5zM12 21a.75.75 0 01-.75-.75v-.01a1.5 1.5 0 013 0v.01a.75.75 0 01-.75.75H12z" clipRule="evenodd" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
+      <path d="M10 2a6 6 0 00-6 6v3.586l-1.293 1.293a1 1 0 00.707 1.707h13.172a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
     </svg>
 );
 
@@ -59,7 +59,10 @@ const Header: React.FC = () => {
                     >
                         <BellIcon className="w-6 h-6" />
                         {unreadCount > 0 && (
-                            <span className="absolute top-1.5 right-1.5 block w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-current"></span>
+                           <span className="absolute top-2 right-2 flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                            </span>
                         )}
                     </button>
                 </div>
