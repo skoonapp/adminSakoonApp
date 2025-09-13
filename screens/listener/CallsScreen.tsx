@@ -97,7 +97,7 @@ const CallsScreen: React.FC = () => {
         { value: 'all', label: 'All Calls' },
         { value: 'completed', label: 'Completed' },
         { value: 'missed', label: 'Missed' },
-        { value: 'rejected', label: 'Rejected' },
+        { value: 'rejected', label: 'Reverse call' },
     ];
 
     return (

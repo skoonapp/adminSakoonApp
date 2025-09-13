@@ -1,7 +1,8 @@
 
 
+
 import React, { useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { messaging, db } from '../../utils/firebase';
 import { useListener } from '../../context/ListenerContext';
 import firebase from 'firebase/compat/app';
@@ -97,7 +98,7 @@ const playMessageTone = () => {
 
 const IncomingCallManager: React.FC = () => {
   const { profile } = useListener();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -152,7 +153,7 @@ const IncomingCallManager: React.FC = () => {
         stopRingtone(); // Stop ringtone after user interacts with prompt
 
         if (isConfirmed && callId) {
-          history.push(`/call/${callId}`);
+          navigate(`/call/${callId}`);
         } else {
           // TODO: Implement call rejection logic
           console.log('Call rejected by listener from foreground prompt.');
@@ -170,7 +171,7 @@ const IncomingCallManager: React.FC = () => {
       unsubscribe();
       stopRingtone(); // Ensure ringtone stops if component unmounts while ringing
     };
-  }, [profile, history, location]);
+  }, [profile, navigate, location]);
 
   return null; // This component does not render anything itself.
 };

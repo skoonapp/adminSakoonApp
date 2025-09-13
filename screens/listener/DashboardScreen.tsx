@@ -92,33 +92,29 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 
 const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
-     <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm opacity-60">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 flex-shrink-0">
+    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center justify-between gap-4 opacity-60 cursor-not-allowed">
+        <div>
+            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                 Active Status
+                <span className="cursor-help" title="Status cannot be changed.">
+                    <svg className="w-4 h-4 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
+                </span>
             </h3>
-            <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0 cursor-not-allowed">
-                <div className="inline-flex items-stretch rounded-full space-x-1">
-                    <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
-                    <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
-                    <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
-                </div>
-            </div>
+            <p className="text-sm text-red-500 dark:text-red-400">{message}</p>
         </div>
-        <p className="text-xs text-red-500 dark:text-red-400 mt-2 text-center sm:text-left">
-            {message}
-        </p>
+        <div className="flex items-center border border-slate-300 dark:border-slate-600 rounded-full p-1 space-x-1">
+            <div className="w-20 py-1.5 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</div>
+            <div className="w-20 py-1.5 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</div>
+            <div className="w-20 py-1.5 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">Online</div>
+        </div>
     </div>
 );
 
 const StatusToggle: React.FC = () => {
     const { profile, loading: profileLoading } = useListener();
-    // Fix: Use ListenerAppStatus type.
     const [optimisticStatus, setOptimisticStatus] = useState<ListenerAppStatus | null>(null);
 
-    // Sync local state with profile from context
     useEffect(() => {
-        // Fix: Use profile.appStatus instead of profile.status.
         if (profile?.appStatus) {
             setOptimisticStatus(profile.appStatus);
         } else if (!profileLoading && !profile) {
@@ -126,47 +122,36 @@ const StatusToggle: React.FC = () => {
         }
     }, [profile, profileLoading]);
     
-    // Fix: Use ListenerAppStatus type.
     const handleStatusChange = async (newStatus: ListenerAppStatus) => {
-        if (!profile) return;
+        if (!profile || newStatus === optimisticStatus) return;
 
-        // Fix: Use profile.appStatus instead of profile.status.
         const previousStatus = optimisticStatus || profile.appStatus;
-        setOptimisticStatus(newStatus); // Optimistically update the UI
+        setOptimisticStatus(newStatus); 
 
         try {
-            // Fix: Update appStatus field instead of status.
             await db.collection('listeners').doc(profile.uid).update({ appStatus: newStatus });
         } catch (error) {
             console.error("Failed to update status:", error);
-            // Revert on error
             setOptimisticStatus(previousStatus);
             alert("Failed to update status. Please check your connection and try again.");
         }
     };
     
     if (profileLoading) {
-        return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+        return <div className="h-[88px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
     }
 
-    if (!profile) {
-        return <DisabledStatusToggle message="Listener profile could not be found." />;
+    if (!profile || !optimisticStatus) {
+        return <DisabledStatusToggle message="Profile or status could not be loaded." />;
     }
     
-    if (!optimisticStatus) {
-        return <DisabledStatusToggle message="Status could not be loaded from profile." />;
-    }
-
     const getSubtitle = () => {
         switch (optimisticStatus) {
-            case 'Available':
-                return 'You are ready to take calls';
+            case 'Available': return 'You are ready to take calls';
             case 'Busy':
-            case 'Break':
-                return 'You will not receive new calls';
+            case 'Break': return 'You will not receive new calls';
             case 'Offline':
-            default:
-                return 'Go online to start taking calls';
+            default: return 'Go online to start taking calls';
         }
     };
     
@@ -177,43 +162,43 @@ const StatusToggle: React.FC = () => {
         { label: 'Busy', value: 'Busy' },
         { label: 'Online', value: 'Available' },
     ];
-
-    const getButtonClasses = (statusValue: ListenerAppStatus) => {
-        const base = "px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500";
-        if (currentUiStatus === statusValue) {
-            switch(statusValue) {
-                case 'Available': return `${base} bg-green-500 text-white shadow`;
-                case 'Busy': return `${base} bg-orange-500 text-white shadow`;
-                case 'Offline': return `${base} bg-slate-500 text-white shadow`;
-                default: return `${base} bg-white dark:bg-slate-900 shadow-sm text-slate-800 dark:text-slate-100`;
-            }
-        }
-        return `${base} text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-slate-600/50`;
-    };
+    
+    const activeIndex = statuses.findIndex(s => s.value === currentUiStatus);
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 flex-shrink-0">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex items-center justify-between gap-4">
+            <div>
+                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                     Active Status
+                    <span className="cursor-help" title="Set your status to control incoming calls.">
+                        <svg className="w-4 h-4 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
+                    </span>
                 </h3>
-                <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-full flex-shrink-0">
-                    <div className="inline-flex items-stretch rounded-full space-x-1">
-                        {statuses.map((status) => (
-                            <button
-                                key={status.value}
-                                onClick={() => handleStatusChange(status.value)}
-                                className={getButtonClasses(status.value)}
-                            >
-                                {status.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center sm:text-right">
-                {getSubtitle()}
-            </p>
+
+            <div className="relative flex items-center border border-slate-300 dark:border-slate-600 rounded-full p-1">
+                <div
+                    className="absolute top-1 left-1 bottom-1 h-auto transition-all duration-300 ease-in-out rounded-full shadow"
+                    style={{
+                        width: 'calc(33.333% - 2.66px)',
+                        transform: `translateX(${activeIndex * 100}%)`,
+                        backgroundColor: currentUiStatus === 'Available' ? '#22c55e' : (currentUiStatus === 'Busy' ? '#f97316' : '#64748b')
+                    }}
+                />
+                {statuses.map(status => (
+                    <button
+                        key={status.value}
+                        onClick={() => handleStatusChange(status.value)}
+                        className="relative z-10 w-20 py-1.5 text-sm font-semibold rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+                        aria-pressed={currentUiStatus === status.value}
+                    >
+                        <span className={`transition-colors duration-300 ${currentUiStatus === status.value ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+                            {status.label}
+                        </span>
+                    </button>
+                ))}
+            </div>
         </div>
     );
 };

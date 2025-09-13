@@ -32,17 +32,22 @@ const formatTime = (timestamp: any): string => {
 const StatusBadge: React.FC<{ status: CallRecord['status'] }> = ({ status }) => {
     const baseClasses = "px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize";
     let colorClasses = "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200";
+    // FIX: Explicitly type label as string to allow assignment of string literals.
+    let label: string = status;
 
     switch (status) {
         case 'completed':
             colorClasses = "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300";
             break;
         case 'missed':
-        case 'rejected':
             colorClasses = "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300";
             break;
+        case 'rejected':
+            colorClasses = "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300";
+            label = 'Reverse call';
+            break;
     }
-    return <span className={`${baseClasses} ${colorClasses}`}>{status}</span>;
+    return <span className={`${baseClasses} ${colorClasses}`}>{label}</span>;
 };
 
 

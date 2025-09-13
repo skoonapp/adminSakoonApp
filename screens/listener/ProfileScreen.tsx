@@ -1,6 +1,8 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../../utils/firebase';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { GuidelinesContent } from '../../components/profile/ListenerGuidelines';
 import { useListener } from '../../context/ListenerContext';
 import { TermsContent } from './TermsScreen';
@@ -57,7 +59,7 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
 
 
 const ProfileScreen: React.FC = () => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const { profile, loading } = useListener();
     const isInitialLoad = useRef(true);
     const [openAccordion, setOpenAccordion] = useState<string | null>(null);
@@ -84,7 +86,7 @@ const ProfileScreen: React.FC = () => {
     const handleLogout = async () => {
         try {
             await auth.signOut();
-            history.push('/login');
+            navigate('/login');
         } catch (error) {
             console.error('Error signing out: ', error);
         }

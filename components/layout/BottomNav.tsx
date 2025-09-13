@@ -1,6 +1,6 @@
 import React from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced useRouteMatch with useMatch and useResolvedPath for v6 compatibility.
-import { Link, useRouteMatch } from 'react-router-dom';
+// FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced useRouteMatch with useResolvedPath and useMatch for v6 compatibility.
+import { Link, useResolvedPath, useMatch } from 'react-router-dom';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: (active: boolean) => <IconDashboard active={active} /> },
@@ -11,10 +11,8 @@ const navItems = [
 ];
 
 const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) => React.ReactNode; }> = ({ path, label, icon }) => {
-    const match = useRouteMatch({
-        path: path,
-        exact: path === '/'
-    });
+    const resolved = useResolvedPath(path);
+    const match = useMatch({ path: resolved.pathname, end: true });
     const isActive = !!match;
 
     const textColor = isActive 
