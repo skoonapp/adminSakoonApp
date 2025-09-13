@@ -1,6 +1,8 @@
 
+
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+// FIX: Downgraded react-router-dom from v6 to v5 syntax.
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
 
@@ -109,45 +111,45 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <Suspense fallback={<SplashScreen />}>
-        <Routes>
+        <Switch>
             {authStatus === 'unauthenticated' && <>
-                <Route path="/login" element={<LoginScreen />} />
-                <Route path="*" element={<Navigate to="/login" replace />} />
+                <Route path="/login"><LoginScreen /></Route>
+                <Route path="*"><Redirect to="/login" /></Route>
             </>}
             {authStatus === 'needs_onboarding' && user && <>
-                <Route path="/onboarding" element={<OnboardingScreen user={user} />} />
-                <Route path="*" element={<Navigate to="/onboarding" replace />} />
+                <Route path="/onboarding"><OnboardingScreen user={user} /></Route>
+                <Route path="*"><Redirect to="/onboarding" /></Route>
             </>}
             {authStatus === 'pending_approval' && <>
-                <Route path="/pending-approval" element={<PendingApprovalScreen />} />
-                <Route path="*" element={<Navigate to="/pending-approval" replace />} />
+                <Route path="/pending-approval"><PendingApprovalScreen /></Route>
+                <Route path="*"><Redirect to="/pending-approval" /></Route>
             </>}
             {authStatus === 'admin' && <>
-                <Route path="/admin/listeners" element={<ListenerManagementScreen />} />
-                <Route path="/admin" element={<AdminDashboardScreen />} />
-                <Route path="*" element={<Navigate to="/admin" replace />} />
+                <Route path="/admin/listeners"><ListenerManagementScreen /></Route>
+                <Route path="/admin"><AdminDashboardScreen /></Route>
+                <Route path="*"><Redirect to="/admin" /></Route>
             </>}
             {authStatus === 'unauthorized' && <>
-                <Route path="/unauthorized" element={<UnauthorizedScreen />} />
-                <Route path="*" element={<Navigate to="/unauthorized" replace />} />
+                <Route path="/unauthorized"><UnauthorizedScreen /></Route>
+                <Route path="*"><Redirect to="/unauthorized" /></Route>
             </>}
             {authStatus === 'active' && user && (
                 <>
-                    <Route path="/call/:callId" element={<ListenerProvider user={user}><ActiveCallScreen /></ListenerProvider>} />
-                    <Route path="/dashboard" element={<GuardedPage user={user}><DashboardScreen /></GuardedPage>} />
-                    <Route path="/calls" element={<GuardedPage user={user}><CallsScreen /></GuardedPage>} />
-                    <Route path="/chat" element={<GuardedPage user={user}><ChatScreen /></GuardedPage>} />
-                    <Route path="/earnings" element={<GuardedPage user={user}><EarningsScreen /></GuardedPage>} />
-                    <Route path="/profile" element={<GuardedPage user={user}><ProfileScreen /></GuardedPage>} />
-                    <Route path="/terms" element={<GuardedPage user={user}><TermsScreen /></GuardedPage>} />
-                    <Route path="/privacy" element={<GuardedPage user={user}><PrivacyPolicyScreen /></GuardedPage>} />
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/call/:callId"><ListenerProvider user={user}><ActiveCallScreen /></ListenerProvider></Route>
+                    <Route path="/dashboard"><GuardedPage user={user}><DashboardScreen /></GuardedPage></Route>
+                    <Route path="/calls"><GuardedPage user={user}><CallsScreen /></GuardedPage></Route>
+                    <Route path="/chat"><GuardedPage user={user}><ChatScreen /></GuardedPage></Route>
+                    <Route path="/earnings"><GuardedPage user={user}><EarningsScreen /></GuardedPage></Route>
+                    <Route path="/profile"><GuardedPage user={user}><ProfileScreen /></GuardedPage></Route>
+                    <Route path="/terms"><GuardedPage user={user}><TermsScreen /></GuardedPage></Route>
+                    <Route path="/privacy"><GuardedPage user={user}><PrivacyPolicyScreen /></GuardedPage></Route>
+                    <Route exact path="/"><Redirect to="/dashboard" /></Route>
+                    <Route path="*"><Redirect to="/dashboard" /></Route>
                 </>
             )}
              {/* Fallback for unhandled statuses or when conditions are not met */}
-             <Route path="*" element={<SplashScreen />} />
-        </Routes>
+             <Route path="*"><SplashScreen /></Route>
+        </Switch>
       </Suspense>
     </HashRouter>
   );

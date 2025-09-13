@@ -1,6 +1,7 @@
 
+
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { db } from '../../utils/firebase';
 import { fetchZegoToken } from '../../utils/zego';
 import { useListener } from '../../context/ListenerContext';
@@ -9,7 +10,7 @@ import type { CallRecord } from '../../types';
 const ActiveCallScreen: React.FC = () => {
     const { callId } = useParams<{ callId: string }>();
     const { profile } = useListener();
-    const navigate = useNavigate();
+    const history = useHistory();
     const [callData, setCallData] = useState<CallRecord | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isJoining, setIsJoining] = useState(true);
@@ -24,7 +25,7 @@ const ActiveCallScreen: React.FC = () => {
         const unsubscribe = callRef.onSnapshot(async (doc) => {
             if (!doc.exists) {
                 setError("Call not found or has ended.");
-                setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
+                setTimeout(() => history.replace('/dashboard'), 3000);
                 return;
             }
 
@@ -59,7 +60,7 @@ const ActiveCallScreen: React.FC = () => {
                                       .catch(err => console.error("Failed to update call status on leave:", err));
                                 }
                             });
-                            navigate('/dashboard', { replace: true });
+                            history.replace('/dashboard');
                         },
                     });
                 } catch (err: any) {
@@ -70,7 +71,7 @@ const ActiveCallScreen: React.FC = () => {
             // If the call status changes to something that terminates it
             if (['completed', 'rejected', 'missed', 'cancelled'].includes(data.status)) {
                 setError(`Call has been ${data.status}. Redirecting...`);
-                 setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
+                 setTimeout(() => history.replace('/dashboard'), 3000);
             }
 
         }, (err) => {
@@ -79,7 +80,7 @@ const ActiveCallScreen: React.FC = () => {
         });
 
         return () => unsubscribe();
-    }, [profile, callId, navigate, isJoining]);
+    }, [profile, callId, history, isJoining]);
 
     if (error) {
         return (

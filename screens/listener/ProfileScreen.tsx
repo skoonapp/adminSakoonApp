@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../../utils/firebase';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { GuidelinesContent } from '../../components/profile/ListenerGuidelines';
 import { useListener } from '../../context/ListenerContext';
 import { TermsContent } from './TermsScreen';
@@ -57,7 +57,7 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
 
 
 const ProfileScreen: React.FC = () => {
-    const navigate = useNavigate();
+    const history = useHistory();
     const { profile, loading } = useListener();
     const isInitialLoad = useRef(true);
     const [openAccordion, setOpenAccordion] = useState<string | null>(null);
@@ -84,7 +84,7 @@ const ProfileScreen: React.FC = () => {
     const handleLogout = async () => {
         try {
             await auth.signOut();
-            navigate('/login');
+            history.push('/login');
         } catch (error) {
             console.error('Error signing out: ', error);
         }
@@ -111,9 +111,11 @@ const ProfileScreen: React.FC = () => {
         <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-700/90 p-4 rounded-xl shadow-sm">
           <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-cyan-100 dark:bg-cyan-900/50 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-cyan-500 dark:text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
-                </div>
+                <img 
+                    src={profile?.avatarUrl || `https://ui-avatars.com/api/?name=${profile?.displayName || 'L'}&background=random&color=fff`} 
+                    alt="Profile" 
+                    className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-slate-700 shrink-0" 
+                />
                 <div>
                   <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{profile?.displayName || 'Listener'}</h2>
                 </div>
