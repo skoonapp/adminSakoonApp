@@ -1,10 +1,7 @@
 
-
-
-
 import React from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced NavLink with Link and useRouteMatch for v5 compatibility.
-import { Link, useRouteMatch } from 'react-router-dom';
+// FIX: Upgraded react-router-dom from v5 to v6 syntax. Replaced useRouteMatch with useMatch and useResolvedPath for v6 compatibility.
+import { Link, useMatch, useResolvedPath } from 'react-router-dom';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: (active: boolean) => <IconDashboard active={active} /> },
@@ -19,7 +16,8 @@ const NavItem: React.FC<{ path: string; label: string; icon: (active: boolean) =
     const inactiveClasses = "text-cyan-200 hover:text-white";
     const activeClasses = "text-white";
 
-    const match = useRouteMatch({ path: path, exact: true });
+    const resolved = useResolvedPath(path);
+    const match = useMatch({ path: resolved.pathname, end: true });
     const isActive = !!match;
 
     return (

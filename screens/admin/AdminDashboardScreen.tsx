@@ -1,12 +1,8 @@
 
-
-
-
 import React, { useState, useEffect } from 'react';
 import { db, functions, auth } from '../../utils/firebase';
 import type { ListenerProfile, Application } from '../../types';
-// FIX: Reverted useNavigate to useHistory for react-router-dom v5 compatibility.
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // --- Icon Components ---
 const RupeeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-5 4h4m5 4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
@@ -62,12 +58,12 @@ const AdminDashboardScreen: React.FC = () => {
   const [onboardingListeners, setOnboardingListeners] = useState<ListenerProfile[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
         await auth.signOut();
-        history.push('/login'); 
+        navigate('/login'); 
     } catch (error) {
         console.error('Error signing out: ', error);
         alert('Could not log out. Please try again.');
@@ -125,7 +121,7 @@ const AdminDashboardScreen: React.FC = () => {
 
 
   return (
-    <div className="p-4 sm:p-6 space-y-8 bg-slate-100 dark:bg-slate-900 min-h-full">
+    <div className="p-4 sm:p-6 space-y-8 bg-slate-100 dark:bg-slate-900 min-h-screen">
         <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
                 <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">एडमिन डैशबोर्ड</h1>

@@ -1,11 +1,8 @@
 
-
-
-
 import React, { useEffect, useRef, useState } from 'react';
 // FIX: Upgraded react-router-dom from v5 to v6 syntax.
 // FIX: Reverted useNavigate to useHistory for react-router-dom v5 compatibility.
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
 import { useListener } from '../context/ListenerContext';
@@ -15,7 +12,7 @@ const ActiveCallScreen: React.FC = () => {
     const { callId } = useParams<{ callId: string }>();
     const { profile } = useListener();
     // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
-    const history = useHistory();
+    const navigate = useNavigate();
     const [callData, setCallData] = useState<CallRecord | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isJoining, setIsJoining] = useState(true);
@@ -31,7 +28,7 @@ const ActiveCallScreen: React.FC = () => {
             if (!doc.exists) {
                 setError("Call not found or has ended.");
                 // FIX: Upgraded from history.replace (v5) to navigate (v6).
-                setTimeout(() => history.replace('/dashboard'), 3000);
+                setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
                 return;
             }
 
@@ -67,7 +64,7 @@ const ActiveCallScreen: React.FC = () => {
                                 }
                             });
                             // FIX: Upgraded from history.replace (v5) to navigate (v6).
-                            history.replace('/dashboard');
+                            navigate('/dashboard', { replace: true });
                         },
                     });
                 } catch (err: any) {
@@ -79,7 +76,7 @@ const ActiveCallScreen: React.FC = () => {
             if (['completed', 'rejected', 'missed', 'cancelled'].includes(data.status)) {
                 setError(`Call has been ${data.status}. Redirecting...`);
                  // FIX: Upgraded from history.replace (v5) to navigate (v6).
-                 setTimeout(() => history.replace('/dashboard'), 3000);
+                 setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
             }
 
         }, (err) => {
@@ -88,7 +85,7 @@ const ActiveCallScreen: React.FC = () => {
         });
 
         return () => unsubscribe();
-    }, [profile, callId, history, isJoining]);
+    }, [profile, callId, navigate, isJoining]);
 
     if (error) {
         return (
