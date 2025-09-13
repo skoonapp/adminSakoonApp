@@ -42,7 +42,7 @@ const Header: React.FC = () => {
     
     return (
         <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-cyan-600 to-teal-500 dark:from-slate-900 dark:to-slate-800 shadow-md text-white z-50 flex items-center justify-between px-4">
-            <h1 className="text-xl font-bold tracking-tight">SakoonApp Admin</h1>
+            <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-200">SakoonApp Admin</h1>
             
             <div className="flex items-center gap-2 sm:gap-4">
                 <div className="relative">

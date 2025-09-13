@@ -37,7 +37,7 @@ const formatTimestamp = (timestamp: any): string => {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage }) => {
     const bubbleClasses = isOwnMessage
-        ? 'bg-cyan-100 dark:bg-teal-900 rounded-br-none'
+        ? 'bg-user-chat-bubble dark:bg-teal-900 rounded-br-none text-slate-800'
         : 'bg-white dark:bg-slate-700 rounded-bl-none';
 
     const renderContent = () => {

@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 // FIX: The import for `Link` is correct for react-router-dom v5. The error was likely a cascading issue from other files using v6 syntax.
 import { Link } from 'react-router-dom';
@@ -72,8 +73,8 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
     return (
         <div className="flex items-center justify-between py-3">
             <div className="flex items-center gap-3 overflow-hidden">
-                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCall ? 'bg-cyan-100 dark:bg-cyan-900/50' : 'bg-purple-100 dark:bg-purple-900/50'}`}>
-                    {isCall ? <PhoneIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-300"/> : <ChatIcon className="h-5 w-5 text-purple-600 dark:text-purple-300"/>}
+                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-cyan-100 dark:bg-cyan-900/50`}>
+                    {isCall ? <PhoneIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-300"/> : <ChatIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-300"/>}
                 </div>
                 <div className="overflow-hidden">
                     <p className="font-semibold text-slate-700 dark:text-slate-300 truncate">
