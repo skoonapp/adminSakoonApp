@@ -130,6 +130,7 @@ const ApplyAsListener: React.FC = () => {
         setError('');
 
         try {
+          // FIX: Replaced direct database write with a secure Cloud Function call.
           const submitListenerApplication = functions.httpsCallable('submitListenerApplication');
           await submitListenerApplication(formData);
           setApplied(true);
