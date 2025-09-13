@@ -123,17 +123,23 @@ const StatusToggle: React.FC = () => {
     }
 
     if (!profile || !optimisticStatus) {
-         return <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm space-y-2 opacity-60">
-            <div className="flex items-center justify-between gap-4">
-                <h3 className="font-semibold text-base text-slate-800 dark:text-slate-200">Active Status</h3>
-                 <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-full p-0.5 space-x-0.5">
-                    <div className="px-3 py-1 w-[70px] text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Offline</div>
-                    <div className="px-3 py-1 w-[70px] text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Busy</div>
-                    <div className="px-3 py-1 w-[70px] text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Online</div>
+         return (
+            <div className="bg-white dark:bg-slate-800 p-2 rounded-xl shadow-sm opacity-60">
+                <div className="flex items-center justify-between gap-4">
+                    <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
+                        Active Status
+                    </h3>
+                    <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 cursor-not-allowed">
+                        <span className="px-4 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Offline</span>
+                        <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
+                        <span className="px-4 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Busy</span>
+                        <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
+                        <span className="px-4 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Online</span>
+                    </div>
                 </div>
+                <p className="text-xs text-red-500 dark:text-red-400 text-left mt-1.5">Profile or status could not be loaded.</p>
             </div>
-            <p className="text-xs text-red-500 dark:text-red-400 text-right pr-1">Profile or status could not be loaded.</p>
-        </div>;
+        );
     }
     
     const getSubtitle = () => {
@@ -155,30 +161,34 @@ const StatusToggle: React.FC = () => {
     ];
     
     return (
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm space-y-2">
+        <div className="bg-white dark:bg-slate-800 p-2 rounded-xl shadow-sm">
             <div className="flex items-center justify-between gap-4">
-                <h3 className="font-semibold text-base text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
                     Active Status
                 </h3>
-
-                <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-full p-0.5 space-x-0.5">
-                    {statuses.map(status => (
-                        <button
-                            key={status.value}
-                            onClick={() => handleStatusChange(status.value)}
-                            className={`px-3 py-1 w-[70px] text-center text-xs font-semibold rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
-                                currentUiStatus === status.value
-                                    ? (status.value === 'Available' ? 'bg-green-500 text-white shadow' : (status.value === 'Busy' ? 'bg-orange-500 text-white shadow' : 'bg-slate-500 text-white shadow'))
-                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                            }`}
-                            aria-pressed={currentUiStatus === status.value}
-                        >
-                            {status.label}
-                        </button>
+                
+                <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600">
+                    {statuses.map((status, index) => (
+                        <React.Fragment key={status.value}>
+                            <button
+                                onClick={() => handleStatusChange(status.value)}
+                                className={`px-4 py-1 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 first:rounded-l-full last:rounded-r-full ${
+                                    currentUiStatus === status.value
+                                        ? (status.value === 'Available' ? 'bg-green-500 text-white' : (status.value === 'Busy' ? 'bg-orange-500 text-white' : 'bg-slate-500 text-white'))
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                }`}
+                                aria-pressed={currentUiStatus === status.value}
+                            >
+                                {status.label}
+                            </button>
+                            {index < statuses.length - 1 && (
+                                <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
+                            )}
+                        </React.Fragment>
                     ))}
                 </div>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-right pr-1">{getSubtitle()}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-left mt-1.5">{getSubtitle()}</p>
         </div>
     );
 };
