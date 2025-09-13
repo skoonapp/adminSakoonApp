@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 // FIX: The import for `Link` is correct for react-router-dom v5. The error was likely a cascading issue from other files using v6 syntax.
 import { Link } from 'react-router-dom';
@@ -49,13 +50,13 @@ const StatCard: React.FC<{ title: string; value: React.ReactNode; icon: React.Re
     };
     
     const content = (
-         <div className={`bg-gradient-to-br p-4 rounded-xl shadow-sm flex flex-col justify-between h-full border hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${colorClasses[color]}`}>
+         <div className={`bg-gradient-to-br p-3 rounded-xl shadow-sm flex flex-col justify-between h-full border hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${colorClasses[color]}`}>
             <div>
                 <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
                     {icon}
                 </div>
-                <div className="text-3xl font-bold text-slate-800 dark:text-slate-200 mt-2">{value}</div>
+                <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mt-2">{value}</div>
             </div>
         </div>
     );
@@ -93,17 +94,17 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 
 const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 opacity-60">
+    <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 opacity-60">
         <div className="flex-grow text-center sm:text-left">
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">Active Status</h3>
-            <p className="text-sm text-red-500 dark:text-red-400 mt-1">{message}</p>
+            <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">Active Status</h3>
+            <p className="text-xs text-red-500 dark:text-red-400 mt-1">{message}</p>
         </div>
         <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0 cursor-not-allowed">
-            <span className="px-6 py-2 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
+            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
             <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-            <span className="px-6 py-2 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
+            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
             <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-            <span className="px-6 py-2 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
+            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
         </div>
     </div>
 );
@@ -176,15 +177,15 @@ const StatusToggle: React.FC = () => {
     ];
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex-grow text-center sm:text-left">
-                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 flex items-center justify-center sm:justify-start">
+                <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 flex items-center justify-center sm:justify-start">
                     Active Status
                     <span className="ml-1.5 text-slate-400 cursor-help" title="Set your status to control incoming calls.">
                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
                     </span>
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
             </div>
             
             <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0">
@@ -192,7 +193,7 @@ const StatusToggle: React.FC = () => {
                     <React.Fragment key={status.value}>
                         <button
                             onClick={() => handleStatusChange(status.value)}
-                            className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
+                            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
                                 currentUiStatus === status.value
                                     ? (status.value === 'Available' ? 'bg-green-500 text-white shadow-md' : 'text-slate-800 dark:text-slate-100')
                                     : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
@@ -334,7 +335,7 @@ const DashboardScreen: React.FC = () => {
             {/* Today's Summary */}
             <div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">Today's Summary</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <StatCard title="Today's Calls" color="blue" linkTo="/calls" icon={<PhoneIcon className="h-5 w-5 text-cyan-500"/>} value={<StatValue loading={loadingActivities}>{todayStats.calls}</StatValue>} />
                     <StatCard title="Total Talk Time" color="indigo" icon={<ClockIcon className="h-5 w-5 text-indigo-500"/>} value={<StatValue loading={loadingActivities}>{formatDuration(todayStats.duration)}</StatValue>} />
                     <StatCard title="Today's Chats" color="purple" linkTo="/chat" icon={<ChatIcon className="h-5 w-5 text-purple-500"/>} value={<StatValue loading={loadingActivities}>{todayStats.chats}</StatValue>} />
