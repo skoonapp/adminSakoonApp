@@ -126,13 +126,13 @@ const StatusToggle: React.FC = () => {
     };
     
     if (profileLoading) {
-        return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+        return <div className="h-20 bg-slate-200 dark:bg-slate-700 animate-pulse -mx-4"></div>;
     }
 
     if (!profile || !optimisticStatus) {
         // Render a disabled state if profile or status isn't available
         return (
-             <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm opacity-50">
+             <div className="bg-white dark:bg-slate-800 p-4 border-y border-slate-200 dark:border-slate-700 opacity-50 -mx-4">
                 <div className="flex items-center justify-between gap-4">
                     <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex-shrink-0">
                         Active Status
@@ -174,7 +174,7 @@ const StatusToggle: React.FC = () => {
     ];
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-slate-800 p-4 border-y border-slate-200 dark:border-slate-700 -mx-4">
             <div className="flex items-center justify-between gap-4">
                 <div>
                     <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex-shrink-0">
@@ -337,11 +337,9 @@ const DashboardScreen: React.FC = () => {
     }, [allActivities]);
 
     return (
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-4">
             <InstallPWAButton />
             <StatusToggle />
-            
-            <hr className="my-6 border-slate-200 dark:border-slate-700" />
             
             {/* Today's Summary */}
             <div>
@@ -354,8 +352,6 @@ const DashboardScreen: React.FC = () => {
                 </div>
             </div>
 
-            <hr className="my-6 border-slate-200 dark:border-slate-700" />
-
             {/* This Week's Performance */}
              <div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">This Week's Performance</h3>
@@ -366,8 +362,6 @@ const DashboardScreen: React.FC = () => {
                     <StatCard title="Avg. Call Duration" color="indigo" icon={<ClockIcon className="h-5 w-5 text-indigo-500"/>} value={<StatValue loading={loadingActivities}>{formatDuration(weekStats.avgDuration)}</StatValue>} />
                 </div>
             </div>
-
-            <hr className="my-6 border-slate-200 dark:border-slate-700" />
 
             {/* Recent Activity */}
             <div>
