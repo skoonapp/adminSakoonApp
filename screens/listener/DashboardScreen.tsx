@@ -117,25 +117,25 @@ const StatusToggle: React.FC = memo(() => {
     }, [profile, optimisticStatus]);
     
     if (profileLoading) {
-        return <div className="h-[74px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
+        return <div className="h-[88px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
     }
 
     if (!profile || !optimisticStatus) {
          return (
-            <div className="bg-white dark:bg-slate-800 p-2 rounded-xl shadow-sm opacity-60">
-                <div className="flex items-center justify-between gap-4">
-                    <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
-                        Active Status
-                    </h3>
-                    <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 cursor-not-allowed">
-                        <span className="px-4 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Offline</span>
+            <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm opacity-60">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex-grow text-center sm:text-left w-full sm:w-auto">
+                        <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">Active Status</h3>
+                        <p className="text-xs text-red-500 dark:text-red-400 mt-1">Profile or status could not be loaded.</p>
+                    </div>
+                    <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 cursor-not-allowed w-full sm:w-auto">
+                        <span className="w-full px-4 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 first:rounded-l-full last:rounded-r-full">Offline</span>
                         <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-                        <span className="px-4 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Busy</span>
+                        <span className="w-full px-4 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 first:rounded-l-full last:rounded-r-full">Busy</span>
                         <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-                        <span className="px-4 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Online</span>
+                        <span className="w-full px-4 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 first:rounded-l-full last:rounded-r-full">Online</span>
                     </div>
                 </div>
-                <p className="text-xs text-red-500 dark:text-red-400 text-left mt-1.5">Profile or status could not be loaded.</p>
             </div>
         );
     }
@@ -159,18 +159,21 @@ const StatusToggle: React.FC = memo(() => {
     ];
     
     return (
-        <div className="bg-white dark:bg-slate-800 p-2 rounded-xl shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-                <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
-                    Active Status
-                </h3>
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex-grow text-center sm:text-left w-full sm:w-auto">
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">
+                        Active Status
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
+                </div>
                 
-                <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600">
+                <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 flex-shrink-0 w-full sm:w-auto">
                     {statuses.map((status, index) => (
                         <React.Fragment key={status.value}>
                             <button
                                 onClick={() => handleStatusChange(status.value)}
-                                className={`px-4 py-1 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 first:rounded-l-full last:rounded-r-full ${
+                                className={`w-full px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 first:rounded-l-full last:rounded-r-full ${
                                     currentUiStatus === status.value
                                         ? (status.value === 'Available' ? 'bg-green-500 text-white' : (status.value === 'Busy' ? 'bg-orange-500 text-white' : 'bg-slate-500 text-white'))
                                         : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -186,7 +189,6 @@ const StatusToggle: React.FC = memo(() => {
                     ))}
                 </div>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-left mt-1.5">{getSubtitle()}</p>
         </div>
     );
 });
