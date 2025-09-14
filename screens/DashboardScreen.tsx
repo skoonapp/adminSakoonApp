@@ -173,40 +173,35 @@ const StatusToggle: React.FC = () => {
         { label: 'Busy', value: 'Busy' },
         { label: 'Online', value: 'Available' },
     ];
-    
-    const statusStyles = {
-        active: {
-            Available: 'bg-green-500 text-white shadow-md',
-            Busy: 'bg-orange-500 text-white shadow-md',
-            Offline: 'bg-slate-500 text-white shadow-md'
-        },
-        inactive: 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-    };
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex-grow text-center sm:text-left">
                 <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
                     Active Status
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{getSubtitle()}</p>
             </div>
             
-            <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0">
+            <div className="inline-flex items-stretch rounded-full border border-slate-200 dark:border-slate-700 flex-shrink-0">
                 {statuses.map((status, index) => (
                     <React.Fragment key={status.value}>
                         <button
                             onClick={() => handleStatusChange(status.value)}
-                            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
-                                currentUiStatus === status.value
-                                    ? statusStyles.active[status.value as keyof typeof statusStyles.active] || ''
-                                    : statusStyles.inactive
-                            }`}
+                            className={`px-4 py-1.5 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500
+                                ${
+                                    currentUiStatus === status.value
+                                        ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200' 
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                }
+                                ${index === 0 ? 'rounded-l-full' : ''}
+                                ${index === statuses.length - 1 ? 'rounded-r-full' : ''}
+                            `}
                         >
                             {status.label}
                         </button>
                         {index < statuses.length - 1 && (
-                            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
+                            <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
                         )}
                     </React.Fragment>
                 ))}
