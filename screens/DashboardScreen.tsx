@@ -91,22 +91,6 @@ const ActivityRow: React.FC<{ activity: Activity }> = ({ activity }) => {
 };
 
 
-const DisabledStatusToggle: React.FC<{ message: string }> = ({ message }) => (
-    <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 opacity-60">
-        <div className="flex-grow text-center sm:text-left">
-            <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">Active Status</h3>
-            <p className="text-xs text-red-500 dark:text-red-400 mt-1">{message}</p>
-        </div>
-        <div className="inline-flex items-stretch rounded-full border border-slate-300 dark:border-slate-600 p-1 flex-shrink-0 cursor-not-allowed">
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Offline</span>
-            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Busy</span>
-            <div className="w-px bg-slate-300 dark:bg-slate-600"></div>
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-400 dark:text-slate-500">Online</span>
-        </div>
-    </div>
-);
-
 const StatusToggle: React.FC = () => {
     const { profile, loading: profileLoading } = useListener();
     // Fix: Use ListenerAppStatus type.
@@ -145,12 +129,27 @@ const StatusToggle: React.FC = () => {
         return <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>;
     }
 
-    if (!profile) {
-        return <DisabledStatusToggle message="Listener profile could not be found." />;
-    }
-    
-    if (!optimisticStatus) {
-        return <DisabledStatusToggle message="Status could not be loaded from profile." />;
+    if (!profile || !optimisticStatus) {
+        // Render a disabled state if profile or status isn't available
+        return (
+             <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm opacity-50">
+                <div className="flex items-center justify-between gap-4">
+                    <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex-shrink-0">
+                        Active Status
+                    </h3>
+                    <div className="inline-flex items-stretch rounded-full border border-slate-200 dark:border-slate-700 flex-shrink-0 cursor-not-allowed">
+                       <span className="px-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">Offline</span>
+                       <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
+                       <span className="px-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">Busy</span>
+                       <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
+                       <span className="px-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">Online</span>
+                    </div>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                    {profile ? 'Status not available.' : 'Listener profile could not be found.'}
+                </p>
+            </div>
+        );
     }
 
     const getSubtitle = () => {
@@ -175,37 +174,39 @@ const StatusToggle: React.FC = () => {
     ];
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex-grow text-center sm:text-left">
-                <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+                <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex-shrink-0">
                     Active Status
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{getSubtitle()}</p>
+                
+                <div className="inline-flex items-stretch rounded-full border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                    {statuses.map((status, index) => (
+                        <React.Fragment key={status.value}>
+                            <button
+                                onClick={() => handleStatusChange(status.value)}
+                                className={`px-4 py-1.5 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500
+                                    ${
+                                        (currentUiStatus === 'Busy' && status.value === 'Busy') || (currentUiStatus === 'Available' && status.value === 'Available') || (currentUiStatus === 'Offline' && status.value === 'Offline')
+                                            ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200' 
+                                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                    }
+                                    ${index === 0 ? 'rounded-l-full' : ''}
+                                    ${index === statuses.length - 1 ? 'rounded-r-full' : ''}
+                                `}
+                            >
+                                {status.label}
+                            </button>
+                            {index < statuses.length - 1 && (
+                                <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
             </div>
-            
-            <div className="inline-flex items-stretch rounded-full border border-slate-200 dark:border-slate-700 flex-shrink-0">
-                {statuses.map((status, index) => (
-                    <React.Fragment key={status.value}>
-                        <button
-                            onClick={() => handleStatusChange(status.value)}
-                            className={`px-4 py-1.5 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500
-                                ${
-                                    currentUiStatus === status.value
-                                        ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200' 
-                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                                }
-                                ${index === 0 ? 'rounded-l-full' : ''}
-                                ${index === statuses.length - 1 ? 'rounded-r-full' : ''}
-                            `}
-                        >
-                            {status.label}
-                        </button>
-                        {index < statuses.length - 1 && (
-                            <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
-                        )}
-                    </React.Fragment>
-                ))}
-            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                {getSubtitle()}
+            </p>
         </div>
     );
 };
