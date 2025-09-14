@@ -1,10 +1,11 @@
 
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../utils/firebase';
 import { fetchZegoToken } from '../utils/zego';
 import { useListener } from '../context/ListenerContext';
-import type { CallRecord } from '../types';
+import type { CallRecord, ListenerAppStatus } from '../types';
 
 const ActiveCallScreen: React.FC = () => {
     const { callId } = useParams<{ callId: string }>();
@@ -14,12 +15,19 @@ const ActiveCallScreen: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isJoining, setIsJoining] = useState(true);
     const callContainerRef = useRef<HTMLDivElement>(null);
+    const previousStatusRef = useRef<ListenerAppStatus | null>(null); // To store status before call
 
     // Effect to fetch call data and join the call
     useEffect(() => {
         if (!profile || !callId || !callContainerRef.current) return;
+        
+        // Store previous status once
+        if (previousStatusRef.current === null) {
+            previousStatusRef.current = profile.appStatus;
+        }
 
         const callRef = db.collection('calls').doc(callId);
+        const listenerRef = db.collection('listeners').doc(profile.uid);
         
         const unsubscribe = callRef.onSnapshot(async (doc) => {
             if (!doc.exists) {
@@ -35,6 +43,9 @@ const ActiveCallScreen: React.FC = () => {
             if (isJoining && callContainerRef.current) {
                 setIsJoining(false);
                 try {
+                    // Set status to Busy before joining
+                    await listenerRef.update({ appStatus: 'Busy' });
+
                     const token = await fetchZegoToken(callId);
                     const zp = window.ZegoUIKitPrebuilt.create(token);
                     
@@ -61,6 +72,12 @@ const ActiveCallScreen: React.FC = () => {
                         },
                         showScreenSharingButton: false,
                         onLeaveRoom: () => {
+                            // Revert status when leaving the room
+                            if (previousStatusRef.current) {
+                                listenerRef.update({ appStatus: previousStatusRef.current })
+                                  .catch(err => console.error("Failed to revert status on leave:", err));
+                            }
+                            
                             // This callback is triggered when the local user leaves the room.
                             // We can add logic here to update call status to 'completed'
                             callRef.get().then(currentDoc => {
@@ -74,11 +91,20 @@ const ActiveCallScreen: React.FC = () => {
                     });
                 } catch (err: any) {
                     setError(`Error joining call: ${err.message}`);
+                     // Revert status if joining fails
+                    if (previousStatusRef.current) {
+                        listenerRef.update({ appStatus: previousStatusRef.current });
+                    }
                 }
             }
             
             // If the call status changes to something that terminates it
             if (['completed', 'rejected', 'missed', 'cancelled'].includes(data.status)) {
+                // Also revert status if call is terminated remotely
+                if (previousStatusRef.current) {
+                    listenerRef.update({ appStatus: previousStatusRef.current })
+                        .catch(err => console.error("Failed to revert status on remote termination:", err));
+                }
                 setError(`Call has been ${data.status}. Redirecting...`);
                  setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
             }

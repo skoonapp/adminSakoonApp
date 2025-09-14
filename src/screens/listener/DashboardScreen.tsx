@@ -101,7 +101,7 @@ const StatusToggle: React.FC = () => {
     }, [profile, profileLoading]);
     
     const handleStatusChange = async (newStatus: ListenerAppStatus) => {
-        if (!profile) return;
+        if (!profile || newStatus === 'Busy') return; // Prevent manual setting to Busy
 
         const previousStatus = optimisticStatus || profile.appStatus;
         setOptimisticStatus(newStatus); // Optimistically update the UI
@@ -131,8 +131,6 @@ const StatusToggle: React.FC = () => {
                     <div className="inline-flex items-stretch rounded-full border border-slate-200 dark:border-slate-700 flex-shrink-0 cursor-not-allowed">
                        <span className="px-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">Offline</span>
                        <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
-                       <span className="px-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">Busy</span>
-                       <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
                        <span className="px-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">Online</span>
                     </div>
                 </div>
@@ -149,7 +147,7 @@ const StatusToggle: React.FC = () => {
                 return 'You are ready to take calls';
             case 'Busy':
             case 'Break':
-                return 'You will not receive new calls';
+                return 'You are on a call and will not receive new calls';
             case 'Offline':
             default:
                 return 'Go online to start taking calls';
@@ -160,7 +158,6 @@ const StatusToggle: React.FC = () => {
     
     const statuses: { label: string; value: ListenerAppStatus }[] = [
         { label: 'Offline', value: 'Offline' },
-        { label: 'Busy', value: 'Busy' },
         { label: 'Online', value: 'Available' },
     ];
 
@@ -174,36 +171,45 @@ const StatusToggle: React.FC = () => {
                 </div>
                 
                 <div className="inline-flex items-stretch rounded-full border border-slate-200 dark:border-slate-700 flex-shrink-0">
-                    {statuses.map((status, index) => {
-                        const isOfflineActive = currentUiStatus === 'Offline' && status.value === 'Offline';
-                        const isBusyActive = currentUiStatus === 'Busy' && status.value === 'Busy';
-                        const isOnlineActive = currentUiStatus === 'Available' && status.value === 'Available';
-                        const isActive = isOfflineActive || isBusyActive || isOnlineActive;
+                    {/* Render a disabled "Busy" button if the status is Busy */}
+                    {currentUiStatus === 'Busy' ? (
+                        <button
+                            key="busy"
+                            disabled
+                            className="px-4 py-1.5 text-xs font-semibold transition-colors duration-200 rounded-full bg-orange-500 text-white cursor-not-allowed"
+                        >
+                            Busy
+                        </button>
+                    ) : (
+                        statuses.map((status, index) => {
+                            const isOfflineActive = currentUiStatus === 'Offline' && status.value === 'Offline';
+                            const isOnlineActive = currentUiStatus === 'Available' && status.value === 'Available';
+                            const isActive = isOfflineActive || isOnlineActive;
 
-                        return (
-                            <React.Fragment key={status.value}>
-                                <button
-                                    onClick={() => handleStatusChange(status.value)}
-                                    className={`
-                                        px-4 py-1.5 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500
-                                        ${index === 0 ? 'rounded-l-full' : ''}
-                                        ${index === statuses.length - 1 ? 'rounded-r-full' : ''}
-                                        ${isActive
-                                            ? `${isOfflineActive ? 'bg-slate-500 text-white' : ''}
-                                               ${isBusyActive ? 'bg-orange-500 text-white' : ''}
-                                               ${isOnlineActive ? 'bg-green-500 text-white' : ''}`
-                                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                                        }
-                                    `}
-                                >
-                                    {status.label}
-                                </button>
-                                {index < statuses.length - 1 && (
-                                    <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
-                                )}
-                            </React.Fragment>
-                        );
-                    })}
+                            return (
+                                <React.Fragment key={status.value}>
+                                    <button
+                                        onClick={() => handleStatusChange(status.value)}
+                                        className={`
+                                            px-4 py-1.5 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500
+                                            ${index === 0 ? 'rounded-l-full' : ''}
+                                            ${index === statuses.length - 1 ? 'rounded-r-full' : ''}
+                                            ${isActive
+                                                ? `${isOfflineActive ? 'bg-slate-500 text-white' : ''}
+                                                   ${isOnlineActive ? 'bg-green-500 text-white' : ''}`
+                                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                            }
+                                        `}
+                                    >
+                                        {status.label}
+                                    </button>
+                                    {index < statuses.length - 1 && (
+                                        <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })
+                    )}
                 </div>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">

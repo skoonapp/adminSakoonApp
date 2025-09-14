@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { auth, db } from '../../utils/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -54,30 +55,6 @@ const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
         <path fill="currentColor" d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91v.01c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91a9.85 9.85 0 0 0-2.91-7.01zM12.04 20.13c-1.53 0-3.03-.38-4.38-1.12l-.31-.18-3.24.85.87-3.18-.2-.33a8.168 8.168 0 0 1-1.26-4.38c0-4.49 3.62-8.12 8.12-8.12 2.18 0 4.22.86 5.74 2.38s2.38 3.56 2.38 5.74c0 4.49-3.63 8.12-8.12 8.12zm4.2-6.11c-.24-.12-1.42-.7-1.64-.78s-.38-.12-.54.12c-.16.24-.62.78-.76.94s-.28.18-.52.06c-.24-.12-1.02-.38-1.94-1.2c-.72-.64-1.2-1.42-1.35-1.66s-.02-.38.11-.5c.11-.1.24-.26.37-.39s.16-.24.24-.4c.08-.16.04-.3-.02-.42s-.54-1.29-.74-1.76c-.2-.48-.4-.41-.55-.41h-.48c-.16 0-.42.06-.64.3s-.84.82-.84 2c0 1.18.86 2.32 1 2.48s1.69 2.58 4.1 3.59c.58.24 1.03.38 1.4.48s.66.15.91-.09c.28-.27.62-.7.71-1.34s.09-1.2-.01-1.32z" />
     </svg>
-);
-
-const EarningStructureContent: React.FC = () => (
-    <>
-        <p>आपकी कमाई दो तरीकों से होती है: वॉयस कॉल और चैट मैसेज।</p>
-        
-        <h4>A) वॉयस कॉल के लिए (ब्रैकेट सिस्टम):</h4>
-        <p>आपको प्रति मिनट का रेट कॉल की कुल लंबाई (duration) के हिसाब से मिलता है। कॉल जितनी लंबी होगी, प्रति मिनट का रेट उतना ही ज़्यादा होगा।</p>
-        <ul>
-            <li><strong>5 मिनट तक की कॉल पर:</strong> ₹2.0 प्रति मिनट</li>
-            <li><strong>6 से 15 मिनट की कॉल पर:</strong> ₹2.5 प्रति मिनट</li>
-            <li><strong>16 से 30 मिनट की कॉल पर:</strong> ₹3.0 प्रति मिनट</li>
-            <li><strong>31 से 45 मिनट की कॉल पर:</strong> ₹3.5 प्रति मिनट</li>
-            <li><strong>45 मिनट से ज़्यादा की कॉल पर:</strong> ₹3.6 प्रति मिनट</li>
-        </ul>
-        <p className="mt-2 text-xs italic bg-slate-100 dark:bg-slate-700/50 p-2 rounded-md"><strong>उदाहरण:</strong> अगर आप 20 मिनट की कॉल पूरी करते हैं, तो आपकी कमाई होगी: 20 मिनट x ₹3.0/मिनट = ₹60</p>
-
-        <h4 className="mt-4">B) चैट मैसेज के लिए (फिक्स्ड रेट):</h4>
-        <p>आपको हर भेजे गए मैसेज के लिए एक फिक्स्ड रेट मिलता है।</p>
-        <ul>
-            <li><strong>हर मैसेज पर कमाई:</strong> ₹0.50 प्रति मैसेज</li>
-        </ul>
-         <p className="mt-2 text-xs italic bg-slate-100 dark:bg-slate-700/50 p-2 rounded-md"><strong>उदाहरण:</strong> अगर आप 25 मैसेज का जवाब देते हैं, तो आपकी कमाई होगी: 25 मैसेज x ₹0.50/मैसेज = ₹12.50</p>
-    </>
 );
 
 
@@ -182,14 +159,6 @@ const ProfileScreen: React.FC = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
             </a>
         </div>
-        
-        <Accordion 
-            title="आपकी कमाई कैसे होती है?"
-            isOpen={openAccordion === 'earning'}
-            onToggle={() => handleAccordionToggle('earning')}
-        >
-            <EarningStructureContent />
-        </Accordion>
 
         <Accordion 
             title="Listener Guidelines & FAQ"
