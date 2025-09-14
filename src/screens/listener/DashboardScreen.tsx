@@ -164,6 +164,15 @@ const StatusToggle: React.FC = () => {
         { label: 'Busy', value: 'Busy' },
         { label: 'Online', value: 'Available' },
     ];
+    
+    const statusStyles = {
+        active: {
+            Available: 'bg-green-500 text-white shadow-md',
+            Busy: 'bg-orange-500 text-white shadow-md',
+            Offline: 'bg-slate-500 text-white shadow-md'
+        },
+        inactive: 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+    };
 
     return (
         <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -184,8 +193,8 @@ const StatusToggle: React.FC = () => {
                             onClick={() => handleStatusChange(status.value)}
                             className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
                                 currentUiStatus === status.value
-                                    ? (status.value === 'Available' ? 'bg-green-500 text-white shadow-md' : 'text-slate-800 dark:text-slate-100')
-                                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                                    ? statusStyles.active[status.value as keyof typeof statusStyles.active] || ''
+                                    : statusStyles.inactive
                             }`}
                         >
                             {status.label}
