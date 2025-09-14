@@ -177,11 +177,8 @@ const StatusToggle: React.FC = () => {
     return (
         <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex-grow text-center sm:text-left">
-                <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 flex items-center justify-center sm:justify-start">
+                <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
                     Active Status
-                    <span className="ml-1.5 text-slate-400 cursor-help" title="Set your status to control incoming calls.">
-                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
-                    </span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{getSubtitle()}</p>
             </div>
@@ -191,7 +188,7 @@ const StatusToggle: React.FC = () => {
                     <React.Fragment key={status.value}>
                         <button
                             onClick={() => handleStatusChange(status.value)}
-                            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
+                            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-slate-800 focus-visible:ring-cyan-500 ${
                                 currentUiStatus === status.value
                                     ? statusStyles.active[status.value as keyof typeof statusStyles.active] || ''
                                     : statusStyles.inactive
