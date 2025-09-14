@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { db, functions, auth } from '../../utils/firebase';
 import type { ListenerProfile, Application } from '../../types';

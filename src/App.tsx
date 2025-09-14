@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax.
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { auth, db } from './utils/firebase';
@@ -110,7 +109,6 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <Suspense fallback={<SplashScreen />}>
-        {/* FIX: Replaced Switch with Routes and updated Route syntax for react-router-dom v6 */}
         <Routes>
             {authStatus === 'unauthenticated' && <>
                 <Route path="/login" element={<LoginScreen />} />

@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { db, functions, auth } from '../../utils/firebase';
 import type { ListenerProfile, Application } from '../../types';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax.
 import { Link, useNavigate } from 'react-router-dom';
 
 // --- Icon Components ---
@@ -59,13 +59,11 @@ const AdminDashboardScreen: React.FC = () => {
   const [onboardingListeners, setOnboardingListeners] = useState<ListenerProfile[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
         await auth.signOut();
-        // FIX: Upgraded from history.push (v5) to navigate (v6).
         navigate('/login'); 
     } catch (error) {
         console.error('Error signing out: ', error);

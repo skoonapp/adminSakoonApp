@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { auth, db } from '../../utils/firebase';
-// FIX: Upgraded from useHistory (v5) to useNavigate (v6).
 import { useNavigate } from 'react-router-dom';
 import { GuidelinesContent } from '../../components/profile/ListenerGuidelines';
 import { useListener } from '../../context/ListenerContext';

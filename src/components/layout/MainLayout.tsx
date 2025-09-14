@@ -1,5 +1,5 @@
+
 import React, { useRef } from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax.
 import { useLocation, useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import IncomingCallManager from '../calls/IncomingCallManager';
@@ -15,7 +15,6 @@ const swipeablePaths = [
 ];
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
   const navigate = useNavigate();
   const location = useLocation();
   const touchStartX = useRef(0);
@@ -56,14 +55,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (isLeftSwipe) {
       // Swiped left, go to the next screen
       if (currentIndex < swipeablePaths.length - 1) {
-        // FIX: Upgraded from history.push (v5) to navigate (v6).
         navigate(swipeablePaths[currentIndex + 1]);
         swipeHandled.current = true;
       }
     } else if (isRightSwipe) {
       // Swiped right, go to the previous screen
       if (currentIndex > 0) {
-        // FIX: Upgraded from history.push (v5) to navigate (v6).
         navigate(swipeablePaths[currentIndex - 1]);
         swipeHandled.current = true;
       }

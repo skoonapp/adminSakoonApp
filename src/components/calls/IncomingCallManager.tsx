@@ -1,6 +1,5 @@
 
 import React, { useEffect } from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax.
 import { useNavigate, useLocation } from 'react-router-dom';
 import { messaging, db } from '../../utils/firebase';
 import { useListener } from '../../context/ListenerContext';
@@ -97,7 +96,6 @@ const playMessageTone = () => {
 
 const IncomingCallManager: React.FC = () => {
   const { profile } = useListener();
-  // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -153,7 +151,6 @@ const IncomingCallManager: React.FC = () => {
         stopRingtone(); // Stop ringtone after user interacts with prompt
 
         if (isConfirmed && callId) {
-          // FIX: Upgraded from history.push (v5) to navigate (v6).
           navigate(`/call/${callId}`);
         } else {
           // TODO: Implement call rejection logic

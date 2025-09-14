@@ -1,6 +1,5 @@
 
 import React, { useEffect } from 'react';
-// FIX: Upgraded react-router-dom from v5 to v6 syntax.
 import { useNavigate, useLocation } from 'react-router-dom';
 import { messaging, db } from '../../utils/firebase';
 import { useListener } from '../../context/ListenerContext';
@@ -97,7 +96,6 @@ const playMessageTone = () => {
 
 const IncomingCallManager: React.FC = () => {
   const { profile } = useListener();
-  // FIX: Upgraded from useHistory (v5) to useNavigate (v6).
   const navigate = useNavigate();
   const location = useLocation();
 
